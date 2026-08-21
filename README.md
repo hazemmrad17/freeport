@@ -1,110 +1,104 @@
-# Freebuff
+# Freeport
 
-English | [简体中文](./README.zh-CN.md)
+**A freemium CLI coding agent with local payment support.** Fork of [Freebuff](https://freebuff.com) (Apache-2.0), repositioned for developers in regions without international payment access.
 
-**Five free AI products for coding, building, and research.** No subscription, credits, or API key required.
+## What is Freeport?
 
-[Freebuff](https://freebuff.com) brings specialized agents and a choice of leading models to your terminal, desktop, browser, and GitHub repositories. Text ads support access to the included models.
+Freeport gives you a full-mode AI coding agent in your terminal, with a generous free tier funded by per-request ads. When you're ready for more, upgrade with local payment rails — no international card required.
 
-## Choose your Freebuff
+- **Free tier**: 6 sessions/day, all models, ad-sponsored
+- **Paid tier**: 200+ sessions/day, ad-free, via Paddle (Visa/Mastercard, PayPal, Apple Pay)
 
-| Product              | What it does                        | Get started                                                           |
-| -------------------- | ----------------------------------- | --------------------------------------------------------------------- |
-| **Freebuff Desktop** | Run parallel agents locally         | [Download for macOS, Windows, or Linux](https://freebuff.com/desktop) |
-| **Freebuff CLI**     | Code from your terminal             | [Install the CLI](https://freebuff.com/cli)                           |
-| **Freebuff Web**     | Build and ship full-stack apps      | [Build an app](https://freebuff.com/web)                              |
-| **Freebuff Cloud**   | Run agents on any GitHub repository | [Connect a repository](https://freebuff.com/cloud)                    |
-| **Freebuff Chat**    | Research and think with AI          | [Start a chat](https://freebuff.com/chat)                             |
+## Architecture
 
-## Quick start
-
-Run Freebuff in any project from your terminal:
-
-```bash
-npm install -g freebuff
-cd ~/my-project
-freebuff
+```
+mycli/
+├── cli/          # TUI client (React, OpenTUI)
+├── sdk/          # JS/TS SDK
+├── common/       # Shared types, tools, schemas
+├── server/       # Backend (Hono + Bun + SQLite)
+└── agents/       # Agent definitions
 ```
 
-Then describe what you want. Freebuff finds the relevant files, makes changes, and runs the checks that matter for your project.
+## Server (Phase 2 + 3)
+
+The backend handles auth, session management, ad serving, usage tracking, and payments.
+
+### Quick start
+
+```bash
+cd server
+bun install
+cp .env.example .env   # fill in your values
+bun run dev             # starts on :8787
+```
+
+### Endpoints
+
+| Route | Purpose |
+|---|---|
+| `POST /api/auth/cli/code` | Device-code login flow |
+| `GET /api/auth/cli/status` | Poll for login approval |
+| `GET/POST/DELETE /api/v1/freebuff/session` | Session admission + daily quota |
+| `POST /api/v1/ads` | Sponsor line per request |
+| `POST /api/v1/usage/report` | CLI reports real token usage |
+| `GET /api/v1/subscription` | Check paid/free status |
+| `POST /api/v1/subscription/checkout` | Create Paddle checkout URL |
+| `POST /api/paddle/webhook` | Paddle event handler |
+| `GET /pricing` | 3-tier pricing page |
+| `GET /admin` | Admin dashboard |
+
+### Config
+
+All env-driven. See `.env.example` for full list. Key vars:
+
+- `PADDLE_API_KEY` — Paddle sandbox/production API key
+- `PADDLE_WEBHOOK_SECRET` — Webhook HMAC secret
+- `PADDLE_CLIENT_TOKEN` — Client-side token for pricing page
+- `PADDLE_ENV` — `sandbox` or `production`
+- `MYCLI_FREE_SESSIONS_PER_DAY` — Free tier limit (default: 6)
+- `MYCLI_PAID_SESSIONS_PER_DAY` — Paid tier limit (default: 200)
+
+## CLI wiring
+
+Point the CLI at your server:
+
+```bash
+NEXT_PUBLIC_CODEBUFF_APP_URL=http://localhost:8787 bun start-cli
+```
+
+Model traffic goes directly to DeepInfra. The backend handles auth, sessions, ads, and usage logging.
 
 ## Models
 
-Freebuff includes a curated model catalog. The regular picker currently offers:
+Routed through DeepInfra (direct, not through the backend):
 
-| Model                       | Access                  | Best for                                                          |
-| --------------------------- | ----------------------- | ----------------------------------------------------------------- |
-| **DeepSeek V4 Flash 07/31** | Full access             | The default everywhere in full mode; fast coding and tool use     |
-| **GPT-5.6 Luna**            | Full access             | Deep reasoning with native images; one session a day              |
-| **MiniMax M3**              | Full access             | Fast responses with image support; unlimited                      |
-| **MiMo 2.5**                | Full and limited access | The limited-mode default; balanced performance with image support |
-| **DeepSeek V4 Pro**         | Full access             | Deepest reasoning; one session a day, closed during peak hours    |
+| Model | Access |
+|---|---|
+| DeepSeek V4 Flash | Default, full access |
+| MiMo 2.5 | Fallback, unlimited |
+| DeepSeek V4 Pro | Full access |
+| MiniMax M3 | Full access |
 
-These limits are **temporary**, and they exist because the providers serving DeepSeek now charge more than free mode can carry. V4 Pro is one session a day and closed during peak hours; GPT-5.6 Luna is one a day; V4 Flash uses your remaining premium sessions; models may serve from a quantized (Q8_0) build. MiMo 2.5 and MiniMax M3 stay unlimited. All of it is intended to be reverted.
+## Unit economics
 
-Beyond the regular picker:
+| Session size | Tokens (in/out) | Cost |
+|---|---|---|
+| Small | 10K / 1K | $0.0012 |
+| Medium | 50K / 3K | $0.0056 |
+| Large | 150K / 8K | $0.0166 |
 
-- **GLM 5.2** is available through earned sessions rather than as an always-unlocked model.
-- **Gemini 3.1 Flash Lite** powers specialist tasks such as file finding and research rather than appearing in the main picker.
+Ad revenue target: ~$0.03/request (needs validation — Phase 4).
 
-Availability and limits depend on your access tier, product, and current capacity. Freebuff Desktop can also run locally installed Claude Code and Codex agents using your existing provider account; those connected models are separate from Freebuff's included catalog.
+## Tech stack
 
-## How Freebuff works
+- **Runtime**: Bun
+- **Server**: Hono
+- **Database**: SQLite via `bun:sqlite`
+- **Payments**: Paddle (Merchant of Record)
+- **CLI**: React + OpenTUI
+- **Models**: DeepInfra (DeepSeek, MiMo, MiniMax)
 
-Freebuff uses specialized agents instead of sending every task through one model and one prompt. Depending on the task, agents gather context, plan, edit or research, run tools, and review the result.
+## License
 
-- **Codebase context** — File-finding agents map the relevant parts of a project before editing.
-- **Implementation and review** — Agents can divide work, make changes, run commands, and inspect the result.
-- **Research and browser use** — Agents can investigate documentation and test applications in a real browser.
-- **Parallel local work** — Desktop isolates concurrent agents in separate workspaces.
-- **Hosted environments** — Web and Cloud provide sandboxes, previews, terminals, and deployment workflows.
-
-## Free access
-
-Freebuff is available in every country. Supported regions receive full access; other regions and VPN users receive limited access, currently MiMo 2.5 with three one-hour sessions per day, earnable up to seven.
-
-Text ads support the included models. Freebuff shows the applicable session limits and any model-specific data-use notice before you start.
-
-<!-- BEGIN GENERATED FREEBUFF DATA USE -->
-
-**Is my data used to train AI?** Only when a model or feature says data may be used for AI training. Freebuff or the provider may then keep submissions to develop, train, test, evaluate, fine-tune, and improve AI models or products.
-
-**How is my data used and stored?** We use prompts, messages, code, files, and repository data to provide the service. We may analyze prompts and messages—including pasted content—to personalize ads, using Freebuff systems and service providers acting on our behalf. Separate uploads and connected repositories are not provided to advertising providers. Where required by law, we provide advertising choices and honor recognized opt-out signals; elsewhere, this processing may be required to use the free service. See the Privacy Policy for retention and details.
-
-See the [Privacy Policy](https://freebuff.com/privacy-policy) for complete details.
-
-<!-- END GENERATED FREEBUFF DATA USE -->
-
-## Contributing
-
-Freebuff is a TypeScript monorepo built with Bun. Contributions to the products, agents, tools, documentation, and underlying runtime are welcome.
-
-Local development requires Docker and a configured `.env.local`; see the
-[Contributing Guide](./CONTRIBUTING.md) before starting the services.
-
-```bash
-git clone https://github.com/CodebuffAI/freebuff.git
-cd freebuff
-bun install
-bun up
-```
-
-Start the CLI separately with:
-
-```bash
-bun start-cli
-```
-
-See the [Contributing Guide](./CONTRIBUTING.md), [development guide](./docs/development.md), and [testing guide](./docs/testing.md) for environment setup and the checks to run before opening a pull request.
-
-## Built on Codebuff
-
-Freebuff is built on [Codebuff](https://codebuff.com), the open multi-agent framework that powers its orchestration, tools, and SDK. To create custom agents or embed them in another application, see the [Codebuff documentation](https://codebuff.com/docs) and [`@codebuff/sdk`](https://www.npmjs.com/package/@codebuff/sdk).
-
-## Links
-
-- [Website](https://freebuff.com)
-- [GitHub](https://github.com/CodebuffAI/freebuff)
-- [Discord](https://discord.gg/yXG3w7wxfs)
-- [Privacy Policy](https://freebuff.com/privacy-policy)
-- [License](./LICENSE)
+Apache-2.0 (forked from [CodebuffAI/freebuff](https://github.com/CodebuffAI/freebuff))
