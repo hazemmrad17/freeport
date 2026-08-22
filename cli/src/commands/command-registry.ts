@@ -12,7 +12,7 @@ import {
 import { buildInterviewPrompt, buildPlanPrompt, buildReviewPromptFromArgs } from './prompt-builders'
 import { runBashCommand } from './router'
 import { handleUsageCommand } from './usage'
-import { returnToFreebuffLanding } from '../hooks/use-freebuff-session'
+import { returnTofreeportLanding } from '../hooks/use-freeport-session'
 import { useThemeStore } from '../hooks/use-theme'
 import { LOGIN_WEBSITE_URL, WEBSITE_URL } from '../login/constants'
 import { startNewChat } from '../project-files'
@@ -20,7 +20,7 @@ import { useChatStore } from '../state/chat-store'
 import { stopActiveRun } from '../utils/active-run'
 import { useFeedbackStore } from '../state/feedback-store'
 import { useLoginStore } from '../state/login-store'
-import { AGENT_MODES, END_SESSION_MESSAGE, IS_FREEBUFF } from '../utils/constants'
+import { AGENT_MODES, END_SESSION_MESSAGE, IS_FREEPORT } from '../utils/constants'
 import { exitCliCleanly } from '../utils/exit-cleanly'
 import { getSystemMessage, getUserMessage } from '../utils/message-history'
 import { capturePendingAttachments } from '../utils/pending-attachments'
@@ -169,7 +169,7 @@ const clearInput = (params: RouterParams) => {
   params.setInputValue({ text: '', cursorPosition: 0, lastEditDueToNav: false })
 }
 
-const FREEBUFF_REMOVED_COMMANDS = new Set([
+const FREEPORT_REMOVED_COMMANDS = new Set([
   'ads:enable',
   'ads:disable',
   'usage',
@@ -179,7 +179,7 @@ const FREEBUFF_REMOVED_COMMANDS = new Set([
   'gpt-5-agent',
 ])
 
-const FREEBUFF_ONLY_COMMANDS = new Set([
+const FREEPORT_ONLY_COMMANDS = new Set([
   'plan',
   'end-session',
   'dashboard',
@@ -403,10 +403,10 @@ const ALL_COMMANDS: CommandDefinition[] = [
   }),
   defineCommand({
     name: 'dashboard',
-    // Freebuff-only (see FREEBUFF_ONLY_COMMANDS): the hub is a Freebuff web
+    // freeport-only (see FREEPORT_ONLY_COMMANDS): the hub is a FREEPORT web
     // surface, and Codebuff has its own credits-shaped `/usage` banner.
     //
-    // `usage` is one of the aliases because Freebuff removes that command —
+    // `usage` is one of the aliases because FREEPORT removes that command —
     // its banner is credits- and subscription-shaped — leaving the product
     // with no answer at all to "how much have I used?". The word now lands
     // somewhere, and only in the build where nothing else claims it.
@@ -448,8 +448,8 @@ const ALL_COMMANDS: CommandDefinition[] = [
       clearInput(params)
     },
   }),
-  // Mode commands generated from AGENT_MODES (excluded in Freebuff)
-  ...(IS_FREEBUFF ? [] : AGENT_MODES).map((mode) =>
+  // Mode commands generated from AGENT_MODES (excluded in FREEPORT)
+  ...(IS_FREEPORT ? [] : AGENT_MODES).map((mode) =>
     defineCommandWithArgs({
       name: `mode:${mode.toLowerCase()}`,
       aliases: [`model:${mode.toLowerCase()}`],
@@ -617,9 +617,9 @@ const ALL_COMMANDS: CommandDefinition[] = [
       clearInput(params)
     },
   }),
-  // /end-session (freebuff-only) — end the active session early and drop back
+  // /end-session (freeport-only) — end the active session early and drop back
   // to the model picker. The hook flips status to 'none', which unmounts
-  // <Chat> and mounts <FreebuffLandingScreen>, where the user picks a model
+  // <Chat> and mounts <freeportLandingScreen>, where the user picks a model
   // and hits Enter to start a new session.
   defineCommand({
     name: 'end-session',
@@ -632,7 +632,7 @@ const ALL_COMMANDS: CommandDefinition[] = [
       ])
       params.saveToHistory(params.inputValue.trim())
       clearInput(params)
-      returnToFreebuffLanding({ resetChat: true }).catch(() => {
+      returnTofreeportLanding({ resetChat: true }).catch(() => {
         // The hook surfaces poll errors via the session store; nothing to do
         // here beyond letting the chat history reflect the attempt.
       })
@@ -640,9 +640,9 @@ const ALL_COMMANDS: CommandDefinition[] = [
   }),
 ]
 
-export const COMMAND_REGISTRY: CommandDefinition[] = IS_FREEBUFF
-  ? ALL_COMMANDS.filter((cmd) => !FREEBUFF_REMOVED_COMMANDS.has(cmd.name))
-  : ALL_COMMANDS.filter((cmd) => !FREEBUFF_ONLY_COMMANDS.has(cmd.name))
+export const COMMAND_REGISTRY: CommandDefinition[] = IS_FREEPORT
+  ? ALL_COMMANDS.filter((cmd) => !FREEPORT_REMOVED_COMMANDS.has(cmd.name))
+  : ALL_COMMANDS.filter((cmd) => !FREEPORT_ONLY_COMMANDS.has(cmd.name))
 
 export function findCommand(cmd: string): CommandDefinition | undefined {
   const lowerCmd = cmd.toLowerCase()

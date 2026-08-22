@@ -41,7 +41,7 @@ export function getAdUserAgent(platform: string = process.platform): string {
  * Deliberately a shape test rather than an allowlist: the question is only
  * "will the provider's device classifier recognise this", and every string it
  * recognises starts with the `Mozilla/` token. A native runtime UA
- * (`Bun/1.3.14`) and a product UA (`Freebuff-CLI/0.0.140`) both fail it, which
+ * (`Bun/1.3.14`) and a product UA (`FREEPORT-CLI/0.0.140`) both fail it, which
  * is the point — they are the two ways we have actually leaked a non-browser
  * UA to Gravity.
  */
@@ -58,7 +58,7 @@ export function isBrowserLikeAdUserAgent(
  * It exists because those two disagreed. The auction declared a browser
  * (clients send `getAdUserAgent()` in the body) while the impression pixel was
  * fired server-side with whatever the client put in its HTTP header —
- * `Freebuff-CLI/<version>`. One impression, two different clients, on a signal
+ * `FREEPORT-CLI/<version>`. One impression, two different clients, on a signal
  * the provider documents as feeding bot filtering. Routing both call sites
  * through here is what makes them agree by construction.
  *

@@ -2,10 +2,10 @@ import fs from 'fs'
 import path from 'path'
 
 import {
-  FREEBUFF_MODELS,
-  isFreebuffModelId,
-  migrateSupersededFreebuffModelPreference,
-} from '@codebuff/common/constants/freebuff-models'
+  FREEPORT_MODELS,
+  isfreeportModelId,
+  migrateSupersededfreeportModelPreference,
+} from '@codebuff/common/constants/freeport-models'
 
 import { getConfigDir } from './auth'
 import { AGENT_MODES } from './constants'
@@ -26,10 +26,10 @@ const DEFAULT_SETTINGS: Settings = {
 export interface Settings {
   mode?: AgentMode
   adsEnabled?: boolean
-  /** Last model the user picked in the freebuff model selector. Restored on
-   *  next freebuff launch so users land in the queue for their preferred
+  /** Last model the user picked in the FREEPORT model selector. Restored on
+   *  next FREEPORT launch so users land in the queue for their preferred
    *  model without re-picking. Persisted as the canonical model id. */
-  freebuffModel?: string
+  freeportModel?: string
   /** @deprecated Use server-side fallbackToALaCarte setting instead */
   alwaysUseALaCarte?: boolean
   /** @deprecated Use server-side fallbackToALaCarte setting instead */
@@ -110,26 +110,26 @@ const validateSettings = (parsed: unknown): Settings => {
     settings.adsEnabled = obj.adsEnabled
   }
 
-  // Validate freebuffModel against the current picker catalog. Server support
+  // Validate freeportModel against the current picker catalog. Server support
   // may intentionally outlive client visibility during a staged model
   // retirement, but an updated client must not restore a retired selection.
   if (
-    typeof obj.freebuffModel === 'string' &&
-    isFreebuffModelId(obj.freebuffModel)
+    typeof obj.freeportModel === 'string' &&
+    isfreeportModelId(obj.freeportModel)
   ) {
-    settings.freebuffModel = obj.freebuffModel
+    settings.freeportModel = obj.freeportModel
   }
 
   // Steer off a model that has since been superseded (MiniMax M3, MiMo 2.5 →
-  // V4 Flash) on EVERY load, so each new freebuff session starts
+  // V4 Flash) on EVERY load, so each new FREEPORT session starts
   // on the better model instead of a pick made before it existed. Picking a
   // superseded model still works for the session you are in; it just stops
   // being what the next launch opens on.
-  const replacement = migrateSupersededFreebuffModelPreference(
-    settings.freebuffModel,
-    FREEBUFF_MODELS.map((model) => model.id),
+  const replacement = migrateSupersededfreeportModelPreference(
+    settings.freeportModel,
+    FREEPORT_MODELS.map((model) => model.id),
   )
-  if (replacement) settings.freebuffModel = replacement
+  if (replacement) settings.freeportModel = replacement
 
   // Validate alwaysUseALaCarte (legacy)
   if (typeof obj.alwaysUseALaCarte === 'boolean') {
@@ -190,22 +190,22 @@ export const saveModePreference = (mode: AgentMode): void => {
 }
 
 /**
- * Load the saved freebuff model preference. Returns undefined if none is
- * saved yet — callers should fall back to DEFAULT_FREEBUFF_MODEL_ID.
+ * Load the saved FREEPORT model preference. Returns undefined if none is
+ * saved yet — callers should fall back to DEFAULT_FREEPORT_MODEL_ID.
  */
-export const loadFreebuffModelPreference = (): string | undefined => {
-  return loadSettings().freebuffModel
+export const loadfreeportModelPreference = (): string | undefined => {
+  return loadSettings().freeportModel
 }
 
 /**
- * Save an ordinary freebuff picker preference so the next launch defaults to
+ * Save an ordinary FREEPORT picker preference so the next launch defaults to
  * it. Referral-only and retired session models are deliberately not
  * rememberable: they may be valid for the current session without being
  * selectable on the next landing screen.
  */
-export const saveFreebuffModelPreference = (model: string): void => {
-  if (!isFreebuffModelId(model)) return
-  saveSettings({ freebuffModel: model })
+export const savefreeportModelPreference = (model: string): void => {
+  if (!isfreeportModelId(model)) return
+  saveSettings({ freeportModel: model })
 }
 
 /**

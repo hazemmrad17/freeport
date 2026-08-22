@@ -352,7 +352,7 @@ describe('parseSkillFileContent', () => {
       '  hermes:',
       '    tags: [ADHD, Productivity]',
       '    category: productivity',
-      '  freebuff-builtin: review',
+      '  FREEPORT-builtin: review',
       '---',
       '',
       '# i-have-adhd',
@@ -364,8 +364,8 @@ describe('parseSkillFileContent', () => {
     })
 
     expect(parsed).toMatchObject({ name: 'i-have-adhd' })
-    // flat entries stay readable — that is how a Freebuff-authored skill is tagged
-    expect(parsed?.metadata?.['freebuff-builtin']).toBe('review')
+    // flat entries stay readable — that is how a FREEPORT-authored skill is tagged
+    expect(parsed?.metadata?.['FREEPORT-builtin']).toBe('review')
     expect(parsed?.metadata?.hermes).toMatchObject({ category: 'productivity' })
   })
 
@@ -395,8 +395,8 @@ describe('parseSkillFileContent', () => {
  * Guards the home-directory boundary itself.
  *
  * The bug these exist for is invisible from the outside: skills load fine, they
- * are just the WRONG MACHINE's. Freebuff Cloud embeds this runner in the
- * freebuff/web server process while the repo lives in a Daytona sandbox, so an
+ * are just the WRONG MACHINE's. FREEPORT Cloud embeds this runner in the
+ * FREEPORT/web server process while the repo lives in a Daytona sandbox, so an
  * always-on `os.homedir()` search meant every Cloud turn parsed the web
  * server's `~/.claude/skills` and offered it to the model. Nothing downstream
  * can tell that apart from working correctly, so it has to be caught here.

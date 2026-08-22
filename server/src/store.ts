@@ -5,6 +5,7 @@ import type { Database } from 'bun:sqlite'
 import type {
   AdEventRow,
   ApiTokenRow,
+  CustomerRow,
   LoginAttemptRow,
   LogRecordRow,
   SessionRow,
@@ -271,6 +272,16 @@ export function getSessionUsageUnits(db: Database, userId: string, periodStartMs
   return row?.units ?? 0
 }
 
+/** Total reported model spend (USD) for this user since `sinceMs`. */
+export function getSpendSinceMs(db: Database, userId: string, sinceMs: number): number {
+  const row = db
+    .query(
+      'SELECT COALESCE(SUM(cost_usd), 0) AS total FROM usage_events WHERE user_id = ? AND created_at >= ?',
+    )
+    .get(userId, sinceMs) as { total: number | null } | undefined
+  return row?.total ?? 0
+}
+
 // ---------------------------------------------------------------------------
 // Usage events
 // ---------------------------------------------------------------------------
@@ -337,12 +348,32 @@ export function getSubscriptionByUserId(
   ) ?? null
 }
 
+export function getSubscriptionByPaddleId(
+  db: Database,
+  paddleSubscriptionId: string,
+): SubscriptionRow | null {
+  return (
+    db
+      .query('SELECT * FROM subscriptions WHERE paddle_subscription_id = ?')
+      .get(paddleSubscriptionId) as SubscriptionRow | undefined
+  ) ?? null
+}
+
+/**
+ * Whether a subscription currently grants paid access.
+ * - `active` and `trialing` grant access.
+ * - A scheduled cancel/pause does NOT revoke — only the actual status does.
+ * - `past_due` grants within the dunning grace window; `canceled`/`paused` deny.
+ */
 export function isPaidUser(db: Database, userId: string): boolean {
   const sub = getSubscriptionByUserId(db, userId)
   if (!sub) return false
-  if (sub.status === 'active') return true
-  // Grace period: still treated as paid if within grace window
-  if (sub.status === 'past_due' && sub.grace_period_end && sub.grace_period_end > Date.now()) {
+  if (sub.status === 'active' || sub.status === 'trialing') return true
+  if (
+    sub.status === 'past_due' &&
+    sub.grace_period_end !== null &&
+    sub.grace_period_end > Date.now()
+  ) {
     return true
   }
   return false
@@ -356,22 +387,30 @@ export function upsertSubscription(
     paddleCustomerId?: string
     status: string
     plan?: string
-    currentPeriodEnd?: number
+    priceId?: string
+    productId?: string
+    scheduledChangeAction?: string | null
+    scheduledChangeAt?: number | null
+    currentPeriodEnd?: number | null
     gracePeriodEnd?: number | null
     lastEventId?: string
   },
 ): SubscriptionRow {
   const now = Date.now()
   db.query(
-    `INSERT INTO subscriptions (user_id, paddle_subscription_id, paddle_customer_id, status, plan, current_period_end, grace_period_end, last_event_id, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO subscriptions (user_id, paddle_subscription_id, paddle_customer_id, status, plan, price_id, product_id, scheduled_change_action, scheduled_change_at, current_period_end, grace_period_end, last_event_id, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(user_id) DO UPDATE SET
        paddle_subscription_id = excluded.paddle_subscription_id,
        paddle_customer_id = excluded.paddle_customer_id,
        status = excluded.status,
        plan = excluded.plan,
+       price_id = excluded.price_id,
+       product_id = excluded.product_id,
+       scheduled_change_action = excluded.scheduled_change_action,
+       scheduled_change_at = excluded.scheduled_change_at,
        current_period_end = excluded.current_period_end,
-       grace_period_end = excluded.grace_period_end,
+       grace_period_end = COALESCE(excluded.grace_period_end, subscriptions.grace_period_end),
        last_event_id = excluded.last_event_id,
        updated_at = excluded.updated_at`,
   ).run(
@@ -380,6 +419,10 @@ export function upsertSubscription(
     params.paddleCustomerId ?? null,
     params.status,
     params.plan ?? 'pro',
+    params.priceId ?? null,
+    params.productId ?? null,
+    params.scheduledChangeAction ?? null,
+    params.scheduledChangeAt ?? null,
     params.currentPeriodEnd ?? null,
     params.gracePeriodEnd ?? null,
     params.lastEventId ?? null,
@@ -387,6 +430,52 @@ export function upsertSubscription(
     now,
   )
   return getSubscriptionByUserId(db, params.userId)!
+}
+
+// ---------------------------------------------------------------------------
+// Customers (Paddle mirror)
+// ---------------------------------------------------------------------------
+
+export function upsertCustomer(
+  db: Database,
+  params: { customerId: string; email: string; userId?: string | null },
+): CustomerRow {
+  const now = Date.now()
+  const existing = db
+    .query('SELECT * FROM customers WHERE customer_id = ?')
+    .get(params.customerId) as CustomerRow | undefined
+
+  let userId = params.userId ?? existing?.user_id ?? null
+  if (!userId) {
+    const user = getUserByEmail(db, params.email)
+    // Auto-provision a local account for checkouts that started on the public
+    // pricing page (no CLI login happened first).
+    userId = user?.id ?? createUser(db, { email: params.email, name: params.email.split('@')[0] ?? params.email }).id
+  }
+
+  db.query(
+    `INSERT INTO customers (customer_id, user_id, email, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(customer_id) DO UPDATE SET
+       user_id = COALESCE(excluded.user_id, customers.user_id),
+       email = excluded.email,
+       updated_at = excluded.updated_at`,
+  ).run(params.customerId, userId, params.email, now, now)
+
+  return db
+    .query('SELECT * FROM customers WHERE customer_id = ?')
+    .get(params.customerId) as CustomerRow
+}
+
+export function getCustomerByPaddleId(
+  db: Database,
+  customerId: string,
+): CustomerRow | null {
+  return (
+    db
+      .query('SELECT * FROM customers WHERE customer_id = ?')
+      .get(customerId) as CustomerRow | undefined
+  ) ?? null
 }
 
 export function isEventProcessed(

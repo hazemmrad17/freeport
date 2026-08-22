@@ -5,7 +5,7 @@ export const CLIENT_ENV_PREFIX = 'NEXT_PUBLIC_'
 export const clientEnvSchema = z.object({
   NEXT_PUBLIC_CB_ENVIRONMENT: z.enum(['dev', 'test', 'prod']),
   NEXT_PUBLIC_CODEBUFF_APP_URL: z.url().min(1),
-  NEXT_PUBLIC_FREEBUFF_APP_URL: z.url().optional(),
+  NEXT_PUBLIC_FREEPORT_APP_URL: z.url().optional(),
   NEXT_PUBLIC_SUPPORT_EMAIL: z.email().min(1),
   NEXT_PUBLIC_POSTHOG_API_KEY: z.string().min(1),
   NEXT_PUBLIC_POSTHOG_HOST_URL: z.url().min(1),
@@ -53,7 +53,7 @@ export const clientEnvSchema = z.object({
    * not.
    */
   NEXT_PUBLIC_RECAPTCHA_V2_SIZE: z.enum(['checkbox', 'invisible']).optional(),
-  /** Human Behavior session-replay write key for Freebuff Web. Public by
+  /** Human Behavior session-replay write key for FREEPORT Web. Public by
    *  design — it only authorizes ingestion. Optional so a dev checkout without
    *  it boots with replay simply switched off. */
   NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY: z.string().min(1).optional(),
@@ -70,7 +70,7 @@ export const clientProcessEnv: ClientInput = {
   NEXT_PUBLIC_CB_ENVIRONMENT: process.env.NEXT_PUBLIC_CB_ENVIRONMENT ?? 'dev',
   NEXT_PUBLIC_CODEBUFF_APP_URL:
     process.env.NEXT_PUBLIC_CODEBUFF_APP_URL ?? 'http://localhost:3000',
-  NEXT_PUBLIC_FREEBUFF_APP_URL: process.env.NEXT_PUBLIC_FREEBUFF_APP_URL,
+  NEXT_PUBLIC_FREEPORT_APP_URL: process.env.NEXT_PUBLIC_FREEPORT_APP_URL,
   NEXT_PUBLIC_SUPPORT_EMAIL:
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'support@freeport.dev',
   NEXT_PUBLIC_POSTHOG_API_KEY:

@@ -6,8 +6,9 @@
 
 Freeport gives you a full-mode AI coding agent in your terminal, with a generous free tier funded by per-request ads. When you're ready for more, upgrade with local payment rails — no international card required.
 
-- **Free tier**: 6 sessions/day, all models, ad-sponsored
-- **Paid tier**: 200+ sessions/day, ad-free, via Paddle (Visa/Mastercard, PayPal, Apple Pay)
+- **Public Utility (free)**: 3 active sessions/day (1-hour slots), fast Flash models, 1–2 text ads per session, $0.05/day hard spend cap
+- **Pro Supporter ($6/mo or $49.99/yr)**: 6 active sessions/day, priority routing, 100% ad-free
+- **Power User (BYOK)**: unlimited, any model your key supports — `freeport --key YOUR_API_KEY`, ad-free
 
 ## Architecture
 
@@ -56,8 +57,9 @@ All env-driven. See `.env.example` for full list. Key vars:
 - `PADDLE_WEBHOOK_SECRET` — Webhook HMAC secret
 - `PADDLE_CLIENT_TOKEN` — Client-side token for pricing page
 - `PADDLE_ENV` — `sandbox` or `production`
-- `MYCLI_FREE_SESSIONS_PER_DAY` — Free tier limit (default: 6)
-- `MYCLI_PAID_SESSIONS_PER_DAY` — Paid tier limit (default: 200)
+- `MYCLI_FREE_SESSIONS_PER_DAY` — Free tier limit (default: 3)
+- `FREEPORT_FREE_DAILY_SPEND_CAP_USD` — Free tier daily spend cap (default: $0.05)
+- `FREEPORT_PAID_SESSIONS_PER_DAY` — Pro Supporter limit (default: 6)
 
 ## CLI wiring
 

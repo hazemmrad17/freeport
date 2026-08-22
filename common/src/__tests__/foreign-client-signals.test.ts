@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test'
 
 import {
-  detectForeignFreebuffClient,
-  FREEBUFF_DOWNGRADE_MODEL_ID,
-  FREEBUFF_SIGNATURE_TOOL_NAMES,
+  detectForeignFREEPORTClient,
+  FREEPORT_DOWNGRADE_MODEL_ID,
+  FREEPORT_SIGNATURE_TOOL_NAMES,
   GENERIC_TOOL_NAMES,
   resolveForeignClientDowngrade,
 } from '../constants/foreign-client-signals'
@@ -13,8 +13,8 @@ function tools(...names: string[]) {
   return names.map((name) => ({ type: 'function', function: { name } }))
 }
 
-/** Toolsets observed on real freebuff traffic over 24h of DeepSeek V4 Flash. */
-const FREEBUFF_TOOLSETS = [
+/** Toolsets observed on real FREEPORT traffic over 24h of DeepSeek V4 Flash. */
+const FREEPORT_TOOLSETS = [
   // CLI / desktop root agent
   tools(
     'ask_user',
@@ -114,14 +114,14 @@ const FOREIGN_TOOLSETS: Array<[string, ReturnType<typeof tools>]> = [
   ],
 ]
 
-describe('detectForeignFreebuffClient', () => {
+describe('detectForeignFREEPORTClient', () => {
   test('the signature is every non-generic tool we define', () => {
     // Derived, not hand-listed: a tool added to `toolNames` joins the signature
     // automatically. That is the rot that flagged researcher-web — a
     // hand-picked list simply never grew to cover it.
     const known = new Set<string>(toolNames)
     for (const name of known) {
-      expect(FREEBUFF_SIGNATURE_TOOL_NAMES.has(name)).toBe(
+      expect(FREEPORT_SIGNATURE_TOOL_NAMES.has(name)).toBe(
         !GENERIC_TOOL_NAMES.has(name),
       )
     }
@@ -129,17 +129,17 @@ describe('detectForeignFreebuffClient', () => {
     for (const name of GENERIC_TOOL_NAMES) {
       expect(known.has(name)).toBe(true)
     }
-    expect(FREEBUFF_SIGNATURE_TOOL_NAMES.size).toBeGreaterThan(20)
+    expect(FREEPORT_SIGNATURE_TOOL_NAMES.size).toBeGreaterThan(20)
   })
 
-  test('clears real freebuff toolsets', () => {
-    for (const toolset of FREEBUFF_TOOLSETS) {
-      expect(detectForeignFreebuffClient({ tools: toolset }).signal).toBeNull()
+  test('clears real FREEPORT toolsets', () => {
+    for (const toolset of FREEPORT_TOOLSETS) {
+      expect(detectForeignFREEPORTClient({ tools: toolset }).signal).toBeNull()
     }
   })
 
   test.each(FOREIGN_TOOLSETS)('flags %s', (_name, toolset) => {
-    expect(detectForeignFreebuffClient({ tools: toolset }).signal).toBe(
+    expect(detectForeignFREEPORTClient({ tools: toolset }).signal).toBe(
       'foreign_toolset',
     )
   })
@@ -148,7 +148,7 @@ describe('detectForeignFreebuffClient', () => {
     // opencode sends `glob` and `web_search`, which we define — but both are
     // generic, so neither is in the signature and the overlap buys it nothing.
     expect(
-      detectForeignFreebuffClient({
+      detectForeignFREEPORTClient({
         tools: tools('glob', 'web_search', 'bash', 'edit', 'write'),
       }).signal,
     ).toBe('foreign_toolset')
@@ -160,10 +160,10 @@ describe('detectForeignFreebuffClient', () => {
     // only generic names — every single-tool agent of ours uses a distinctive
     // one (`run_terminal_command`, `spawn_agents`, `read_docs`, `set_output`).
     expect(
-      detectForeignFreebuffClient({ tools: tools('web_search') }).signal,
+      detectForeignFREEPORTClient({ tools: tools('web_search') }).signal,
     ).toBe('foreign_toolset')
     expect(
-      detectForeignFreebuffClient({ tools: tools('glob', 'web_search') }).signal,
+      detectForeignFREEPORTClient({ tools: tools('glob', 'web_search') }).signal,
     ).toBe('foreign_toolset')
   })
 
@@ -171,7 +171,7 @@ describe('detectForeignFreebuffClient', () => {
     // 16 users in one day sent our tools AND set params. Downgrading them is
     // the false positive this ordering exists to prevent.
     expect(
-      detectForeignFreebuffClient({
+      detectForeignFREEPORTClient({
         tools: tools('ask_user', 'read_files'),
         temperature: 0.3,
         max_tokens: 32000,
@@ -180,24 +180,24 @@ describe('detectForeignFreebuffClient', () => {
   })
 
   test('flags sampling params only when no tools are offered', () => {
-    expect(detectForeignFreebuffClient({ temperature: 0.7 }).signal).toBe(
+    expect(detectForeignFREEPORTClient({ temperature: 0.7 }).signal).toBe(
       'sampling_params',
     )
-    expect(detectForeignFreebuffClient({ top_p: 0.9 }).signal).toBe(
+    expect(detectForeignFREEPORTClient({ top_p: 0.9 }).signal).toBe(
       'sampling_params',
     )
-    expect(detectForeignFreebuffClient({ max_tokens: 4096 }).signal).toBe(
+    expect(detectForeignFREEPORTClient({ max_tokens: 4096 }).signal).toBe(
       'sampling_params',
     )
     expect(
-      detectForeignFreebuffClient({ max_completion_tokens: 4096 }).signal,
+      detectForeignFREEPORTClient({ max_completion_tokens: 4096 }).signal,
     ).toBe('sampling_params')
   })
 
   test('clears a tool-free request that leaves sampling params unset', () => {
     // Our helper agents (chat titles, compaction) send no tools at all.
-    expect(detectForeignFreebuffClient({}).signal).toBeNull()
-    expect(detectForeignFreebuffClient({ tools: [] }).signal).toBeNull()
+    expect(detectForeignFREEPORTClient({}).signal).toBeNull()
+    expect(detectForeignFREEPORTClient({ tools: [] }).signal).toBeNull()
   })
 
   test('explicit nulls are not treated as set', () => {
@@ -212,10 +212,10 @@ describe('detectForeignFreebuffClient', () => {
       { max_completion_tokens: null },
       { temperature: null, top_p: null, max_tokens: null },
     ]) {
-      expect(detectForeignFreebuffClient(body as never).signal).toBeNull()
+      expect(detectForeignFREEPORTClient(body as never).signal).toBeNull()
     }
     expect(
-      detectForeignFreebuffClient({
+      detectForeignFREEPORTClient({
         temperature: undefined,
         top_p: undefined,
         max_tokens: undefined,
@@ -225,10 +225,10 @@ describe('detectForeignFreebuffClient', () => {
 
   test('zero is a real choice and stays flagged', () => {
     // `!= null` must not swallow falsy-but-set values.
-    expect(detectForeignFreebuffClient({ temperature: 0 }).signal).toBe(
+    expect(detectForeignFREEPORTClient({ temperature: 0 }).signal).toBe(
       'sampling_params',
     )
-    expect(detectForeignFreebuffClient({ top_p: 0 }).signal).toBe(
+    expect(detectForeignFREEPORTClient({ top_p: 0 }).signal).toBe(
       'sampling_params',
     )
   })
@@ -236,17 +236,17 @@ describe('detectForeignFreebuffClient', () => {
   test('tolerates malformed tool entries without throwing', () => {
     for (const tools of [null, undefined, 'nope', [], [null], [{}], [{ function: {} }]]) {
       expect(() =>
-        detectForeignFreebuffClient({ tools } as never),
+        detectForeignFREEPORTClient({ tools } as never),
       ).not.toThrow()
     }
     // Tools present but unparseable read as "no tools offered", so the request
     // falls through to the param check rather than being flagged on a name
     // list we could not actually read.
-    expect(detectForeignFreebuffClient({ tools: [{}] }).signal).toBeNull()
+    expect(detectForeignFREEPORTClient({ tools: [{}] }).signal).toBeNull()
   })
 
   test('truncates caller-controlled tool names before they reach logs', () => {
-    const verdict = detectForeignFreebuffClient({
+    const verdict = detectForeignFREEPORTClient({
       tools: [{ type: 'function', function: { name: 'x'.repeat(5000) } }],
     })
     expect(verdict.signal).toBe('foreign_toolset')
@@ -254,7 +254,7 @@ describe('detectForeignFreebuffClient', () => {
   })
 
   test('reports bounded evidence for the log line', () => {
-    const verdict = detectForeignFreebuffClient({
+    const verdict = detectForeignFREEPORTClient({
       tools: tools('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'),
     })
     expect(verdict.toolCount).toBe(10)
@@ -264,7 +264,7 @@ describe('detectForeignFreebuffClient', () => {
   test.each([
     ['researcher-web', ['web_search', 'read_url']],
     ['researcher-docs', ['read_docs']],
-    ['freebuff-desktop-autorun', ['decide']],
+    ['FREEPORT-desktop-autorun', ['decide']],
     ['basher', ['run_terminal_command']],
     ['file-picker', ['spawn_agents']],
   ])('clears our own %s toolset', (_agent, names) => {
@@ -272,7 +272,7 @@ describe('detectForeignFreebuffClient', () => {
     // flagged on 100% of 334,042 requests from 4,821 users, autorun on 100% of
     // 2,904 from 41. `web_search` cannot join the signature (opencode ships
     // it), so these clear by the every-tool-is-ours rule instead.
-    expect(detectForeignFreebuffClient({ tools: tools(...names) }).signal).toBeNull()
+    expect(detectForeignFREEPORTClient({ tools: tools(...names) }).signal).toBeNull()
   })
 
   test('borrowing one distinctive name clears an otherwise foreign toolset', () => {
@@ -283,7 +283,7 @@ describe('detectForeignFreebuffClient', () => {
     // the moment it shows up in the logs, and the proxy has to actually
     // implement the tool for its own loop to keep working.
     expect(
-      detectForeignFreebuffClient({ tools: tools('read_files', 'Bash') }).signal,
+      detectForeignFREEPORTClient({ tools: tools('read_files', 'Bash') }).signal,
     ).toBeNull()
   })
 
@@ -293,11 +293,11 @@ describe('detectForeignFreebuffClient', () => {
     // roots send zero tool-free requests (0 of 683,151 for -v3, 0 of 294,823
     // for -worktree) and the CLI roots 0.30%/2.81%. All 18 users sampled across
     // that tail were non-coding automation.
-    expect(detectForeignFreebuffClient({}, true).signal).toBe(
+    expect(detectForeignFREEPORTClient({}, true).signal).toBe(
       'root_agent_no_tools',
     )
     // Sampling params do not change the verdict for a root.
-    expect(detectForeignFreebuffClient({ temperature: 0.7 }, true).signal).toBe(
+    expect(detectForeignFREEPORTClient({ temperature: 0.7 }, true).signal).toBe(
       'root_agent_no_tools',
     )
   })
@@ -306,10 +306,10 @@ describe('detectForeignFreebuffClient', () => {
     // Evading root_agent_no_tools means sending our toolset, at which point the
     // toolset check applies instead — the same convergent property.
     expect(
-      detectForeignFreebuffClient({ tools: tools('ask_user') }, true).signal,
+      detectForeignFREEPORTClient({ tools: tools('ask_user') }, true).signal,
     ).toBeNull()
     expect(
-      detectForeignFreebuffClient({ tools: tools('Bash', 'Edit') }, true).signal,
+      detectForeignFREEPORTClient({ tools: tools('Bash', 'Edit') }, true).signal,
     ).toBe('foreign_toolset')
   })
 
@@ -317,13 +317,13 @@ describe('detectForeignFreebuffClient', () => {
     // Our helper agents (chat titles, compaction, researcher-docs) legitimately
     // send no tools; only ROOT agents are agentic by definition. Defaulting
     // isRootAgent to false keeps every non-root caller on the old behaviour.
-    expect(detectForeignFreebuffClient({}).signal).toBeNull()
-    expect(detectForeignFreebuffClient({}, false).signal).toBeNull()
+    expect(detectForeignFREEPORTClient({}).signal).toBeNull()
+    expect(detectForeignFREEPORTClient({}, false).signal).toBeNull()
   })
 
   test('downgrade target is the free OpenRouter variant', () => {
-    expect(FREEBUFF_DOWNGRADE_MODEL_ID).toBe('inclusionai/ling-3.0-tiny:free')
-    expect(FREEBUFF_DOWNGRADE_MODEL_ID.endsWith(':free')).toBe(true)
+    expect(FREEPORT_DOWNGRADE_MODEL_ID).toBe('inclusionai/ling-3.0-tiny:free')
+    expect(FREEPORT_DOWNGRADE_MODEL_ID.endsWith(':free')).toBe(true)
   })
 })
 
@@ -333,12 +333,12 @@ describe('resolveForeignClientDowngrade', () => {
   const ours = { tools: tools('ask_user', 'read_files') }
 
   test('always downgrades a foreign toolset', () => {
-    // Third-party clients are a terms violation: Freebuff funds free inference
+    // Third-party clients are a terms violation: FREEPORT funds free inference
     // with ads only our own clients render, so a proxied request takes the
     // cost and returns none of the revenue. There is no mode in which this is
     // served what it asked for.
     expect(resolveForeignClientDowngrade({ body: foreign })!.downgradeTo).toBe(
-      FREEBUFF_DOWNGRADE_MODEL_ID,
+      FREEPORT_DOWNGRADE_MODEL_ID,
     )
   })
 
@@ -365,13 +365,13 @@ describe('resolveForeignClientDowngrade', () => {
     expect(decision.downgradeTo).toBeNull()
   })
 
-  test('a freebuff toolset is never reported', () => {
+  test('a FREEPORT toolset is never reported', () => {
     expect(resolveForeignClientDowngrade({ body: ours })).toBeNull()
   })
 
   test('does not re-downgrade a request already on the downgrade model', () => {
     const decision = resolveForeignClientDowngrade({
-      body: { ...foreign, model: FREEBUFF_DOWNGRADE_MODEL_ID },
+      body: { ...foreign, model: FREEPORT_DOWNGRADE_MODEL_ID },
     })!
     expect(decision.signal).toBe('foreign_toolset')
     expect(decision.downgradeTo).toBeNull()

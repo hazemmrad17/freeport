@@ -3,7 +3,7 @@
  *
  * What this catches
  * -----------------
- * `pingmike2/freebuff2api-wokers` and its relatives run as a Cloudflare Worker
+ * `pingmike2/FREEPORT2api-wokers` and its relatives run as a Cloudflare Worker
  * that pools harvested account tokens and resells free mode as an
  * OpenAI/Anthropic-compatible endpoint. Cloudflare stamps `CF-Worker` onto every
  * outbound subrequest a Worker makes, naming the Worker's zone, and Worker code

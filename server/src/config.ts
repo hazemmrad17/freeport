@@ -40,6 +40,8 @@ export interface ServerConfig {
   paddleClientToken: string
   /** Sessions per day for paid users (soft abuse cap). */
   paidSessionsPerDay: number
+  /** Hard daily model-spend cap for free users, in USD. */
+  freeDailySpendCapUsd: number
   /** Whether paid users see ads (default: false). */
   paidAdsEnabled: boolean
   /** Grace period in days after past_due before downgrade. */
@@ -119,7 +121,7 @@ export function loadConfig(overrides: Partial<ServerConfig> = {}): ServerConfig 
       process.env.FREEPORT_DB_PATH ??
         path.join(import.meta.dirname, '..', 'data', 'freeport.db'),
     ),
-    freeSessionsPerDay: envNumber('FREEPORT_FREE_SESSIONS_PER_DAY', 6, {
+    freeSessionsPerDay: envNumber('FREEPORT_FREE_SESSIONS_PER_DAY', 3, {
       min: 0,
       max: 10_000,
     }),
@@ -157,9 +159,15 @@ export function loadConfig(overrides: Partial<ServerConfig> = {}): ServerConfig 
     paddleWebhookSecret: process.env.PADDLE_WEBHOOK_SECRET ?? '',
     paddleEnv: (process.env.PADDLE_ENV as 'sandbox' | 'production') ?? 'sandbox',
     paddleClientToken: process.env.PADDLE_CLIENT_TOKEN ?? '',
-    paidSessionsPerDay: envNumber('FREEPORT_PAID_SESSIONS_PER_DAY', 200, {
+    paidSessionsPerDay: envNumber('FREEPORT_PAID_SESSIONS_PER_DAY', 6, {
       min: 1,
       max: 10_000,
+    }),
+    /** Hard daily model-spend cap for free users (USD). Admission is refused
+     *  once today's reported usage crosses it — protects against runaway
+     *  context loops draining the wallet. */
+    freeDailySpendCapUsd: envNumber('FREEPORT_FREE_DAILY_SPEND_CAP_USD', 0.05, {
+      min: 0,
     }),
     paidAdsEnabled: process.env.FREEPORT_PAID_ADS_ENABLED === 'true',
     subscriptionGracePeriodDays: envNumber('FREEPORT_SUBSCRIPTION_GRACE_PERIOD_DAYS', 7, {

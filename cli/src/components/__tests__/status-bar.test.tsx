@@ -28,7 +28,7 @@ describe('StatusBar', () => {
           isAtBottom
           scrollToLatest={() => {}}
           statusIndicatorState={statusIndicatorState}
-          freebuffSession={null}
+          FREEPORTSession={null}
         />,
       )
     })

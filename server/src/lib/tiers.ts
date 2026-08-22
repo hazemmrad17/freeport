@@ -1,57 +1,51 @@
+export type TierName = 'Public Utility' | 'Pro Supporter' | 'Power User'
+
 export interface Tier {
-  name: 'Starter' | 'Pro' | 'Advanced'
+  name: TierName
   description: string
   features: string[]
-  priceId: { month: string; year: string }
+  /** What the button does: open Paddle checkout, or a no-op/free path. */
+  cta: { label: string; kind: 'checkout' | 'free' | 'byok' }
+  /** Only present for checkout tiers. */
+  priceId?: { month: string; year: string }
 }
 
 export const TIERS: Tier[] = [
   {
-    name: 'Starter',
-    description: 'For individual developers getting started',
+    name: 'Public Utility',
+    description: 'Free forever, funded by unobtrusive sponsor lines',
     features: [
-      '200 sessions/day',
-      'All models included',
-      'Priority support',
-      'Ad-free experience',
+      '3 active sessions / day (1-hour slots)',
+      'Fast Flash models (Ox Alpha, DeepSeek V4 Flash)',
+      '1–2 terminal developer text ads per session',
+      'Daily spend cap keeps the service sustainable',
     ],
+    cta: { label: 'Start Free', kind: 'free' },
+  },
+  {
+    name: 'Pro Supporter',
+    description: 'Double quota, zero ads, priority routing',
+    features: [
+      '6 active sessions / day (2× free quota)',
+      'Priority queue routing + Flash Reasoning fallback',
+      '100% ad-free',
+      'Hard session cap — no surprise spend, ever',
+    ],
+    cta: { label: 'Subscribe', kind: 'checkout' },
     priceId: {
-      month: 'price_starter_monthly',  // TODO: replace with real Paddle price ID
-      year: 'price_starter_yearly',    // TODO: replace with real Paddle price ID
+      month: 'pri_01m0jk57xcf1q8t3j6shn9eye1', // Pro Supporter Monthly ($6.00)
+      year: 'pri_01m0jk60rczgbvfwmjs3wp8f2y', // Pro Supporter Annually ($49.99)
     },
   },
   {
-    name: 'Pro',
-    description: 'For professional developers and small teams',
+    name: 'Power User',
+    description: 'Bring your own key, unlimited everything',
     features: [
-      '500 sessions/day',
-      'All models included',
-      'Priority support',
-      'Ad-free experience',
-      'API access',
-      'Usage analytics',
+      'Unlimited sessions — no quota, no caps',
+      'Any model your key supports (OpenRouter & more)',
+      '100% ad-free',
+      'Runs entirely on your own account',
     ],
-    priceId: {
-      month: 'pri_01m0hrq2hexvc9mxac86tarf59',
-      year: 'pri_01m0hrq2hexvc9mxac86tarf59_yearly',  // TODO: replace with real yearly price ID
-    },
-  },
-  {
-    name: 'Advanced',
-    description: 'For teams and organizations',
-    features: [
-      'Unlimited sessions',
-      'All models included',
-      'Dedicated support',
-      'Ad-free experience',
-      'API access',
-      'Usage analytics',
-      'Custom integrations',
-      'SLA guarantee',
-    ],
-    priceId: {
-      month: 'price_advanced_monthly',  // TODO: replace with real Paddle price ID
-      year: 'price_advanced_yearly',    // TODO: replace with real Paddle price ID
-    },
+    cta: { label: 'Use --key YOUR_API_KEY', kind: 'byok' },
   },
 ]

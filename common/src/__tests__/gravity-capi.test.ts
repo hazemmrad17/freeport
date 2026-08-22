@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   buildGravityFirstMessagePayload,
   gravityFirstMessageEventId,
-  isFreebuffGravitySurface,
+  isFREEPORTGravitySurface,
   sanitizeGravityCapiData,
   sendGravityFirstMessageConversion,
 } from '../gravity-capi'
@@ -21,7 +21,7 @@ describe('Gravity first-message CAPI', () => {
           event_source_url: 'https://stale.example',
           client_context: { timezone: 'America/Los_Angeles' },
         },
-        'https://freebuff.com/chat',
+        'https://FREEPORT.com/chat',
       ),
     ).toEqual({
       user_data: {
@@ -30,11 +30,11 @@ describe('Gravity first-message CAPI', () => {
         session_id: 'session-1',
         client_user_agent: undefined,
       },
-      event_source_url: 'https://freebuff.com/chat',
+      event_source_url: 'https://FREEPORT.com/chat',
       client_context: { timezone: 'America/Los_Angeles' },
     })
-    expect(isFreebuffGravitySurface('desktop')).toBe(true)
-    expect(isFreebuffGravitySurface('preexisting')).toBe(false)
+    expect(isFREEPORTGravitySurface('desktop')).toBe(true)
+    expect(isFREEPORTGravitySurface('preexisting')).toBe(false)
   })
 
   test('drops oversized client context before forwarding it to Gravity', () => {
@@ -63,7 +63,7 @@ describe('Gravity first-message CAPI', () => {
         surface: 'cloud',
         eventTime: 123,
         gravity: {
-          event_source_url: 'https://freebuff.com/cloud/project/example',
+          event_source_url: 'https://FREEPORT.com/cloud/project/example',
           user_data: {
             click_id: 'click-1',
             visitor_id: 'visitor-1',
@@ -78,9 +78,9 @@ describe('Gravity first-message CAPI', () => {
         {
           event_name: 'FirstMessage',
           event_time: 123,
-          event_id: 'freebuff-first-message-user-123',
+          event_id: 'FREEPORT-first-message-user-123',
           action_source: 'website',
-          event_source_url: 'https://freebuff.com/cloud/project/example',
+          event_source_url: 'https://FREEPORT.com/cloud/project/example',
           user_data: {
             click_id: 'click-1',
             visitor_id: 'visitor-1',
@@ -91,7 +91,7 @@ describe('Gravity first-message CAPI', () => {
           },
           client_context: { timezone: 'America/Los_Angeles' },
           custom_data: {
-            content_name: 'Freebuff first message',
+            content_name: 'FREEPORT first message',
             content_category: 'cloud',
           },
         },
@@ -101,7 +101,7 @@ describe('Gravity first-message CAPI', () => {
 
   test('uses the same event id across surfaces for Gravity deduplication', () => {
     expect(gravityFirstMessageEventId('user-123')).toBe(
-      'freebuff-first-message-user-123',
+      'FREEPORT-first-message-user-123',
     )
   })
 
@@ -117,7 +117,7 @@ describe('Gravity first-message CAPI', () => {
           JSON.stringify({
             results: [
               {
-                event_id: 'freebuff-first-message-user-123',
+                event_id: 'FREEPORT-first-message-user-123',
                 status: 'duplicate',
               },
             ],

@@ -1,24 +1,24 @@
-import { FREEBUFF_PROVIDER_USAGE_MESSAGE } from '@codebuff/common/constants/freebuff-errors'
+import { FREEPORT_PROVIDER_USAGE_MESSAGE } from '@codebuff/common/constants/freeport-errors'
 import { getErrorObject } from '@codebuff/common/util/error'
 
 import {
-  markFreebuffSessionCountryBlocked,
-  markFreebuffSessionEnded,
-  markFreebuffSessionSuperseded,
-  refreshFreebuffSession,
-} from '../use-freebuff-session'
+  markfreeportSessionCountryBlocked,
+  markfreeportSessionEnded,
+  markfreeportSessionSuperseded,
+  refreshfreeportSession,
+} from '../use-freeport-session'
 import { getProjectRoot } from '../../project-files'
 import { useChatStore } from '../../state/chat-store'
-import { IS_FREEBUFF } from '../../utils/constants'
+import { IS_FREEPORT } from '../../utils/constants'
 import { processBashContext } from '../../utils/bash-context-processor'
 import { markRunningAgentsAsCancelled } from '../../utils/block-operations'
 import {
   getCountryBlockFromFreeModeError,
   getFreeModeUnavailableErrorMessage,
-  getFreebuffGateErrorKind,
-  getFreebuffRateLimitErrorMessage,
+  getfreeportGateErrorKind,
+  getfreeportRateLimitErrorMessage,
   isOutOfCreditsError,
-  isFreebuffProviderUsageError,
+  isfreeportProviderUsageError,
   isFreeModeUnavailableError,
   OUT_OF_CREDITS_MESSAGE,
 } from '../../utils/error-handling'
@@ -345,7 +345,7 @@ export const handleRunCompletion = (params: {
   updater: BatchedMessageUpdater
   aiMessageId: string
   wasAbortedByUser: boolean
-  /** Whether the run streamed any content before finishing. A freebuff gate
+  /** Whether the run streamed any content before finishing. A FREEPORT gate
    *  rejection with no content means the prompt was consumed unprocessed —
    *  surfaced as an inline error instead of silently looking sent. */
   hasReceivedContent?: boolean
@@ -402,8 +402,8 @@ export const handleRunCompletion = (params: {
   }
 
   if (output.type === 'error') {
-    if (IS_FREEBUFF && isFreebuffProviderUsageError(output)) {
-      updater.setError(FREEBUFF_PROVIDER_USAGE_MESSAGE)
+    if (IS_FREEPORT && isfreeportProviderUsageError(output)) {
+      updater.setError(FREEPORT_PROVIDER_USAGE_MESSAGE)
       finalizeAfterError()
       return
     }
@@ -418,8 +418,8 @@ export const handleRunCompletion = (params: {
 
     if (isFreeModeUnavailableError(output)) {
       updater.setError(getFreeModeUnavailableErrorMessage(output))
-      if (IS_FREEBUFF) {
-        markFreebuffSessionCountryBlocked(
+      if (IS_FREEPORT) {
+        markfreeportSessionCountryBlocked(
           getCountryBlockFromFreeModeError(output) ?? {
             countryCode: 'UNKNOWN',
           },
@@ -429,20 +429,20 @@ export const handleRunCompletion = (params: {
       return
     }
 
-    const gateKind = getFreebuffGateErrorKind(output)
+    const gateKind = getfreeportGateErrorKind(output)
     if (gateKind) {
-      handleFreebuffGateError(gateKind, updater, {
+      handlefreeportGateError(gateKind, updater, {
         messageWasDropped: params.hasReceivedContent === false,
       })
       finalizeAfterError()
       return
     }
 
-    const freebuffRateLimitMessage = IS_FREEBUFF
-      ? getFreebuffRateLimitErrorMessage(output)
+    const freeportRateLimitMessage = IS_FREEPORT
+      ? getfreeportRateLimitErrorMessage(output)
       : null
-    if (freebuffRateLimitMessage) {
-      updater.setError(freebuffRateLimitMessage)
+    if (freeportRateLimitMessage) {
+      updater.setError(freeportRateLimitMessage)
       finalizeAfterError()
       return
     }
@@ -525,8 +525,8 @@ export const handleRunError = (params: {
   })
   timerController.stop('error')
 
-  if (IS_FREEBUFF && isFreebuffProviderUsageError(error)) {
-    updater.setError(FREEBUFF_PROVIDER_USAGE_MESSAGE)
+  if (IS_FREEPORT && isfreeportProviderUsageError(error)) {
+    updater.setError(FREEPORT_PROVIDER_USAGE_MESSAGE)
     return
   }
 
@@ -539,8 +539,8 @@ export const handleRunError = (params: {
 
   if (isFreeModeUnavailableError(error)) {
     updater.setError(getFreeModeUnavailableErrorMessage(error))
-    if (IS_FREEBUFF) {
-      markFreebuffSessionCountryBlocked(
+    if (IS_FREEPORT) {
+      markfreeportSessionCountryBlocked(
         getCountryBlockFromFreeModeError(error) ?? {
           countryCode: 'UNKNOWN',
         },
@@ -549,19 +549,19 @@ export const handleRunError = (params: {
     return
   }
 
-  const gateKind = getFreebuffGateErrorKind(error)
+  const gateKind = getfreeportGateErrorKind(error)
   if (gateKind) {
-    handleFreebuffGateError(gateKind, updater, {
+    handlefreeportGateError(gateKind, updater, {
       messageWasDropped: hasReceivedContent === false,
     })
     return
   }
 
-  const freebuffRateLimitMessage = IS_FREEBUFF
-    ? getFreebuffRateLimitErrorMessage(error)
+  const freeportRateLimitMessage = IS_FREEPORT
+    ? getfreeportRateLimitErrorMessage(error)
     : null
-  if (freebuffRateLimitMessage) {
-    updater.setError(freebuffRateLimitMessage)
+  if (freeportRateLimitMessage) {
+    updater.setError(freeportRateLimitMessage)
     return
   }
 
@@ -575,8 +575,8 @@ export const handleRunError = (params: {
  * the request because our session is no longer valid; update local state so
  * the UI reflects reality and we stop sending requests until we re-admit.
  */
-function handleFreebuffGateError(
-  kind: ReturnType<typeof getFreebuffGateErrorKind>,
+function handlefreeportGateError(
+  kind: ReturnType<typeof getfreeportGateErrorKind>,
   updater: BatchedMessageUpdater,
   opts: { messageWasDropped?: boolean } = {},
 ) {
@@ -603,7 +603,7 @@ function handleFreebuffGateError(
       // mounted so any in-flight agent work can finish under the server-side
       // grace period, and the session-ended banner prompts the user to press
       // Enter when they're ready to rejoin.
-      markFreebuffSessionEnded()
+      markfreeportSessionEnded()
       return
     case 'waiting_room_queued':
       // Legacy error code: sessions are admitted immediately now, so this is
@@ -613,15 +613,15 @@ function handleFreebuffGateError(
       )
       // Re-sync without resetting chat — this is a "we'll wait", not a
       // "let's start fresh".
-      refreshFreebuffSession().catch(() => {})
+      refreshfreeportSession().catch(() => {})
       return
     case 'session_superseded':
       updater.setError(
-        'Another freebuff CLI took over this account. Close the other instance, then restart.',
+        'Another FREEPORT CLI took over this account. Close the other instance, then restart.',
       )
       // Terminal state: stop polling and flip UI to a "please restart" screen
       // so we don't silently fight the other instance for the seat.
-      markFreebuffSessionSuperseded()
+      markfreeportSessionSuperseded()
       return
     default:
       return

@@ -25,7 +25,7 @@
  * spend, so a guess would be wrong precisely where it is read.
  *
  * This file is in `common/`, which is published wholesale to the public repo
- * (docs/freebuff-honeypot-models.md). That is fine here: these are the names of
+ * (docs/FREEPORT-honeypot-models.md). That is fine here: these are the names of
  * companies we buy inference from, all of them already named in
  * ./provider-routes.ts. Do not add prices, ceilings, or routing preference to
  * this file.

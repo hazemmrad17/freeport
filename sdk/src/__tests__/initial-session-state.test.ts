@@ -403,7 +403,7 @@ describe('Initial Session State', () => {
   })
 
   /**
-   * Hosts that embed this runner in a different process from the repo (Freebuff
+   * Hosts that embed this runner in a different process from the repo (FREEPORT
    * Cloud: runner in the web server, repo in a Daytona sandbox) must be able to
    * replace the filesystem walk outright. Without that, the default loader
    * reads the SERVER's disk and home directory — see `skillsLoader` docs.
@@ -461,7 +461,7 @@ describe('Initial Session State', () => {
 
     /**
      * `skillsLoader` is the per-run fix; this is the backstop for a host that
-     * never sets it. Freebuff Cloud reaches the runner through
+     * never sets it. FREEPORT Cloud reaches the runner through
      * initialSessionState, so the guard has to hold at THIS entry point and not
      * only inside loadSkills.
      */

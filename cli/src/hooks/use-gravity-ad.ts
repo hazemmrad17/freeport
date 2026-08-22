@@ -8,7 +8,7 @@ import { getAdsEnabled } from '../commands/ads'
 import { useChatStore } from '../state/chat-store'
 import { isUserActive, subscribeToActivity } from '../utils/activity-tracker'
 import { getAuthToken } from '../utils/auth'
-import { IS_FREEBUFF } from '../utils/constants'
+import { IS_FREEPORT } from '../utils/constants'
 import { getCliEnv } from '../utils/env'
 import { logger } from '../utils/logger'
 import { AI_MESSAGE_ID_PREFIX } from '../utils/ai-message-id'
@@ -48,7 +48,7 @@ export type AdResponse = {
  */
 export type AdProvider = 'gravity' | 'carbon' | 'zeroclick'
 // Product surfaces the ads API maps to Gravity placements. 'waiting_room' is the
-// legacy wire name for the freebuff landing screen; 'cli_chat' is the inline
+// legacy wire name for the FREEPORT landing screen; 'cli_chat' is the inline
 // transcript ad in the coding-agent chat. Values must match the server's
 // AD_SURFACES enum, so don't rename them.
 export type AdSurface = 'waiting_room' | 'cli_chat'
@@ -137,7 +137,7 @@ function trackInlineAdEvent(
 
 type GravityAdOptionsBase = {
   enabled?: boolean
-  /** Skip the "wait for first user message" gate. Used by the freebuff
+  /** Skip the "wait for first user message" gate. Used by the FREEPORT
    *  landing screen, which has no conversation but still needs ads. */
   forceStart?: boolean
   /** Ad network to request first. The server owns fallback ordering. */
@@ -185,10 +185,10 @@ export const useGravityAd = (options?: GravityAdOptions): GravityAdState => {
   const { terminalHeight } = useTerminalLayout()
   const isVeryCompactHeight = terminalHeight <= 17
 
-  // Freebuff always shows ads even on compact screens (ads are mandatory there).
-  const isFreeMode = IS_FREEBUFF
+  // FREEPORT always shows ads even on compact screens (ads are mandatory there).
+  const isFreeMode = IS_FREEPORT
 
-  // Skip ads on very compact screens unless we're in Freebuff (where ads are mandatory)
+  // Skip ads on very compact screens unless we're in FREEPORT (where ads are mandatory)
   // Also skip if explicitly disabled (e.g. user has a subscription)
   const shouldHideAds = !enabled || (isVeryCompactHeight && !isFreeMode)
 
@@ -234,7 +234,7 @@ export const useGravityAd = (options?: GravityAdOptions): GravityAdState => {
         return
       }
 
-      // Include mode in request - Freebuff should not grant credits (no balance concept).
+      // Include mode in request - FREEPORT should not grant credits (no balance concept).
       const agentMode = useChatStore.getState().agentMode
 
       const res = await fetch(`${WEBSITE_URL}/api/v1/ads/impression`, {
@@ -249,7 +249,7 @@ export const useGravityAd = (options?: GravityAdOptions): GravityAdState => {
           mode: agentMode,
           // The same browser-like UA and OS this ad was auctioned with. The
           // server fires Gravity's pixel for us, and without these it fired it
-          // as `Freebuff-CLI/<version>` while the auction had claimed a
+          // as `freeport-CLI/<version>` while the auction had claimed a
           // browser — one impression describing two different clients, on the
           // field Gravity uses for bot filtering.
           userAgent: getAdUserAgent(),
@@ -554,7 +554,7 @@ export const useGravityAd = (options?: GravityAdOptions): GravityAdState => {
         provider,
         surface,
         placement_id: inlinePlacementId,
-        is_freebuff: IS_FREEBUFF,
+        is_FREEPORT: IS_FREEPORT,
       }
       trackInlineAdEvent(
         AnalyticsEvent.CLI_INLINE_AD_SLOT_ELIGIBLE,
@@ -657,7 +657,7 @@ function getDeviceInfo(): DeviceInfo {
 }
 
 function getCliAdRequestUserAgent(): string {
-  const product = IS_FREEBUFF ? 'Freebuff-CLI' : 'Codebuff-CLI'
+  const product = IS_FREEPORT ? 'freeport-CLI' : 'Codebuff-CLI'
   const version = getCliEnv().CODEBUFF_CLI_VERSION ?? 'dev'
   return `${product}/${version}`
 }

@@ -81,12 +81,12 @@ const wrappers = [
     },
   },
   {
-    name: 'freebuff',
-    directory: 'freebuff/cli/release',
+    name: 'FREEPORT',
+    directory: 'FREEPORT/cli/release',
     expectedConfig: {
-      packageName: 'freebuff',
-      displayName: 'Freebuff',
-      telemetryEvent: 'cli.update_freebuff_failed',
+      packageName: 'FREEPORT',
+      displayName: 'FREEPORT',
+      telemetryEvent: 'cli.update_FREEPORT_failed',
     },
   },
 ]

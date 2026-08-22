@@ -1,10 +1,10 @@
 /**
  * The one reasoning-effort vocabulary, shared by every surface.
  *
- * This list started in `freebuff-desktop/src/shared/types.ts`, where it drives
- * the Claude Code and Codex effort pickers. It lives here now so the Freebuff
+ * This list started in `FREEPORT-desktop/src/shared/types.ts`, where it drives
+ * the Claude Code and Codex effort pickers. It lives here now so the FREEPORT
  * model catalog and Desktop speak the same words: Desktop re-exports these,
- * so a value persisted on a Desktop thread and a value on a Freebuff catalog
+ * so a value persisted on a Desktop thread and a value on a FREEPORT catalog
  * row are the same strings, comparable without a translation table.
  *
  * ORDERED, ascending, and that order is load-bearing — `clampReasoningEffort`

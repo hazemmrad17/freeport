@@ -85,8 +85,13 @@ function pricingPageHtml(params: {
       render();
     }
 
-    function formatPrice(price) {
-      return price.formattedTotals.total;
+    function firstLineTotal(preview) {
+      const total = preview?.data?.details?.lineItems?.[0]?.formattedTotals?.total;
+      if (!total) {
+        console.error('Unexpected PricePreview shape:', JSON.stringify(preview));
+        return null;
+      }
+      return total;
     }
 
     async function fetchPrices() {
@@ -99,22 +104,26 @@ function pricingPageHtml(params: {
         Paddle.Environment.set(PADDLE_ENV);
         Paddle.Initialize({ token: PADDLE_TOKEN });
 
-        for (const tier of TIERS) {
-          const monthPriceId = tier.priceId.month;
-          const yearPriceId = tier.priceId.year;
+        // Omitted when no server-side country header: Paddle auto-detects IP.
+        const location = COUNTRY ? { address: { countryCode: COUNTRY } } : {};
 
-          const monthPreview = await Paddle.PricePreview({
-            priceId: monthPriceId,
-            ...(COUNTRY ? { country: COUNTRY } : {}),
-          });
-          const yearPreview = await Paddle.PricePreview({
-            priceId: yearPriceId,
-            ...(COUNTRY ? { country: COUNTRY } : {}),
-          });
+        for (const tier of TIERS) {
+          if (!tier.priceId) continue; // free / BYOK tiers have no Paddle prices
+
+          const [monthPreview, yearPreview] = await Promise.all([
+            Paddle.PricePreview({
+              items: [{ priceId: tier.priceId.month, quantity: 1 }],
+              ...location,
+            }),
+            Paddle.PricePreview({
+              items: [{ priceId: tier.priceId.year, quantity: 1 }],
+              ...location,
+            }),
+          ]);
 
           prices[tier.name] = {
-            month: monthPreview,
-            year: yearPreview,
+            month: firstLineTotal(monthPreview),
+            year: firstLineTotal(yearPreview),
           };
         }
 
@@ -131,18 +140,30 @@ function pricingPageHtml(params: {
       const suffix = isYearly ? '/yr' : '/mo';
 
       container.className = 'grid';
-      container.innerHTML = TIERS.map((tier, i) => {
-        const priceData = prices[tier.name];
-        const price = priceData ? formatPrice(priceData[billing]) : '---';
-        const popular = tier.name === 'Pro' ? ' popular' : '';
-        const btnClass = tier.name === 'Pro' ? 'btn btn-primary' : 'btn btn-outline';
+      container.innerHTML = TIERS.map((tier) => {
+        const isCheckout = tier.cta.kind === 'checkout' && tier.priceId;
+        const price = (isCheckout && prices[tier.name] && prices[tier.name][billing]) || '---';
+        const popular = tier.name === 'Pro Supporter' ? ' popular' : '';
+        const btnClass = tier.name === 'Pro Supporter' ? 'btn btn-primary' : 'btn btn-outline';
+
+        let button;
+        if (isCheckout) {
+          const pid = tier.priceId[billing];
+          button = '<button class="' + btnClass + '" data-pid="' + pid + '" onclick="openCheckout(this.dataset.pid)">' + tier.cta.label + '</button>';
+        } else {
+          button = '<button class="' + btnClass + '" disabled title="'
+            + (tier.cta.kind === 'byok' ? 'Run: freeport --key YOUR_API_KEY' : 'Just run freeport — no signup cost')
+            + '">' + tier.cta.label + '</button>';
+        }
 
         return '<div class="card' + popular + '">' +
           '<div class="tier-name">' + tier.name + '</div>' +
           '<div class="tier-desc">' + tier.description + '</div>' +
-          '<div class="price"><span class="amount">' + price + '</span><span class="period">' + suffix + '</span></div>' +
+          '<div class="price"><span class="amount">' + price + '</span>'
+          + (isCheckout ? '<span class="period">' + suffix + '</span>' : '') +
+          '</div>' +
           '<ul class="features">' + tier.features.map(f => '<li>' + f + '</li>').join('') + '</ul>' +
-          '<button class="' + btnClass + '" onclick="openCheckout(\'' + tier.priceId[billing] + '\')">Subscribe</button>' +
+          button +
         '</div>';
       }).join('');
     }

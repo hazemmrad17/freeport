@@ -81,7 +81,7 @@ export type CliEnv = BaseEnv & {
   // Set to 1/true to suppress the terminal-reset watchdog on machines where
   // the PowerShell process shape conflicts with endpoint-security policy.
   CODEBUFF_NO_TERMINAL_WATCHDOG?: string
-  FREEBUFF_MODE?: string
+  FREEPORT_MODE?: string
 }
 
 /**

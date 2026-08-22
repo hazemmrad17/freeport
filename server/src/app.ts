@@ -13,6 +13,7 @@ import { pricingRoutes } from './routes/pricing'
 import { sessionRoutes } from './routes/session'
 import { subscriptionRoutes } from './routes/subscription'
 import { usageRoutes } from './routes/usage'
+import { welcomeRoutes } from './routes/welcome'
 
 export type AppVariables = {
   config: ServerConfig
@@ -45,6 +46,7 @@ export function createApp(config: ServerConfig): Hono<{ Variables: AppVariables 
   app.route('/', subscriptionRoutes)
   app.route('/', paddleWebhookRoutes)
   app.route('/', pricingRoutes)
+  app.route('/', welcomeRoutes)
 
   app.onError((err, c) => {
     console.error('[freeport-server] unhandled error', err)

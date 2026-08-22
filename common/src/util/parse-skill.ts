@@ -19,7 +19,7 @@ import matter from 'gray-matter'
  *
  * The SDK re-exports this, so `parseSkillFileContent` remains one function with
  * one implementation. That matters more than where it lives: the writer in
- * Freebuff Cloud validates a draft by running the READER over it, and a second
+ * FREEPORT Cloud validates a draft by running the READER over it, and a second
  * copy would make that check a lookalike instead of the real thing.
  */
 export function parseSkillFileContent(

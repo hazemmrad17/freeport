@@ -61,18 +61,18 @@ ${PLACEHOLDER.KNOWLEDGE_FILES_CONTENTS}
 
 /**
  * The CLI's own base3 roots — Codebuff's DEFAULT and LITE modes, and every
- * Freebuff model the picker offers.
+ * FREEPORT model the picker offers.
  *
- * Kept separate from `createBase3` rather than folded into it, because Freebuff
+ * Kept separate from `createBase3` rather than folded into it, because FREEPORT
  * Desktop derives its toolset from `createBase3().toolNames` and would silently
  * inherit whatever is added here (THREAD_AGENT_TOOLS in
- * freebuff-desktop/.../thread-agent.ts unions that array with its own extras).
+ * FREEPORT-desktop/.../thread-agent.ts unions that array with its own extras).
  * The bare eight are the harness; what follows is CLI product surface.
  *
  * Two things are load-bearing, both for the same reason they are on the Web
- * roots (docs/freebuff-base3-harness.md):
+ * roots (docs/FREEPORT-base3-harness.md):
  *
- * - The appendix is APPENDED. `hasFreebuffRootSystemPromptOpening` requires a
+ * - The appendix is APPENDED. `hasFREEPORTRootSystemPromptOpening` requires a
  *   canonical opening at byte 0, so prepending 403s every free-mode turn.
  * - No `instructionsPrompt`. base2 carries one and it is re-injected after
  *   every user message, which breaks the prompt cache this harness exists to
@@ -81,14 +81,14 @@ ${PLACEHOLDER.KNOWLEDGE_FILES_CONTENTS}
 export function createBase3CliRoot(
   options: {
     model?: SecretAgentDefinition['model']
-    /** Freebuff branding and meta-information instead of Codebuff's. */
-    isFreebuff?: boolean
+    /** FREEPORT branding and meta-information instead of Codebuff's. */
+    isFREEPORT?: boolean
     /** Drop the tools that address a human. For the eval harness, where an
      *  ask_user call would stall the run rather than gather anything. */
     noAskUser?: boolean
   } = {},
 ): Omit<SecretAgentDefinition, 'id'> {
-  const { model = OPUS_MODEL, isFreebuff = false, noAskUser = false } = options
+  const { model = OPUS_MODEL, isFREEPORT = false, noAskUser = false } = options
   const base3 = createBase3(model)
 
   const root: Omit<SecretAgentDefinition, 'id'> = {
@@ -97,7 +97,7 @@ export function createBase3CliRoot(
     // `foreign-client-shipped-agents.test.ts` scans source for literal
     // toolNames arrays and asserts none of ours reads as a third-party
     // harness — a toolset assembled at runtime is invisible to that scan,
-    // which is how `freebuff-desktop-autorun` shipped flagged.
+    // which is how `FREEPORT-desktop-autorun` shipped flagged.
     //
     // The first eight are base3's own. `web_search`/`read_url` replace the
     // researcher subagents base2 spawned. The last five are CLI product
@@ -121,7 +121,7 @@ export function createBase3CliRoot(
       'skill',
     ],
     systemPrompt: `${base3.systemPrompt}
-${buildCliAppendix({ isFreebuff, model, noAskUser })}`,
+${buildCliAppendix({ isFREEPORT, model, noAskUser })}`,
   }
 
   if (!noAskUser) return root
@@ -138,11 +138,11 @@ const HUMAN_TOOL_NAMES: ReadonlySet<string> = new Set([
 ])
 
 function buildCliAppendix({
-  isFreebuff,
+  isFREEPORT,
   model,
   noAskUser = false,
 }: {
-  isFreebuff: boolean
+  isFREEPORT: boolean
   model: SecretAgentDefinition['model']
   noAskUser?: boolean
 }): string {
@@ -158,13 +158,13 @@ ${
 ${gravityIndexGuidance()}
 ${SKILL_DISCOVERY_GUIDANCE}
 
-# ${isFreebuff ? 'Freebuff' : 'Codebuff'} Meta-information
+# ${isFREEPORT ? 'FREEPORT' : 'Codebuff'} Meta-information
 
 You are running on the ${model} model.
 
 ${
-  isFreebuff
-    ? 'You are the AI agent behind Freebuff, a tool where users can chat with you to code with AI for free. See freebuff.com for more information about the product.'
+  isFREEPORT
+    ? 'You are the AI agent behind FREEPORT, a tool where users can chat with you to code with AI for free. See FREEPORT.com for more information about the product.'
     : [
         'Users send prompts to you in one of a few user-selected modes, like DEFAULT, LITE, MAX, or PLAN.',
         "Every prompt sent consumes the user's credits, which is calculated based on the API cost of the models used.",

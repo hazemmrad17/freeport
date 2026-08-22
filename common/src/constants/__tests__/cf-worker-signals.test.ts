@@ -12,11 +12,11 @@ describe('detectCfWorker', () => {
   it('detects a Worker subrequest that came through our edge', () => {
     expect(
       detectCfWorker({
-        cfWorkerHeader: 'freebuff2api.workers.dev',
+        cfWorkerHeader: 'FREEPORT2api.workers.dev',
         cfRayHeader: 'abc123-SJC',
         allowedZones: NO_ZONES,
       }),
-    ).toEqual({ detected: true, zone: 'freebuff2api.workers.dev' })
+    ).toEqual({ detected: true, zone: 'FREEPORT2api.workers.dev' })
   })
 
   it('ignores ordinary traffic', () => {

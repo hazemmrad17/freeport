@@ -1,28 +1,28 @@
 export const GRAVITY_CAPI_ENDPOINT = 'https://api.trygravity.ai/gateway/events'
 export const GRAVITY_FIRST_MESSAGE_EVENT = 'FirstMessage'
 
-export const FREEBUFF_GRAVITY_SURFACES = [
+export const FREEPORT_GRAVITY_SURFACES = [
   'cli',
   'desktop',
   'web',
   'cloud',
   'chat',
 ] as const
-export type FreebuffGravitySurface = (typeof FREEBUFF_GRAVITY_SURFACES)[number]
-export type FreebuffServiceGravitySurface = Extract<
-  FreebuffGravitySurface,
+export type FREEPORTGravitySurface = (typeof FREEPORT_GRAVITY_SURFACES)[number]
+export type FREEPORTServiceGravitySurface = Extract<
+  FREEPORTGravitySurface,
   'web' | 'cloud' | 'chat'
 >
 
-export function isFreebuffGravitySurface(
+export function isFREEPORTGravitySurface(
   value: unknown,
-): value is FreebuffGravitySurface {
-  return FREEBUFF_GRAVITY_SURFACES.includes(value as FreebuffGravitySurface)
+): value is FREEPORTGravitySurface {
+  return FREEPORT_GRAVITY_SURFACES.includes(value as FREEPORTGravitySurface)
 }
 
-export function isFreebuffServiceGravitySurface(
+export function isFREEPORTServiceGravitySurface(
   value: unknown,
-): value is FreebuffServiceGravitySurface {
+): value is FREEPORTServiceGravitySurface {
   return value === 'web' || value === 'cloud' || value === 'chat'
 }
 
@@ -106,13 +106,13 @@ export function sanitizeGravityCapiData(
 }
 
 export function gravityFirstMessageEventId(userId: string): string {
-  return `freebuff-first-message-${userId}`
+  return `FREEPORT-first-message-${userId}`
 }
 
 export function buildGravityFirstMessagePayload(params: {
   userId: string
   email?: string | null
-  surface: FreebuffGravitySurface
+  surface: FREEPORTGravitySurface
   gravity?: GravityCapiData | null
   userAgent?: string | null
   eventTime?: number
@@ -147,7 +147,7 @@ export function buildGravityFirstMessagePayload(params: {
           ? { client_context: params.gravity.client_context }
           : {}),
         custom_data: {
-          content_name: 'Freebuff first message',
+          content_name: 'FREEPORT first message',
           content_category: params.surface,
         },
       },
@@ -163,7 +163,7 @@ export async function sendGravityFirstMessageConversion(params: {
   apiKey: string
   userId: string
   email?: string | null
-  surface: FreebuffGravitySurface
+  surface: FREEPORTGravitySurface
   gravity?: GravityCapiData | null
   userAgent?: string | null
   fetchImpl?: typeof fetch
@@ -174,7 +174,7 @@ export async function sendGravityFirstMessageConversion(params: {
     headers: {
       Authorization: `Bearer ${params.apiKey}`,
       'Content-Type': 'application/json',
-      'User-Agent': 'freebuff/1.0 (gravity-capi)',
+      'User-Agent': 'FREEPORT/1.0 (gravity-capi)',
     },
     body: JSON.stringify(buildGravityFirstMessagePayload(params)),
     signal: AbortSignal.timeout(3_000),

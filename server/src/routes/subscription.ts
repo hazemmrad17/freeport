@@ -2,8 +2,11 @@ import { Hono } from 'hono'
 
 import type { AppBindings } from '../middleware/auth'
 import { requireUser } from '../middleware/auth'
-import { createCheckoutUrl } from '../lib/paddle'
-import { getSubscriptionByUserId, isPaidUser } from '../store'
+import { createCheckoutUrl, createPortalSessionUrl } from '../lib/paddle'
+import {
+  getSubscriptionByUserId,
+  isPaidUser,
+} from '../store'
 
 export const subscriptionRoutes = new Hono<AppBindings>()
 
@@ -94,4 +97,36 @@ subscriptionRoutes.post('/api/v1/subscription/checkout', requireUser, async (c) 
   }
 
   return c.json({ checkoutUrl })
+})
+
+/**
+ * GET /api/v1/subscription/portal
+ * Mints a Paddle-hosted customer portal session for the signed-in user.
+ * The Paddle customer ID is resolved server-side from our mirror — never
+ * trusted from the client.
+ */
+subscriptionRoutes.get('/api/v1/subscription/portal', requireUser, async (c) => {
+  const config = c.get('config')
+  const db = c.get('db')
+  const user = c.get('user')!
+
+  const sub = getSubscriptionByUserId(db, user.id)
+  if (!sub?.paddle_customer_id) {
+    c.status(404)
+    return c.json({ error: 'no_customer_record' })
+  }
+
+  const subscriptionIds = sub.paddle_subscription_id
+    ? [sub.paddle_subscription_id]
+    : []
+  const url = await createPortalSessionUrl(
+    config,
+    sub.paddle_customer_id,
+    subscriptionIds,
+  )
+  if (!url) {
+    c.status(502)
+    return c.json({ error: 'portal_session_failed' })
+  }
+  return c.json({ url })
 })

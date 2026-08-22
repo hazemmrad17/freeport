@@ -39,9 +39,9 @@ const status = await fetch(
 const token = status.user.authToken
 console.log('user:', status.user.email)
 
-const admit = await fetch(`${base}/api/v1/freebuff/session`, {
+const admit = await fetch(`${base}/api/v1/FREEPORT/session`, {
   method: 'POST',
-  headers: { Authorization: `Bearer ${token}`, 'x-freebuff-model': 'deepseek/deepseek-v4-flash' },
+  headers: { Authorization: `Bearer ${token}`, 'x-FREEPORT-model': 'deepseek/deepseek-v4-flash' },
 }).then((r) => r.json())
 console.log('session:', admit.status, admit.instanceId?.slice(0, 8))
 

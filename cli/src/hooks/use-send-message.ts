@@ -6,14 +6,14 @@ import { setCurrentChatId } from '../project-files'
 import { createStreamController } from './stream-state'
 import { useChatStore } from '../state/chat-store'
 import {
-  getFreebuffInstanceId,
-  markFreebuffSessionEnded,
-} from './use-freebuff-session'
+  getfreeportInstanceId,
+  markfreeportSessionEnded,
+} from './use-freeport-session'
 import { getCodebuffClient } from '../utils/codebuff-client'
-import { AGENT_MODE_TO_COST_MODE, IS_FREEBUFF } from '../utils/constants'
+import { AGENT_MODE_TO_COST_MODE, IS_FREEPORT } from '../utils/constants'
 import { createEventHandlerState } from '../utils/create-event-handler-state'
 import { createRunConfig } from '../utils/create-run-config'
-import { getAgentIdForMode } from '../utils/freebuff-agent-selection'
+import { getAgentIdForMode } from '../utils/freeport-agent-selection'
 import { loadAgentDefinitions } from '../utils/local-agent-registry'
 import { logger } from '../utils/logger'
 import { reportModelUsage } from '../utils/report-usage'
@@ -76,7 +76,7 @@ interface UseSendMessageOptions {
   isQueuePausedRef?: React.MutableRefObject<boolean>
   isProcessingQueueRef?: React.MutableRefObject<boolean>
   resumeQueue?: () => void
-  /** Put a message back at the head of the queue. Used by the freebuff
+  /** Put a message back at the head of the queue. Used by the FREEPORT
    *  run-start guard so a message that can't be sent (session fully over)
    *  is held for the next session instead of consumed. */
   requeueMessageAtFront?: (message: {
@@ -260,14 +260,14 @@ export const useSendMessage = ({
       updateChainInProgress(true)
       setCanProcessQueue(false)
 
-      // Freebuff run-start guard: without a live session slot the server
+      // FREEPORT run-start guard: without a live session slot the server
       // rejects the request outright, consuming the message. Hold it at the
       // head of the queue instead; it resumes when the user rejoins from the
       // session-ended banner. Catches sends that bypass the queue's
       // sendBlocked hold (direct review-screen answers) and the dequeue race
       // where the slot expires between the queue's check and this call.
-      if (IS_FREEBUFF && !getFreebuffInstanceId()) {
-        markFreebuffSessionEnded()
+      if (IS_FREEPORT && !getfreeportInstanceId()) {
+        markfreeportSessionEnded()
         requeueMessageAtFront?.({ content, attachments: attachments ?? [] })
         resetEarlyReturnState({
           setCanProcessQueue,
@@ -483,7 +483,7 @@ export const useSendMessage = ({
           '[send-message] No Codebuff client available. Please ensure you are authenticated.',
         )
         // Show error to user instead of silently failing
-        const brandName = IS_FREEBUFF ? 'Freebuff' : 'Codebuff'
+        const brandName = IS_FREEPORT ? 'FREEPORT' : 'Codebuff'
         setMessages((prev) => [
           ...prev,
           createErrorChatMessage(
@@ -575,7 +575,7 @@ export const useSendMessage = ({
           },
         })
 
-        const freebuffInstanceId = getFreebuffInstanceId()
+        const freeportInstanceId = getfreeportInstanceId()
         const runConfig = createRunConfig({
           logger,
           agent: resolvedAgent,
@@ -587,8 +587,8 @@ export const useSendMessage = ({
           signal: abortController.signal,
           costMode: AGENT_MODE_TO_COST_MODE[agentMode],
           extraCodebuffMetadata:
-            IS_FREEBUFF && freebuffInstanceId
-              ? { freebuff_instance_id: freebuffInstanceId }
+            IS_FREEPORT && freeportInstanceId
+              ? { FREEPORT_instance_id: freeportInstanceId }
               : undefined,
           onStateSnapshot: (snapshot) => {
             latestRunStateSnapshot = snapshot
@@ -612,7 +612,7 @@ export const useSendMessage = ({
             )
           },
           onUsage: (usage) => {
-            reportModelUsage(usage, { sessionId: getFreebuffInstanceId() })
+            reportModelUsage(usage, { sessionId: getfreeportInstanceId() })
           },
         })
 

@@ -103,7 +103,7 @@ describe('session lifecycle with daily quota', () => {
   })
 
   test('starts at status none with quota snapshots', async () => {
-    const resp = await app.request('/api/v1/freebuff/session', {
+    const resp = await app.request('/api/v1/FREEPORT/session', {
       headers: auth(token),
     })
     expect(resp.status).toBe(200)
@@ -120,9 +120,9 @@ describe('session lifecycle with daily quota', () => {
   })
 
   test('admits a session on POST and reports it on GET', async () => {
-    const resp = await app.request('/api/v1/freebuff/session', {
+    const resp = await app.request('/api/v1/FREEPORT/session', {
       method: 'POST',
-      headers: { ...auth(token), 'x-freebuff-model': 'deepseek/deepseek-v4-flash' },
+      headers: { ...auth(token), 'x-FREEPORT-model': 'deepseek/deepseek-v4-flash' },
     })
     expect(resp.status).toBe(200)
     const active = (await json(resp)) as {
@@ -135,8 +135,8 @@ describe('session lifecycle with daily quota', () => {
     expect(active.instanceId).toBeTruthy()
     expect(active.remainingMs).toBeGreaterThan(0)
 
-    const getResp = await app.request('/api/v1/freebuff/session', {
-      headers: { ...auth(token), 'x-freebuff-instance-id': active.instanceId },
+    const getResp = await app.request('/api/v1/FREEPORT/session', {
+      headers: { ...auth(token), 'x-FREEPORT-instance-id': active.instanceId },
     })
     const got = (await json(getResp)) as { status: string; instanceId: string }
     expect(got.status).toBe('active')
@@ -144,9 +144,9 @@ describe('session lifecycle with daily quota', () => {
   })
 
   test('returns model_locked when switching models', async () => {
-    const resp = await app.request('/api/v1/freebuff/session', {
+    const resp = await app.request('/api/v1/FREEPORT/session', {
       method: 'POST',
-      headers: { ...auth(token), 'x-freebuff-model': 'mimo/mimo-v2.5' },
+      headers: { ...auth(token), 'x-FREEPORT-model': 'mimo/mimo-v2.5' },
     })
     expect(resp.status).toBe(409)
     const data = (await json(resp)) as { status: string; currentModel: string; requestedModel: string }
@@ -156,7 +156,7 @@ describe('session lifecycle with daily quota', () => {
   })
 
   test('releases the session on DELETE', async () => {
-    const resp = await app.request('/api/v1/freebuff/session', { method: 'DELETE', headers: auth(token) })
+    const resp = await app.request('/api/v1/FREEPORT/session', { method: 'DELETE', headers: auth(token) })
     expect(resp.status).toBe(200)
     const data = (await json(resp)) as { status: string }
     expect(data.status).toBe('none')
@@ -164,15 +164,15 @@ describe('session lifecycle with daily quota', () => {
 
   test('rate-limits once the daily quota is spent', async () => {
     const admit = async () =>
-      app.request('/api/v1/freebuff/session', {
+      app.request('/api/v1/FREEPORT/session', {
         method: 'POST',
-        headers: { ...auth(token), 'x-freebuff-model': 'deepseek/deepseek-v4-flash' },
+        headers: { ...auth(token), 'x-FREEPORT-model': 'deepseek/deepseek-v4-flash' },
       })
 
     // Session 2 of 2.
     const second = await admit()
     expect((await json(second)) as { status: string }).toMatchObject({ status: 'active' })
-    await app.request('/api/v1/freebuff/session', { method: 'DELETE', headers: auth(token) })
+    await app.request('/api/v1/FREEPORT/session', { method: 'DELETE', headers: auth(token) })
 
     // Quota exhausted — session 3 must be refused.
     const third = await admit()

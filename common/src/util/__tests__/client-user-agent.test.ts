@@ -9,8 +9,8 @@ import {
 describe('normalizeClientUserAgent', () => {
   it('parses the official CLI agent', () => {
     // What getCliAdRequestUserAgent() emits.
-    expect(normalizeClientUserAgent('Freebuff-CLI/0.0.138')).toEqual({
-      product: 'freebuff-cli',
+    expect(normalizeClientUserAgent('FREEPORT-CLI/0.0.138')).toEqual({
+      product: 'FREEPORT-cli',
       version: '0.0.138',
     })
     expect(normalizeClientUserAgent('Codebuff-CLI/1.0.685')).toEqual({
@@ -28,9 +28,9 @@ describe('normalizeClientUserAgent', () => {
       product: 'bun',
       version: '1.3.11',
     })
-    // The UA a published Freebuff proxy sends. The second segment is not a
+    // The UA a published FREEPORT proxy sends. The second segment is not a
     // version, so it is dropped — `ai-sdk` alone still separates it from
-    // `freebuff-cli`, which is the whole point.
+    // `FREEPORT-cli`, which is the whole point.
     expect(
       normalizeClientUserAgent('ai-sdk/openai-compatible/1.0.25/codebuff'),
     ).toEqual({ product: 'ai-sdk' })
@@ -140,8 +140,8 @@ describe('normalizeClientUserAgent', () => {
     expect(clientUserAgentFields('someclient')).toEqual({
       client_ua_product: 'someclient',
     })
-    expect(clientUserAgentFields('Freebuff-CLI/0.0.138')).toEqual({
-      client_ua_product: 'freebuff-cli',
+    expect(clientUserAgentFields('FREEPORT-CLI/0.0.138')).toEqual({
+      client_ua_product: 'FREEPORT-cli',
       client_ua_version: '0.0.138',
     })
   })

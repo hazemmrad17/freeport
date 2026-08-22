@@ -1,8 +1,8 @@
 import {
-  FREEBUFF_CLI_BASE3_AGENT_ID_BY_MODEL,
-  hasFreebuffRootSystemPromptOpening,
+  FREEPORT_CLI_BASE3_AGENT_ID_BY_MODEL,
+  hasfreeportRootSystemPromptOpening,
 } from '@codebuff/common/constants/free-agents'
-import { SUPPORTED_FREEBUFF_MODELS } from '@codebuff/common/constants/freebuff-models'
+import { SUPPORTED_FREEPORT_MODELS } from '@codebuff/common/constants/freeport-models'
 import { describe, test, expect } from 'bun:test'
 
 import base3, { createBase3, createBase3CliRoot } from '../base3'
@@ -20,16 +20,16 @@ import base3Lite from '../base3-lite'
 /**
  * The CLI's base3 roots.
  *
- * `CLI_HARNESS` routes DEFAULT, LITE, and Freebuff turns here. These definitions
+ * `CLI_HARNESS` routes DEFAULT, LITE, and FREEPORT turns here. These definitions
  * ship compiled into the CLI binary, so a regression requires a new release to
  * repair rather than a server-side kill switch (see
- * docs/freebuff-base3-harness.md).
+ * docs/freeport-base3-harness.md).
  *
  * What makes base3 cheaper rides on the DEFINITION, not the call site — the
  * runtime reads `windowedFileReads` and `compactContext` straight off the agent
  * template. A root that loses one keeps working and quietly costs base2 money
  * again. The Web bundle has the same assertions for its own roots
- * (freebuff_bundled_agents.test.ts); these are the CLI's, which ship compiled
+ * (FREEPORT_bundled_agents.test.ts); these are the CLI's, which ship compiled
  * into the binary instead.
  */
 const CLI_ROOTS = [
@@ -68,7 +68,7 @@ describe('base3 CLI roots', () => {
   test('declares no reasoning, leaving the catalog the single authority', () => {
     // An agent-declared reasoning reaches the wire as `body.reasoning`, which
     // makes the agent the authority on effort and leaves
-    // applyFreebuffReasoningDefaults unable to tell a model default apart from
+    // applyfreeportReasoningDefaults unable to tell a model default apart from
     // a user's pick — so the effort control silently does nothing on exactly
     // the models people most want to tune. The Web roots make this structural
     // by having no such parameter; the CLI roots spread object literals, so
@@ -82,14 +82,14 @@ describe('base3 CLI roots', () => {
     // The appendix is appended, never prepended: the chat-completions gate
     // requires a canonical opening at byte 0, so prepending 403s every turn.
     for (const agent of CLI_ROOTS) {
-      expect(hasFreebuffRootSystemPromptOpening(agent.systemPrompt!)).toBe(true)
+      expect(hasfreeportRootSystemPromptOpening(agent.systemPrompt!)).toBe(true)
     }
   })
 
-  test('every Freebuff root is pinned to the model its id is registered under', () => {
+  test('every FREEPORT root is pinned to the model its id is registered under', () => {
     const byId = new Map(CLI_ROOTS.map((a) => [a.id, a]))
     for (const [model, agentId] of Object.entries(
-      FREEBUFF_CLI_BASE3_AGENT_ID_BY_MODEL,
+      FREEPORT_CLI_BASE3_AGENT_ID_BY_MODEL,
     )) {
       // A root whose model disagrees with the allowlist 403s with
       // free_mode_invalid_agent_model on every request.
@@ -98,15 +98,15 @@ describe('base3 CLI roots', () => {
   })
 
   test('ships a root for every model the picker offers', () => {
-    for (const model of SUPPORTED_FREEBUFF_MODELS) {
-      const agentId = FREEBUFF_CLI_BASE3_AGENT_ID_BY_MODEL[model.id]
+    for (const model of SUPPORTED_FREEPORT_MODELS) {
+      const agentId = FREEPORT_CLI_BASE3_AGENT_ID_BY_MODEL[model.id]
       expect(agentId).toBeDefined()
       expect(CLI_ROOTS.some((a) => a.id === agentId)).toBe(true)
     }
   })
 
   test('leaves the bare harness alone, so Desktop does not inherit CLI tools', () => {
-    // freebuff-desktop builds THREAD_AGENT_TOOLS by unioning
+    // freeport-desktop builds THREAD_AGENT_TOOLS by unioning
     // createBase3().toolNames with its own extras, so anything added to the
     // base factory lands on every Desktop thread silently.
     expect(createBase3().toolNames).toEqual([
@@ -145,10 +145,10 @@ describe('base3 CLI roots', () => {
     )
   })
 
-  test('brands Freebuff roots as Freebuff, and Codebuff roots as Codebuff', () => {
-    expect(base3FreeDeepseek.systemPrompt).toContain('Freebuff')
+  test('brands FREEPORT roots as FREEPORT, and Codebuff roots as Codebuff', () => {
+    expect(base3FreeDeepseek.systemPrompt).toContain('FREEPORT')
     expect(base3FreeDeepseek.systemPrompt).not.toContain('/usage')
-    // Codebuff's paid modes explain credits; Freebuff has none to explain.
+    // Codebuff's paid modes explain credits; FREEPORT has none to explain.
     expect(base3.systemPrompt).toContain('/usage')
   })
 })

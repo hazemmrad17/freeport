@@ -14,7 +14,7 @@
 
 import { copyTextToClipboard, showClipboardMessage } from '../utils/clipboard'
 import { useChatStore } from '../state/chat-store'
-import { IS_FREEBUFF } from '../utils/constants'
+import { IS_FREEPORT } from '../utils/constants'
 
 import type { RouterParams } from './command-registry'
 import type { ChatMessage, ContentBlock } from '../types/chat'
@@ -304,7 +304,7 @@ export function serializeConversation(
     renderMessage(message, segments)
   }
 
-  const product = IS_FREEBUFF ? 'Freebuff' : 'Codebuff'
+  const product = IS_FREEPORT ? 'FREEPORT' : 'Codebuff'
   const header = `# ${product} conversation\n_${messages.length} message${messages.length === 1 ? '' : 's'}_`
   const prefix = `${header}\n\n---\n\n`
 

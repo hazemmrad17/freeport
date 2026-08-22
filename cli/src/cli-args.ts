@@ -2,7 +2,7 @@ import { createRequire } from 'module'
 
 import { Argument, Command } from 'commander'
 
-import { IS_FREEBUFF, type AgentMode } from './utils/constants'
+import { IS_FREEPORT, type AgentMode } from './utils/constants'
 import { getCliEnv } from './utils/env'
 
 const require = createRequire(import.meta.url)
@@ -38,16 +38,16 @@ export function loadPackageVersion(): string {
 
 export function parseArgs({
   argv = process.argv,
-  isFreebuff = IS_FREEBUFF,
+  isFREEPORT = IS_FREEPORT,
   version = loadPackageVersion(),
 }: {
   argv?: string[]
-  isFreebuff?: boolean
+  isFREEPORT?: boolean
   version?: string
 } = {}): ParsedArgs {
   const program = new Command()
 
-  if (isFreebuff) {
+  if (isFREEPORT) {
     // freeport: simplified CLI - free-only mode
     program
       .name('freeport')
@@ -109,9 +109,9 @@ export function parseArgs({
   const continueFlag = options.continue
 
   // Determine initial mode from flags (last flag wins if multiple specified)
-  // Freebuff always uses LITE mode
+  // FREEPORT always uses LITE mode
   let initialMode: AgentMode | undefined
-  if (isFreebuff) {
+  if (isFREEPORT) {
     initialMode = 'LITE'
   } else {
     if (options.free || options.lite) initialMode = 'LITE'
@@ -120,7 +120,7 @@ export function parseArgs({
   }
 
   return {
-    initialPrompt: !isFreebuff && args.length > 0 ? args.join(' ') : null,
+    initialPrompt: !isFREEPORT && args.length > 0 ? args.join(' ') : null,
     command: args[0],
     agent: options.agent,
     clearLogs: options.clearLogs || false,

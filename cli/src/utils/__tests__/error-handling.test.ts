@@ -1,16 +1,16 @@
 import { describe, test, expect } from 'bun:test'
-import { FREEBUFF_PROVIDER_USAGE_MESSAGE } from '@codebuff/common/constants/freebuff-errors'
+import { FREEPORT_PROVIDER_USAGE_MESSAGE } from '@codebuff/common/constants/freeport-errors'
 
 import {
-  getFreebuffRateLimitErrorMessage,
+  getfreeportRateLimitErrorMessage,
   getFreeModeUnavailableErrorMessage,
   isOutOfCreditsError,
   isFreeModeUnavailableError,
   getCountryBlockFromFreeModeError,
   OUT_OF_CREDITS_MESSAGE,
   FREE_MODE_UNAVAILABLE_MESSAGE,
-  FREEBUFF_RATE_LIMIT_MESSAGE,
-  isFreebuffProviderUsageError,
+  FREEPORT_RATE_LIMIT_MESSAGE,
+  isfreeportProviderUsageError,
   createErrorMessage,
 } from '../error-handling'
 
@@ -90,7 +90,7 @@ describe('error-handling', () => {
           statusCode: 403,
           responseBody: JSON.stringify({
             error: 'free_mode_unavailable',
-            message: 'Freebuff cannot be used from VPN traffic.',
+            message: 'FREEPORT cannot be used from VPN traffic.',
           }),
         }),
       ).toBe(true)
@@ -132,44 +132,44 @@ describe('error-handling', () => {
     })
   })
 
-  describe('getFreebuffRateLimitErrorMessage', () => {
+  describe('getfreeportRateLimitErrorMessage', () => {
     test('returns the generic message for untyped 429 errors', () => {
       expect(
-        getFreebuffRateLimitErrorMessage({
+        getfreeportRateLimitErrorMessage({
           statusCode: 429,
           message: 'Too Many Requests',
         }),
-      ).toBe(FREEBUFF_RATE_LIMIT_MESSAGE)
+      ).toBe(FREEPORT_RATE_LIMIT_MESSAGE)
     })
 
     test('returns the generic message for thrown API errors with status 429', () => {
       expect(
-        getFreebuffRateLimitErrorMessage({
+        getfreeportRateLimitErrorMessage({
           status: 429,
           message: 'Too Many Requests',
         }),
-      ).toBe(FREEBUFF_RATE_LIMIT_MESSAGE)
+      ).toBe(FREEPORT_RATE_LIMIT_MESSAGE)
     })
 
     test('returns the generic message for retry-wrapped untyped 429 errors', () => {
       expect(
-        getFreebuffRateLimitErrorMessage({
+        getfreeportRateLimitErrorMessage({
           message: 'Failed after 4 attempts. Last error: Too Many Requests',
           lastError: {
             statusCode: 429,
             message: 'Too Many Requests',
           },
         }),
-      ).toBe(FREEBUFF_RATE_LIMIT_MESSAGE)
+      ).toBe(FREEPORT_RATE_LIMIT_MESSAGE)
     })
 
     test('returns null for non-429 status codes', () => {
-      expect(getFreebuffRateLimitErrorMessage({ statusCode: 402 })).toBe(null)
-      expect(getFreebuffRateLimitErrorMessage({ statusCode: 500 })).toBe(null)
+      expect(getfreeportRateLimitErrorMessage({ statusCode: 402 })).toBe(null)
+      expect(getfreeportRateLimitErrorMessage({ statusCode: 500 })).toBe(null)
     })
 
     test('returns null for string statusCode', () => {
-      expect(getFreebuffRateLimitErrorMessage({ statusCode: '429' })).toBe(
+      expect(getfreeportRateLimitErrorMessage({ statusCode: '429' })).toBe(
         null,
       )
     })
@@ -179,7 +179,7 @@ describe('error-handling', () => {
         'Free mode rate limit exceeded (1 minute limit). Try again in 30 seconds.'
 
       expect(
-        getFreebuffRateLimitErrorMessage({
+        getfreeportRateLimitErrorMessage({
           statusCode: 429,
           error: 'free_mode_rate_limited',
           message,
@@ -192,7 +192,7 @@ describe('error-handling', () => {
         'Free mode rate limit exceeded (1 minute limit). Try again in 30 seconds.'
 
       expect(
-        getFreebuffRateLimitErrorMessage({
+        getfreeportRateLimitErrorMessage({
           statusCode: 429,
           message: 'Too Many Requests',
           responseBody: JSON.stringify({
@@ -208,7 +208,7 @@ describe('error-handling', () => {
         'Free mode rate limit exceeded (1 minute limit). Try again in 30 seconds.'
 
       expect(
-        getFreebuffRateLimitErrorMessage({
+        getfreeportRateLimitErrorMessage({
           message: 'Failed after 4 attempts. Last error: Too Many Requests',
           lastError: {
             statusCode: 429,
@@ -224,28 +224,28 @@ describe('error-handling', () => {
 
     test('falls back to the generic message when typed quota errors have no message', () => {
       expect(
-        getFreebuffRateLimitErrorMessage({
+        getfreeportRateLimitErrorMessage({
           statusCode: 429,
           error: 'free_mode_rate_limited',
         }),
-      ).toBe(FREEBUFF_RATE_LIMIT_MESSAGE)
+      ).toBe(FREEPORT_RATE_LIMIT_MESSAGE)
     })
 
     test('appends detail from agent-run output objects for untyped 429s', () => {
       expect(
-        getFreebuffRateLimitErrorMessage({
+        getfreeportRateLimitErrorMessage({
           type: 'error',
           statusCode: 429,
           message: 'Model is at capacity. Please try again later.',
         }),
       ).toBe(
-        `${FREEBUFF_RATE_LIMIT_MESSAGE} (Model is at capacity. Please try again later.)`,
+        `${FREEPORT_RATE_LIMIT_MESSAGE} (Model is at capacity. Please try again later.)`,
       )
     })
 
     test('appends detail from OpenAI-style nested provider error bodies', () => {
       expect(
-        getFreebuffRateLimitErrorMessage({
+        getfreeportRateLimitErrorMessage({
           statusCode: 429,
           message: 'Too Many Requests',
           responseBody: JSON.stringify({
@@ -257,23 +257,23 @@ describe('error-handling', () => {
           }),
         }),
       ).toBe(
-        `${FREEBUFF_RATE_LIMIT_MESSAGE} (Model is at capacity. Please try again later.)`,
+        `${FREEPORT_RATE_LIMIT_MESSAGE} (Model is at capacity. Please try again later.)`,
       )
     })
 
     test('does not echo bare HTTP status text from output objects', () => {
       expect(
-        getFreebuffRateLimitErrorMessage({
+        getfreeportRateLimitErrorMessage({
           type: 'error',
           statusCode: 429,
           message: 'Too Many Requests',
         }),
-      ).toBe(FREEBUFF_RATE_LIMIT_MESSAGE)
+      ).toBe(FREEPORT_RATE_LIMIT_MESSAGE)
     })
   })
 
-  describe('isFreebuffProviderUsageError', () => {
-    test('recognizes Freebuff provider usage failures across upstream shapes', () => {
+  describe('isfreeportProviderUsageError', () => {
+    test('recognizes FREEPORT provider usage failures across upstream shapes', () => {
       for (const error of [
         {
           statusCode: 402,
@@ -293,13 +293,13 @@ describe('error-handling', () => {
           }),
         },
       ]) {
-        expect(isFreebuffProviderUsageError(error)).toBe(true)
+        expect(isfreeportProviderUsageError(error)).toBe(true)
       }
     })
 
     test('does not rewrite unrelated failures', () => {
       expect(
-        isFreebuffProviderUsageError({
+        isfreeportProviderUsageError({
           statusCode: 500,
           message: 'Internal server error',
         }),
@@ -425,19 +425,19 @@ describe('error-handling', () => {
     })
   })
 
-  describe('FREEBUFF_RATE_LIMIT_MESSAGE', () => {
+  describe('FREEPORT_RATE_LIMIT_MESSAGE', () => {
     test('encourages retry without mentioning credits or payment', () => {
-      const message = FREEBUFF_RATE_LIMIT_MESSAGE.toLowerCase()
+      const message = FREEPORT_RATE_LIMIT_MESSAGE.toLowerCase()
       expect(message).toContain('try again')
       expect(message).not.toContain('credit')
       expect(message).not.toContain('pay')
     })
   })
 
-  describe('FREEBUFF_PROVIDER_USAGE_MESSAGE', () => {
+  describe('FREEPORT_PROVIDER_USAGE_MESSAGE', () => {
     test('owns the refill without blaming the user account', () => {
-      const message = FREEBUFF_PROVIDER_USAGE_MESSAGE.toLowerCase()
-      expect(message).toContain('freebuff ran out of provider usage')
+      const message = FREEPORT_PROVIDER_USAGE_MESSAGE.toLowerCase()
+      expect(message).toContain('FREEPORT ran out of provider usage')
       expect(message).toContain('needs a refill')
       expect(message).toContain('not your account')
       expect(message).not.toContain('add credits')

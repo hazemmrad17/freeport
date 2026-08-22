@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 
-import type { FreebuffModelOption } from '../constants/freebuff-models'
+import type { freeportModelOption } from '../constants/freeport-models'
 import {
   clampReasoningEffort,
   reasoningEffortRank,
@@ -11,22 +11,22 @@ import {
   EFFORTS_THROUGH_HIGH,
   EFFORTS_THROUGH_MAX,
   EFFORTS_THROUGH_XHIGH,
-  FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID,
-  FREEBUFF_DEEPSEEK_V4_PRO_MODEL_ID,
-  FREEBUFF_FABLE_5_MODEL_ID,
-  FREEBUFF_GLM_V52_MODEL_ID,
-  FREEBUFF_GPT_5_6_LUNA_MODEL_ID,
-  FREEBUFF_KIMI_K3_ECO_MODEL_ID,
-  FREEBUFF_MIMO_V25_MODEL_ID,
-  FREEBUFF_MINIMAX_M3_MODEL_ID,
-  FREEBUFF_MUSE_SPARK_12_CONTRIBUTOR_MODEL_ID,
-  FREEBUFF_WEB_ALL_MODELS,
-  getFreebuffModelDefaultEffort,
-  getFreebuffModelEfforts,
-  getFreebuffModelReasoningEffort,
-  resolveFreebuffReasoningEffort,
-  SUPPORTED_FREEBUFF_MODELS,
-} from '../constants/freebuff-models'
+  FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID,
+  FREEPORT_DEEPSEEK_V4_PRO_MODEL_ID,
+  FREEPORT_FABLE_5_MODEL_ID,
+  FREEPORT_GLM_V52_MODEL_ID,
+  FREEPORT_GPT_5_6_LUNA_MODEL_ID,
+  FREEPORT_KIMI_K3_ECO_MODEL_ID,
+  FREEPORT_MIMO_V25_MODEL_ID,
+  FREEPORT_MINIMAX_M3_MODEL_ID,
+  FREEPORT_MUSE_SPARK_12_CONTRIBUTOR_MODEL_ID,
+  FREEPORT_WEB_ALL_MODELS,
+  getfreeportModelDefaultEffort,
+  getfreeportModelEfforts,
+  getfreeportModelReasoningEffort,
+  resolvefreeportReasoningEffort,
+  SUPPORTED_FREEPORT_MODELS,
+} from '../constants/freeport-models'
 
 describe('the shared effort ladder', () => {
   test('is ordered ascending, because the clamp does index arithmetic on it', () => {
@@ -74,19 +74,19 @@ describe('the shared effort ladder', () => {
   })
 })
 
-// `as const satisfies FreebuffModelOption` gives each row a narrow literal
+// `as const satisfies freeportModelOption` gives each row a narrow literal
 // type, so the union has no `efforts` property at all unless every member
 // declares one. Widening once here keeps the invariants readable.
-const ALL_ROWS: readonly FreebuffModelOption[] = [
-  ...SUPPORTED_FREEBUFF_MODELS,
-  ...FREEBUFF_WEB_ALL_MODELS,
+const ALL_ROWS: readonly freeportModelOption[] = [
+  ...SUPPORTED_FREEPORT_MODELS,
+  ...FREEPORT_WEB_ALL_MODELS,
 ]
 
 describe('per-model effort ladders', () => {
   test('every ladder contains its default', () => {
     for (const model of ALL_ROWS) {
       if (!model.efforts?.length) continue
-      const dflt = getFreebuffModelDefaultEffort(model.id)!
+      const dflt = getfreeportModelDefaultEffort(model.id)!
       expect({
         id: model.id,
         containsDefault: model.efforts.includes(dflt),
@@ -103,25 +103,25 @@ describe('per-model effort ladders', () => {
   })
 
   test('Muse Spark and Luna expose their complete native ladders', () => {
-    expect(getFreebuffModelEfforts(FREEBUFF_MUSE_SPARK_12_CONTRIBUTOR_MODEL_ID)).toEqual(
+    expect(getfreeportModelEfforts(FREEPORT_MUSE_SPARK_12_CONTRIBUTOR_MODEL_ID)).toEqual(
       EFFORTS_THROUGH_XHIGH,
     )
-    expect(getFreebuffModelEfforts(FREEBUFF_GPT_5_6_LUNA_MODEL_ID)).toEqual(
+    expect(getfreeportModelEfforts(FREEPORT_GPT_5_6_LUNA_MODEL_ID)).toEqual(
       EFFORTS_THROUGH_MAX,
     )
     expect(
-      resolveFreebuffReasoningEffort(FREEBUFF_MUSE_SPARK_12_CONTRIBUTOR_MODEL_ID, undefined),
+      resolvefreeportReasoningEffort(FREEPORT_MUSE_SPARK_12_CONTRIBUTOR_MODEL_ID, undefined),
     ).toBe('xhigh')
     expect(
-      resolveFreebuffReasoningEffort(FREEBUFF_GPT_5_6_LUNA_MODEL_ID, undefined),
+      resolvefreeportReasoningEffort(FREEPORT_GPT_5_6_LUNA_MODEL_ID, undefined),
     ).toBe('high')
   })
 
   test('Claude Fable 5 exposes every enabled effort', () => {
-    expect(getFreebuffModelEfforts(FREEBUFF_FABLE_5_MODEL_ID)).toEqual(
+    expect(getfreeportModelEfforts(FREEPORT_FABLE_5_MODEL_ID)).toEqual(
       EFFORTS_THROUGH_MAX,
     )
-    expect(getFreebuffModelDefaultEffort(FREEBUFF_FABLE_5_MODEL_ID)).toBe(
+    expect(getfreeportModelDefaultEffort(FREEPORT_FABLE_5_MODEL_ID)).toBe(
       'high',
     )
   })
@@ -131,35 +131,35 @@ describe('per-model effort ladders', () => {
     // requested→actual mapping for flash and pro, and low is a real template on
     // both. Medium is not, on either, so it must not appear as a rung.
     for (const id of [
-      FREEBUFF_DEEPSEEK_V4_PRO_MODEL_ID,
-      FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID,
+      FREEPORT_DEEPSEEK_V4_PRO_MODEL_ID,
+      FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID,
     ]) {
-      expect(getFreebuffModelEfforts(id)).toEqual(['low', 'high', 'max'])
-      expect(resolveFreebuffReasoningEffort(id, undefined)).toBe('high')
-      expect(getFreebuffModelReasoningEffort(id)).toBe('high')
-      expect(resolveFreebuffReasoningEffort(id, 'medium')).toBe('high')
-      expect(resolveFreebuffReasoningEffort(id, 'max')).toBe('max')
-      expect(resolveFreebuffReasoningEffort(id, 'low')).toBe('low')
+      expect(getfreeportModelEfforts(id)).toEqual(['low', 'high', 'max'])
+      expect(resolvefreeportReasoningEffort(id, undefined)).toBe('high')
+      expect(getfreeportModelReasoningEffort(id)).toBe('high')
+      expect(resolvefreeportReasoningEffort(id, 'medium')).toBe('high')
+      expect(resolvefreeportReasoningEffort(id, 'max')).toBe('max')
+      expect(resolvefreeportReasoningEffort(id, 'low')).toBe('low')
     }
   })
 
   test('binary, adaptive, and ignored controls do not masquerade as ladders', () => {
     for (const id of [
-      FREEBUFF_MINIMAX_M3_MODEL_ID,
-      FREEBUFF_MIMO_V25_MODEL_ID,
-      FREEBUFF_GLM_V52_MODEL_ID,
-      FREEBUFF_KIMI_K3_ECO_MODEL_ID,
+      FREEPORT_MINIMAX_M3_MODEL_ID,
+      FREEPORT_MIMO_V25_MODEL_ID,
+      FREEPORT_GLM_V52_MODEL_ID,
+      FREEPORT_KIMI_K3_ECO_MODEL_ID,
     ]) {
-      expect(getFreebuffModelEfforts(id)).toBeNull()
-      expect(resolveFreebuffReasoningEffort(id, 'low')).toBeNull()
+      expect(getfreeportModelEfforts(id)).toBeNull()
+      expect(resolvefreeportReasoningEffort(id, 'low')).toBeNull()
     }
-    expect(resolveFreebuffReasoningEffort('some/unknown-model', 'high')).toBeNull()
+    expect(resolvefreeportReasoningEffort('some/unknown-model', 'high')).toBeNull()
   })
 
   test('a dated provider snapshot resolves like the undated id', () => {
     expect(
-      resolveFreebuffReasoningEffort(
-        `${FREEBUFF_MUSE_SPARK_12_CONTRIBUTOR_MODEL_ID}-20260901`,
+      resolvefreeportReasoningEffort(
+        `${FREEPORT_MUSE_SPARK_12_CONTRIBUTOR_MODEL_ID}-20260901`,
         'low',
       ),
     ).toBe('low')

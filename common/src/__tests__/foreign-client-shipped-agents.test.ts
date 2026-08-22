@@ -3,23 +3,23 @@ import { join, relative } from 'node:path'
 
 import { describe, expect, test } from 'bun:test'
 
-import { FREEBUFF_ROOT_AGENT_IDS } from '../constants/free-agents'
+import { FREEPORT_ROOT_AGENT_IDS } from '../constants/free-agents'
 import {
-  detectForeignFreebuffClient,
-  FREEBUFF_CUSTOM_TOOL_NAMES,
+  detectForeignFREEPORTClient,
+  FREEPORT_CUSTOM_TOOL_NAMES,
 } from '../constants/foreign-client-signals'
 
 /**
  * Nothing we ship may be mistaken for a third-party client.
  *
  * The downgrade now runs unconditionally with no flag to disable it, so a
- * freebuff agent the detector flags is served a different model in production
+ * FREEPORT agent the detector flags is served a different model in production
  * with no way to switch it off short of a revert and redeploy. This has already
  * happened twice, both silently:
  *
  *  - `researcher-web` offers `['web_search', 'read_url']` and was flagged on
  *    100% of its 334,042 requests from 4,821 users over 30 days.
- *  - `freebuff-desktop-autorun` offers only the custom tool `decide`, so it had
+ *  - `FREEPORT-desktop-autorun` offers only the custom tool `decide`, so it had
  *    no signature tool at all — 2,904 requests from 41 users.
  *
  * Both were found by querying production, which is the wrong place to find
@@ -36,8 +36,8 @@ const REPO_ROOT = join(import.meta.dir, '..', '..', '..')
 const SEARCH_ROOTS = [
   'agents',
   '.agents',
-  'freebuff',
-  'freebuff-desktop/src',
+  'FREEPORT',
+  'FREEPORT-desktop/src',
   'web/src',
   'common/src',
   'sdk/src',
@@ -51,7 +51,7 @@ const SEARCH_ROOTS = [
  */
 const EXCLUDED: Array<{ path: string; mustContain: string; why: string }> = [
   {
-    path: 'freebuff/e2e/agent/freebuff-tester.ts',
+    path: 'FREEPORT/e2e/agent/FREEPORT-tester.ts',
     mustContain: "model: 'anthropic/claude-sonnet-4.5'",
     why:
       'e2e harness pinned to a paid Anthropic model. The downgrade only runs ' +
@@ -135,7 +135,7 @@ function asToolSchemas(names: string[]) {
   return names.map((name) => ({ type: 'function', function: { name } }))
 }
 
-describe('no shipped freebuff agent is flagged as a foreign client', () => {
+describe('no shipped FREEPORT agent is flagged as a foreign client', () => {
   test('the scan actually found our agents', () => {
     // Guards the failure mode where a reformat stops the regex matching and
     // every assertion below passes over an empty set.
@@ -145,7 +145,7 @@ describe('no shipped freebuff agent is flagged as a foreign client', () => {
   test.each(DECLARATIONS.map((d): [string, Declaration] => [d.file, d]))(
     '%s',
     (_file, declaration) => {
-      const verdict = detectForeignFreebuffClient({
+      const verdict = detectForeignFREEPORTClient({
         tools: asToolSchemas(declaration.names),
       })
       // Surface the toolset in the failure, since the fix is almost always
@@ -165,7 +165,7 @@ describe('no shipped freebuff agent is flagged as a foreign client', () => {
 
   test.each([
     ['researcher-web', 'agents/researcher/researcher-web.ts'],
-    ['desktop mission', 'freebuff-desktop/src/server/services/mission.ts'],
+    ['desktop mission', 'FREEPORT-desktop/src/server/services/mission.ts'],
     ['glob-matcher', 'agents/file-explorer/glob-matcher.ts'],
   ])('still covers %s, which the scan must not silently drop', (_name, path) => {
     // The first two are the agents this test exists because of. The third has
@@ -179,7 +179,7 @@ describe('no shipped freebuff agent is flagged as a foreign client', () => {
     // tools, on the grounds that our roots are agentic by definition. A root
     // shipped with an empty toolset would therefore have every one of its
     // requests downgraded in production, with no flag to turn it off.
-    const roots = new Set<string>(FREEBUFF_ROOT_AGENT_IDS)
+    const roots = new Set<string>(FREEPORT_ROOT_AGENT_IDS)
     const shippedRoots = DECLARATIONS.filter((d) =>
       d.ids.some((id) => roots.has(id)),
     )
@@ -194,7 +194,7 @@ describe('no shipped freebuff agent is flagged as a foreign client', () => {
     ).toEqual([])
   })
 
-  test.each([...FREEBUFF_CUSTOM_TOOL_NAMES])(
+  test.each([...FREEPORT_CUSTOM_TOOL_NAMES])(
     'custom tool %s clears on its own',
     (name) => {
       // Custom tools are registered at runtime through customToolDefinitions,
@@ -202,17 +202,17 @@ describe('no shipped freebuff agent is flagged as a foreign client', () => {
       // else — which is exactly what desktop autorun does — has no signature
       // tool unless it is enumerated.
       expect(
-        detectForeignFreebuffClient({ tools: asToolSchemas([name]) }).signal,
+        detectForeignFREEPORTClient({ tools: asToolSchemas([name]) }).signal,
       ).toBeNull()
     },
   )
 
   test('custom tools appended to a real toolset stay cleared', () => {
     // How the chat surface composes: base-chat's tools plus per-turn image and
-    // document tools (freebuff/web/src/server/chat/agent.ts). The additions are
+    // document tools (FREEPORT/web/src/server/chat/agent.ts). The additions are
     // caller-named and arbitrary, so this must not depend on recognising them.
     expect(
-      detectForeignFreebuffClient({
+      detectForeignFREEPORTClient({
         tools: asToolSchemas([
           'spawn_agents',
           'gravity_index',

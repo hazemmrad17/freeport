@@ -8,7 +8,7 @@ export enum AnalyticsEvent {
   // id on every surface, so unique-users of this event gives accurate
   // per-surface DAU (filter on the `surface` property) and a combined DAU (no
   // filter). The `surface` property is one of: cli, web, chat, desktop, cloud
-  // (web = the freebuff.com builder, cloud = connected-repo builder projects).
+  // (web = the FREEPORT.com builder, cloud = connected-repo builder projects).
   // Emission points: cli client analytics; chat's stream route (server-side);
   // desktop's analytics module; web/cloud via the Convex send mutation
   // (PostHog + Axiom, both direct from Convex — see convex/analytics.ts).
@@ -190,12 +190,12 @@ export enum AnalyticsEvent {
   TOKEN_COUNT_VALIDATION_ERROR = 'api.token_count_validation_error',
   TOKEN_COUNT_ERROR = 'api.token_count_error',
 
-  // Freebuff - Creator Attribution
-  FREEBUFF_REFERRER_ATTRIBUTED = 'freebuff.referrer_attributed',
+  // FREEPORT - Creator Attribution
+  FREEPORT_REFERRER_ATTRIBUTED = 'FREEPORT.referrer_attributed',
 
-  // Freebuff - Referral program server lifecycle (emitted from packages/billing
+  // FREEPORT - Referral program server lifecycle (emitted from packages/billing
   // via the server logger → Axiom `event` column).
-  FREEBUFF_REFERRAL_REDEEMED = 'freebuff.referral.redeemed',
+  FREEPORT_REFERRAL_REDEEMED = 'FREEPORT.referral.redeemed',
   // A redemption attempt that hit one of the one-shot eligibility guards
   // (signup_too_old, user_banned, referrer_limit_reached, reverse_referral,
   // self_referral). Deliberately EXCLUDES the two repeat-prone errors —
@@ -204,81 +204,81 @@ export enum AnalyticsEvent {
   // — which would otherwise re-fire on every <=10-min token mint; those log
   // at debug only. Without this event, a "my friend's invite didn't count"
   // support case is undiagnosable — the guards otherwise return silently.
-  FREEBUFF_REFERRAL_REDEEM_FAILED = 'freebuff.referral.redeem_failed',
+  FREEPORT_REFERRAL_REDEEM_FAILED = 'FREEPORT.referral.redeem_failed',
   // Attribution went through and the referred user redeemed from an IP or
   // browser the REFERRER was recently seen on. Evidence, NOT a verdict: this
   // is also exactly what a genuine in-person referral looks like ("try it,
   // here's my laptop" — a sibling on the family computer shares both). Only
   // suspicious when corroborated by real farm signals (dormant GitHub, burst
   // velocity, no product use); the sweep + scripts do that weighing.
-  FREEBUFF_REFERRAL_SOCK_SIGNAL = 'freebuff.referral.sock_signal',
-  // Freebuff - Get Started Page (referral onboarding funnel, in order:
+  FREEPORT_REFERRAL_SOCK_SIGNAL = 'FREEPORT.referral.sock_signal',
+  // FREEPORT - Get Started Page (referral onboarding funnel, in order:
   //   viewed → sign_in_clicked → signed_in → eligibility_resolved →
   //   [connect_github_clicked] → install_command_copied | web_clicked).
   // Every event carries a `referrer` prop (the inviter's name) for per-referrer
   // funnel breakdowns.
-  FREEBUFF_GET_STARTED_VIEWED = 'freebuff.get_started_viewed',
-  FREEBUFF_GET_STARTED_SIGN_IN_CLICKED = 'freebuff.get_started_sign_in_clicked',
-  FREEBUFF_GET_STARTED_SIGNED_IN = 'freebuff.get_started_signed_in',
-  FREEBUFF_GET_STARTED_ELIGIBILITY_RESOLVED = 'freebuff.get_started_eligibility_resolved',
-  FREEBUFF_GET_STARTED_CONNECT_GITHUB_CLICKED = 'freebuff.get_started_connect_github_clicked',
-  FREEBUFF_GET_STARTED_INSTALL_COMMAND_COPIED = 'freebuff.get_started_install_command_copied',
-  FREEBUFF_GET_STARTED_WEB_CLICKED = 'freebuff.get_started_web_clicked',
+  FREEPORT_GET_STARTED_VIEWED = 'FREEPORT.get_started_viewed',
+  FREEPORT_GET_STARTED_SIGN_IN_CLICKED = 'FREEPORT.get_started_sign_in_clicked',
+  FREEPORT_GET_STARTED_SIGNED_IN = 'FREEPORT.get_started_signed_in',
+  FREEPORT_GET_STARTED_ELIGIBILITY_RESOLVED = 'FREEPORT.get_started_eligibility_resolved',
+  FREEPORT_GET_STARTED_CONNECT_GITHUB_CLICKED = 'FREEPORT.get_started_connect_github_clicked',
+  FREEPORT_GET_STARTED_INSTALL_COMMAND_COPIED = 'FREEPORT.get_started_install_command_copied',
+  FREEPORT_GET_STARTED_WEB_CLICKED = 'FREEPORT.get_started_web_clicked',
   // Deprecated (previous get-started design — no longer fired):
-  FREEBUFF_GET_STARTED_HELP_EXPANDED = 'freebuff.get_started_help_expanded',
-  FREEBUFF_GET_STARTED_EDITOR_CLICKED = 'freebuff.get_started_editor_clicked',
+  FREEPORT_GET_STARTED_HELP_EXPANDED = 'FREEPORT.get_started_help_expanded',
+  FREEPORT_GET_STARTED_EDITOR_CLICKED = 'FREEPORT.get_started_editor_clicked',
 
-  // Freebuff - Chat
+  // FREEPORT - Chat
   // Emitted once per new-thread title generation attempt (server-side). The
   // `outcome` property is one of: generated | empty | unknown_model | error |
   // aborted. Carries `latencyMs`, `model`, and `titleLength` so the failure/
   // fallback rate and added latency are queryable.
-  FREEBUFF_CHAT_TITLE_GENERATED = 'freebuff.chat_title_generated',
+  FREEPORT_CHAT_TITLE_GENERATED = 'FREEPORT.chat_title_generated',
 
-  // Freebuff - CLI landing page (/cli). Fired when the install command is
+  // FREEPORT - CLI landing page (/cli). Fired when the install command is
   // copied; `location` distinguishes hero vs install section. Lets us measure
   // install intent per campaign (utm_* ride along as super-properties) — the
   // best proxy conversion for CLI traffic, since CLI activation happens in a
   // separate identity space with no key back to the web landing.
-  FREEBUFF_CLI_INSTALL_COMMAND_COPIED = 'freebuff.cli_install_command_copied',
+  FREEPORT_CLI_INSTALL_COMMAND_COPIED = 'FREEPORT.cli_install_command_copied',
 
-  // Freebuff - Enterprise landing page (/enterprise). Fired when the contact
+  // FREEPORT - Enterprise landing page (/enterprise). Fired when the contact
   // form is submitted successfully; carries `companySize` and whether the
   // sender self-identified as an AI lab, so inbound demand can be segmented
   // without reading the emails. The lead itself lands in james@/victor@ inboxes
   // — this event only measures the funnel into them.
-  FREEBUFF_ENTERPRISE_CONTACT_SUBMITTED = 'freebuff.enterprise_contact_submitted',
+  FREEPORT_ENTERPRISE_CONTACT_SUBMITTED = 'FREEPORT.enterprise_contact_submitted',
 
-  // Freebuff - Desktop download CTAs (home hero, products row, /desktop).
+  // FREEPORT - Desktop download CTAs (home hero, products row, /desktop).
   // Fired on every click of a download button; `location` distinguishes the
   // CTA, `platform` the build, and `repeat: true` marks a click we swallowed
   // because the same download had just started (the "did that work?" double
   // click) — a direct read on whether the click feedback is landing.
-  FREEBUFF_DESKTOP_DOWNLOAD_CLICKED = 'freebuff.desktop_download_clicked',
+  FREEPORT_DESKTOP_DOWNLOAD_CLICKED = 'FREEPORT.desktop_download_clicked',
 
-  // Freebuff Web creation gate: the user's idea was screened as something Web
+  // FREEPORT Web creation gate: the user's idea was screened as something Web
   // cannot build, and they clicked through to the surface we suggested.
   // `surface` is desktop | cli | unsupported. Pairs with the Convex
   // web_gate_decision row (which carries the same click) — PostHog answers
   // "did the redirect land?" across the funnel, Convex answers "for which
   // ideas?". Both exist because the Convex row cannot see what the user does
   // after leaving /web.
-  FREEBUFF_WEB_GATE_REDIRECT_CLICKED = 'freebuff.web_gate_redirect_clicked',
+  FREEPORT_WEB_GATE_REDIRECT_CLICKED = 'FREEPORT.web_gate_redirect_clicked',
 
-  // Freebuff Web first-session onboarding. The details sequence runs in the
+  // FREEPORT Web first-session onboarding. The details sequence runs in the
   // chat pane while the first build streams; its answers are composed into the
   // user's SECOND prompt, which is the drop-off metric this exists to move
   // (51% of Web projects never get one). `_STEP` fires per question with
   // whether it was answered or skipped, so the funnel shows which question
   // people bail on. `_FINISHED` carries `answered` (0-4) and `sent`.
-  FREEBUFF_WEB_ONBOARDING_STEP = 'freebuff.web_onboarding_step',
-  FREEBUFF_WEB_ONBOARDING_FINISHED = 'freebuff.web_onboarding_finished',
+  FREEPORT_WEB_ONBOARDING_STEP = 'FREEPORT.web_onboarding_step',
+  FREEPORT_WEB_ONBOARDING_FINISHED = 'FREEPORT.web_onboarding_finished',
 
   // The workspace spotlight tour that follows the first build. `_STEP` fires
   // per pane shown (preview/database/logs/publish/chat); `_FINISHED` records
   // completed vs skipped and where they stopped.
-  FREEBUFF_WEB_TOUR_STEP = 'freebuff.web_tour_step',
-  FREEBUFF_WEB_TOUR_FINISHED = 'freebuff.web_tour_finished',
+  FREEPORT_WEB_TOUR_STEP = 'FREEPORT.web_tour_step',
+  FREEPORT_WEB_TOUR_FINISHED = 'FREEPORT.web_tour_finished',
 
   // The bookmark gate: a blocking card shown once per browser, right after the
   // user's first prompt in a Web or Cloud workspace, asking them to bookmark
@@ -286,61 +286,61 @@ export enum AnalyticsEvent {
   // pointer | touch (the two illustrations). `_SHOWN` minus `_CONFIRMED` is the
   // abandon rate — the number to watch, since the card has no other exit and a
   // gap between the two means people are closing the tab instead.
-  FREEBUFF_BOOKMARK_GATE_SHOWN = 'freebuff.bookmark_gate_shown',
-  FREEBUFF_BOOKMARK_GATE_CONFIRMED = 'freebuff.bookmark_gate_confirmed',
+  FREEPORT_BOOKMARK_GATE_SHOWN = 'FREEPORT.bookmark_gate_shown',
+  FREEPORT_BOOKMARK_GATE_CONFIRMED = 'FREEPORT.bookmark_gate_confirmed',
 
-  // Freebuff - Cloud landing page (/cloud). Fired when a logged-out visitor
+  // FREEPORT - Cloud landing page (/cloud). Fired when a logged-out visitor
   // clicks a "Continue with GitHub" / "Connect your repo" CTA; `location`
   // distinguishes hero vs the migration/lovable section vs the final CTA. Best
   // proxy for cloud sign-up intent (utm_* ride along as super-properties).
-  FREEBUFF_CLOUD_CONNECT_REPO_CLICKED = 'freebuff.cloud_connect_repo_clicked',
-  FREEBUFF_CLOUD_BLANK_PROJECT_CLICKED = 'freebuff.cloud_blank_project_clicked',
+  FREEPORT_CLOUD_CONNECT_REPO_CLICKED = 'FREEPORT.cloud_connect_repo_clicked',
+  FREEPORT_CLOUD_BLANK_PROJECT_CLICKED = 'FREEPORT.cloud_blank_project_clicked',
 
-  // Freebuff - Home Page
-  FREEBUFF_HOME_INSTALL_COMMAND_COPIED = 'freebuff.home_install_command_copied',
-  FREEBUFF_HOME_GITHUB_CLICKED = 'freebuff.home_github_clicked',
-  FREEBUFF_HOME_INSTALL_GUIDE_EXPANDED = 'freebuff.home_install_guide_expanded',
-  FREEBUFF_HOME_FAQ_OPENED = 'freebuff.home_faq_opened',
+  // FREEPORT - Home Page
+  FREEPORT_HOME_INSTALL_COMMAND_COPIED = 'FREEPORT.home_install_command_copied',
+  FREEPORT_HOME_GITHUB_CLICKED = 'FREEPORT.home_github_clicked',
+  FREEPORT_HOME_INSTALL_GUIDE_EXPANDED = 'FREEPORT.home_install_guide_expanded',
+  FREEPORT_HOME_FAQ_OPENED = 'FREEPORT.home_faq_opened',
 
-  // Freebuff - Home savings calculator CTA. Fires alongside
-  // FREEBUFF_DESKTOP_DOWNLOAD_CLICKED (location: savings_calculator) but adds
+  // FREEPORT - Home savings calculator CTA. Fires alongside
+  // FREEPORT_DESKTOP_DOWNLOAD_CLICKED (location: savings_calculator) but adds
   // what the visitor had configured at the moment they converted: `savings`
   // (the headline number they were looking at), `perSeat`, `seats`, `tools`
   // and `toolCount`. The question it exists to answer is whether a bigger
   // computed number actually converts better — bucket `savings` and compare
   // click-through, which the download event alone cannot show.
-  FREEBUFF_HOME_SAVINGS_CTA_CLICKED = 'freebuff.home_savings_cta_clicked',
+  FREEPORT_HOME_SAVINGS_CTA_CLICKED = 'FREEPORT.home_savings_cta_clicked',
 
-  // Freebuff - acquisition attribution (UTM / ad-click params captured as
+  // FREEPORT - acquisition attribution (UTM / ad-click params captured as
   // super-properties; filter by utm_source, reddit_click_id, is_reddit_traffic)
-  FREEBUFF_ATTRIBUTED = 'freebuff.attributed',
-  FREEBUFF_AFFILIATE_SIGNUP = 'freebuff.affiliate.signup',
-  FREEBUFF_AFFILIATE_ACTIVATION = 'freebuff.affiliate.activation',
-  // Freebuff - Reddit ad funnel (filter in PostHog by reddit_click_id / utm_source)
-  FREEBUFF_REDDIT_FUNNEL_CLI_INSTALLED = 'freebuff.reddit_funnel.cli_installed',
-  FREEBUFF_REDDIT_FUNNEL_LOGIN = 'freebuff.reddit_funnel.login',
-  FREEBUFF_REDDIT_FUNNEL_SIGN_UP = 'freebuff.reddit_funnel.sign_up',
-  FREEBUFF_REDDIT_FUNNEL_FIRST_PROMPT = 'freebuff.reddit_funnel.first_prompt',
-  FREEBUFF_REDDIT_FUNNEL_RETENTION_1D = 'freebuff.reddit_funnel.retention_1d',
-  FREEBUFF_REDDIT_FUNNEL_RETENTION_7D = 'freebuff.reddit_funnel.retention_7d',
-  FREEBUFF_REDDIT_FUNNEL_RETENTION_24D = 'freebuff.reddit_funnel.retention_24d',
+  FREEPORT_ATTRIBUTED = 'FREEPORT.attributed',
+  FREEPORT_AFFILIATE_SIGNUP = 'FREEPORT.affiliate.signup',
+  FREEPORT_AFFILIATE_ACTIVATION = 'FREEPORT.affiliate.activation',
+  // FREEPORT - Reddit ad funnel (filter in PostHog by reddit_click_id / utm_source)
+  FREEPORT_REDDIT_FUNNEL_CLI_INSTALLED = 'FREEPORT.reddit_funnel.cli_installed',
+  FREEPORT_REDDIT_FUNNEL_LOGIN = 'FREEPORT.reddit_funnel.login',
+  FREEPORT_REDDIT_FUNNEL_SIGN_UP = 'FREEPORT.reddit_funnel.sign_up',
+  FREEPORT_REDDIT_FUNNEL_FIRST_PROMPT = 'FREEPORT.reddit_funnel.first_prompt',
+  FREEPORT_REDDIT_FUNNEL_RETENTION_1D = 'FREEPORT.reddit_funnel.retention_1d',
+  FREEPORT_REDDIT_FUNNEL_RETENTION_7D = 'FREEPORT.reddit_funnel.retention_7d',
+  FREEPORT_REDDIT_FUNNEL_RETENTION_24D = 'FREEPORT.reddit_funnel.retention_24d',
   // Legacy surface-specific names retained for historical dashboards.
-  FREEBUFF_REDDIT_FUNNEL_FIRST_PROMPT_CLI = 'freebuff.reddit_funnel.first_prompt_cli',
-  FREEBUFF_REDDIT_FUNNEL_FIRST_PROMPT_WEB = 'freebuff.reddit_funnel.first_prompt_web',
-  FREEBUFF_REDDIT_FUNNEL_FIRST_PROMPT_CHAT = 'freebuff.reddit_funnel.first_prompt_chat',
-  FREEBUFF_REDDIT_FUNNEL_RETENTION_1D_CLI = 'freebuff.reddit_funnel.retention_1d_cli',
-  FREEBUFF_REDDIT_FUNNEL_RETENTION_7D_CLI = 'freebuff.reddit_funnel.retention_7d_cli',
-  FREEBUFF_REDDIT_FUNNEL_RETENTION_24D_CLI = 'freebuff.reddit_funnel.retention_24d_cli',
-  FREEBUFF_REDDIT_FUNNEL_GRAVITY_AD_CLICK = 'freebuff.reddit_funnel.gravity_ad_click',
+  FREEPORT_REDDIT_FUNNEL_FIRST_PROMPT_CLI = 'FREEPORT.reddit_funnel.first_prompt_cli',
+  FREEPORT_REDDIT_FUNNEL_FIRST_PROMPT_WEB = 'FREEPORT.reddit_funnel.first_prompt_web',
+  FREEPORT_REDDIT_FUNNEL_FIRST_PROMPT_CHAT = 'FREEPORT.reddit_funnel.first_prompt_chat',
+  FREEPORT_REDDIT_FUNNEL_RETENTION_1D_CLI = 'FREEPORT.reddit_funnel.retention_1d_cli',
+  FREEPORT_REDDIT_FUNNEL_RETENTION_7D_CLI = 'FREEPORT.reddit_funnel.retention_7d_cli',
+  FREEPORT_REDDIT_FUNNEL_RETENTION_24D_CLI = 'FREEPORT.reddit_funnel.retention_24d_cli',
+  FREEPORT_REDDIT_FUNNEL_GRAVITY_AD_CLICK = 'FREEPORT.reddit_funnel.gravity_ad_click',
 
-  // Freebuff web /chat ads experiment (server-rendered Gravity ads vs the
+  // FREEPORT web /chat ads experiment (server-rendered Gravity ads vs the
   // existing @gravity-ai/react inline slot; bucketed by user id — see
-  // freebuff/web/src/app/chat/_components/ad-experiment.ts). Both events carry
+  // FREEPORT/web/src/app/chat/_components/ad-experiment.ts). Both events carry
   // `experiment` + `variant` so PostHog can break down exposure and CTR by arm.
-  FREEBUFF_CHAT_ADS_EXPERIMENT_EXPOSED = 'freebuff.chat_ads.experiment_exposed',
-  FREEBUFF_CHAT_ADS_AD_SHOWN = 'freebuff.chat_ads.ad_shown',
+  FREEPORT_CHAT_ADS_EXPERIMENT_EXPOSED = 'FREEPORT.chat_ads.experiment_exposed',
+  FREEPORT_CHAT_ADS_AD_SHOWN = 'FREEPORT.chat_ads.ad_shown',
 
-  // Freebuff Desktop (Electron app)
+  // FREEPORT Desktop (Electron app)
   // Mirrors the CLI's surface events so the desktop shows up in the same DAU /
   // login funnels. `message_sent` (above) is reused with `surface: 'desktop'`;
   // these capture the launch, auth, and per-turn activity unique to the app.
@@ -370,7 +370,7 @@ export enum AnalyticsEvent {
   // Feature-adoption catch-all. ONE event for the long tail of desktop
   // features (panels, worktrees, diffs, skills, terminal, preview, …), keyed
   // by a bounded `feature` property from
-  // `freebuff-desktop/src/core/features.ts`. A single PostHog insight
+  // `FREEPORT-desktop/src/core/features.ts`. A single PostHog insight
   // ("desktop.feature_used, broken down by feature", unique users) answers
   // "what do people actually use?" for the whole app, and adding a feature
   // never means adding an event to this enum or to the sampling lists.

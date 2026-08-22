@@ -1,22 +1,22 @@
 import {
-  FALLBACK_FREEBUFF_MODEL_ID,
-  isFreebuffPremiumModelId,
-  SUPPORTED_FREEBUFF_MODELS,
-  type FreebuffModelOption,
-} from '@codebuff/common/constants/freebuff-models'
-import { getRateLimitsByModel } from '@codebuff/common/types/freebuff-session'
+  FALLBACK_FREEPORT_MODEL_ID,
+  isfreeportPremiumModelId,
+  SUPPORTED_FREEPORT_MODELS,
+  type freeportModelOption,
+} from '@codebuff/common/constants/freeport-models'
+import { getRateLimitsByModel } from '@codebuff/common/types/freeport-session'
 import { TextAttributes } from '@opentui/core'
 import { useKeyboard } from '@opentui/react'
 import React, { useCallback, useState } from 'react'
 
 import { Button } from './button'
 import {
-  refreshFreebuffSession,
-  returnToFreebuffLanding,
-} from '../hooks/use-freebuff-session'
+  refreshfreeportSession,
+  returnTofreeportLanding,
+} from '../hooks/use-freeport-session'
 import { useTheme } from '../hooks/use-theme'
-import { useFreebuffModelStore } from '../state/freebuff-model-store'
-import { useFreebuffSessionStore } from '../state/freebuff-session-store'
+import { usefreeportModelStore } from '../state/freeport-model-store'
+import { usefreeportSessionStore } from '../state/freeport-session-store'
 import { formatSessionUnits } from '../utils/format-session-units'
 import { isPlainEnterKey } from '../utils/terminal-enter-detection'
 import { BORDER_CHARS } from '../utils/ui-constants'
@@ -31,7 +31,7 @@ interface SessionEndedBannerProps {
 }
 
 /**
- * Replaces the chat input when the freebuff session has ended. Captures
+ * Replaces the chat input when the FREEPORT session has ended. Captures
  * Enter to start a new same-chat session. Esc returns to model selection
  * once no in-flight work needs the global stream-interrupt handler.
  */
@@ -46,13 +46,13 @@ export const SessionEndedBanner: React.FC<SessionEndedBannerProps> = ({
   // All premium models share one daily pool; the server replicates the same
   // snapshot under each premium model id, so the first entry has the right
   // count.
-  const premiumQuota = useFreebuffSessionStore(
+  const premiumQuota = usefreeportSessionStore(
     (s) => Object.values(getRateLimitsByModel(s.session) ?? {})[0] ?? null,
   )
   const isQuotaExhausted = premiumQuota
     ? premiumQuota.recentCount >= premiumQuota.limit
     : false
-  const accessTier = useFreebuffSessionStore((s) =>
+  const accessTier = usefreeportSessionStore((s) =>
     s.session && 'accessTier' in s.session ? s.session.accessTier : 'full',
   )
   const quotaLabel = accessTier === 'limited' ? 'sessions' : 'premium sessions'
@@ -68,13 +68,13 @@ export const SessionEndedBanner: React.FC<SessionEndedBannerProps> = ({
   // Flash) instead — the same flip the landing picker's recommendation makes.
   // Limited tier is excluded: its models all share the one exhausted pool, so
   // there is nothing to flip to.
-  const selectedModel = useFreebuffModelStore((s) => s.selectedModel)
+  const selectedModel = usefreeportModelStore((s) => s.selectedModel)
   const continueOnFallback =
     isQuotaExhausted &&
     accessTier !== 'limited' &&
-    isFreebuffPremiumModelId(selectedModel)
-  const fallbackModel: FreebuffModelOption | undefined =
-    SUPPORTED_FREEBUFF_MODELS.find((m) => m.id === FALLBACK_FREEBUFF_MODEL_ID)
+    isfreeportPremiumModelId(selectedModel)
+  const fallbackModel: freeportModelOption | undefined =
+    SUPPORTED_FREEPORT_MODELS.find((m) => m.id === FALLBACK_FREEPORT_MODEL_ID)
   const fallbackModelName = fallbackModel?.displayName ?? 'DeepSeek V4 Flash'
   // Remind the user of the fallback's data-collection policy before they
   // continue on it — the landing picker shows this caveat on the model row,
@@ -91,10 +91,10 @@ export const SessionEndedBanner: React.FC<SessionEndedBannerProps> = ({
     setPendingAction('landing')
     // Drop back to the landing picker (status: 'none') so the user picks a
     // model and hits Enter again to commit, instead of silently starting a
-    // new session. app.tsx swaps us into <FreebuffLandingScreen> on the
+    // new session. app.tsx swaps us into <freeportLandingScreen> on the
     // transition, unmounting this banner — no need to clear the pending state on
     // success.
-    returnToFreebuffLanding({ resetChat: true }).catch(() =>
+    returnTofreeportLanding({ resetChat: true }).catch(() =>
       setPendingAction(null),
     )
   }, [canRestart])
@@ -106,13 +106,13 @@ export const SessionEndedBanner: React.FC<SessionEndedBannerProps> = ({
       // In-memory flip only (like the server-driven model flips): today's
       // exhausted pool must not overwrite the user's saved preference. The
       // rejoin POST reads the store at tick time, so it picks this up.
-      useFreebuffModelStore
+      usefreeportModelStore
         .getState()
-        .setSelectedModel(FALLBACK_FREEBUFF_MODEL_ID)
+        .setSelectedModel(FALLBACK_FREEPORT_MODEL_ID)
     }
     // Re-POST with the currently selected model and keep the chat/run state
     // intact so the next prompt continues the same conversation.
-    refreshFreebuffSession().catch(() => setPendingAction(null))
+    refreshfreeportSession().catch(() => setPendingAction(null))
   }, [canRestart, continueOnFallback])
 
   useKeyboard(

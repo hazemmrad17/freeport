@@ -5,20 +5,20 @@ import { useShallow } from 'zustand/react/shallow'
 import { Chat } from './chat'
 import { ChatHistoryScreen } from './components/chat-history-screen'
 import { ChatRuntimeProvider } from './contexts/chat-runtime-context'
-import { FreebuffSupersededScreen } from './components/freebuff-superseded-screen'
+import { freeportSupersededScreen } from './components/freeport-superseded-screen'
 import { LoginModal } from './components/login-modal'
 import { ProjectPickerScreen } from './components/project-picker-screen'
-import { FreebuffLandingScreen } from './components/freebuff-landing-screen'
+import { freeportLandingScreen } from './components/freeport-landing-screen'
 import { useAuthQuery } from './hooks/use-auth-query'
 import { useAuthState } from './hooks/use-auth-state'
-import { useFreebuffSession } from './hooks/use-freebuff-session'
+import { usefreeportSession } from './hooks/use-freeport-session'
 import { useTerminalFocus } from './hooks/use-terminal-focus'
 import { getProjectRoot, startNewChat } from './project-files'
 import { useChatHistoryStore } from './state/chat-history-store'
 import { stopActiveRun } from './utils/active-run'
 import { useChatStore } from './state/chat-store'
 import type { TopBannerType } from './types/store'
-import { IS_FREEBUFF } from './utils/constants'
+import { IS_FREEPORT } from './utils/constants'
 import { findGitRoot } from './utils/git'
 
 import type { MultilineInputHandle } from './components/multiline-input'
@@ -212,7 +212,7 @@ export const App = ({
   // Render project picker FIRST when at home directory or outside a project.
   // This deliberately precedes the login/auth and free-session gates so the
   // user always gets to pick a working directory before anything else — auth
-  // failures or a banned freebuff session would otherwise replace the
+  // failures or a banned FREEPORT session would otherwise replace the
   // picker mid-flash and look like being kicked out of the app.
   if (showProjectPicker) {
     return (
@@ -288,12 +288,12 @@ interface AuthedSurfaceProps {
 }
 
 /**
- * Rendered only after auth is confirmed. Owns the freebuff session gate
- * so `useFreebuffSession` runs exactly once per authed session (not before
+ * Rendered only after auth is confirmed. Owns the FREEPORT session gate
+ * so `usefreeportSession` runs exactly once per authed session (not before
  * we have a token).
  */
 const AuthedSurface = (props: AuthedSurfaceProps) => {
-  const { session, failure: sessionFailure } = useFreebuffSession()
+  const { session, failure: sessionFailure } = usefreeportSession()
 
   return (
     <ChatRuntimeProvider
@@ -330,14 +330,14 @@ const AuthedSurfaceRoutes = ({
   session,
   sessionFailure,
 }: AuthedSurfaceProps & {
-  session: ReturnType<typeof useFreebuffSession>['session']
-  sessionFailure: ReturnType<typeof useFreebuffSession>['failure']
+  session: ReturnType<typeof usefreeportSession>['session']
+  sessionFailure: ReturnType<typeof usefreeportSession>['failure']
 }) => {
   // Terminal state: a 409 from the gate means another CLI rotated our
   // instance id. Show a dedicated screen and stop polling — don't fall back
   // into the pre-chat screen, which would look like normal startup progress.
-  if (IS_FREEBUFF && session?.status === 'superseded') {
-    return <FreebuffSupersededScreen />
+  if (IS_FREEPORT && session?.status === 'superseded') {
+    return <freeportSupersededScreen />
   }
 
   // Route every non-admitted state through the pre-chat screen:
@@ -354,7 +354,7 @@ const AuthedSurfaceRoutes = ({
   // finishing work under the server-side grace period, and the chat surface
   // itself swaps the input box for the session-ended banner.
   if (
-    IS_FREEBUFF &&
+    IS_FREEPORT &&
     (session === null ||
       session.status === 'none' ||
       session.status === 'country_blocked' ||
@@ -364,10 +364,10 @@ const AuthedSurfaceRoutes = ({
       session.status === 'ip_capped' ||
       session.status === 'takeover_prompt')
   ) {
-    return <FreebuffLandingScreen session={session} failure={sessionFailure} />
+    return <freeportLandingScreen session={session} failure={sessionFailure} />
   }
 
-  // Chat history renders inside AuthedSurface so the freebuff session stays
+  // Chat history renders inside AuthedSurface so the FREEPORT session stays
   // mounted while the user browses history. Unmounting this surface would
   // DELETE the session row and drop the user back onto the landing screen on
   // return.
@@ -393,7 +393,7 @@ const AuthedSurfaceRoutes = ({
       initialMode={initialMode}
       gitRoot={gitRoot}
       onSwitchToGitRoot={onSwitchToGitRoot}
-      freebuffSession={session}
+      freeportSession={session}
     />
   )
 }

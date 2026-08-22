@@ -6,13 +6,13 @@
 import { describe, expect, test, beforeEach } from 'bun:test'
 
 import {
-  FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID,
-  FREEBUFF_GPT_5_6_LUNA_MODEL_ID,
-} from '@codebuff/common/constants/freebuff-models'
+  FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID,
+  FREEPORT_GPT_5_6_LUNA_MODEL_ID,
+} from '@codebuff/common/constants/freeport-models'
 import {
-  formatFreebuffRowQuota,
-  getFreebuffSectionQuotas,
-} from '@codebuff/common/util/freebuff-session-pools'
+  formatfreeportRowQuota,
+  getfreeportSectionQuotas,
+} from '@codebuff/common/util/freeport-session-pools'
 
 const quota = (
   model: string,
@@ -34,19 +34,19 @@ const quota = (
 
 describe('a section holding two pools', () => {
   const rows = [
-    FREEBUFF_GPT_5_6_LUNA_MODEL_ID,
-    FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID,
+    FREEPORT_GPT_5_6_LUNA_MODEL_ID,
+    FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID,
   ]
   const quotas = {
-    [FREEBUFF_GPT_5_6_LUNA_MODEL_ID]: quota(
-      FREEBUFF_GPT_5_6_LUNA_MODEL_ID,
+    [FREEPORT_GPT_5_6_LUNA_MODEL_ID]: quota(
+      FREEPORT_GPT_5_6_LUNA_MODEL_ID,
       'premium',
       'Premium',
       5,
       1,
     ),
-    [FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID]: quota(
-      FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID,
+    [FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID]: quota(
+      FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID,
       'deepseek',
       'DeepSeek',
       1,
@@ -59,30 +59,30 @@ describe('a section holding two pools', () => {
     // the tie breaks toward display order — Luna leads, so Premium labels the
     // section. The failure this prevents is a header reading "of 1" for every
     // premium model because DeepSeek happened to sort first.
-    const { header } = getFreebuffSectionQuotas(rows, quotas)
+    const { header } = getfreeportSectionQuotas(rows, quotas)
     expect(header?.pool).toBe('premium')
     expect(header?.limit).toBe(5)
   })
 
   test('the stricter row is handed back separately, keyed by model', () => {
-    const { perModel } = getFreebuffSectionQuotas(rows, quotas)
-    expect(Object.keys(perModel)).toEqual([FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID])
-    expect(perModel[FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID]!.limit).toBe(1)
+    const { perModel } = getfreeportSectionQuotas(rows, quotas)
+    expect(Object.keys(perModel)).toEqual([FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID])
+    expect(perModel[FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID]!.limit).toBe(1)
   })
 
   test('its chip names the pool, since the number alone contradicts the header', () => {
-    const { perModel } = getFreebuffSectionQuotas(rows, quotas)
+    const { perModel } = getfreeportSectionQuotas(rows, quotas)
     expect(
-      formatFreebuffRowQuota(perModel[FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID]!),
+      formatfreeportRowQuota(perModel[FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID]!),
     ).toBe('DeepSeek: 1 of 1 used')
   })
 
   test('nothing is singled out when every row shares a pool', () => {
     const onePool = {
-      [FREEBUFF_GPT_5_6_LUNA_MODEL_ID]: quotas[FREEBUFF_GPT_5_6_LUNA_MODEL_ID]!,
+      [FREEPORT_GPT_5_6_LUNA_MODEL_ID]: quotas[FREEPORT_GPT_5_6_LUNA_MODEL_ID]!,
     }
-    const { header, perModel } = getFreebuffSectionQuotas(
-      [FREEBUFF_GPT_5_6_LUNA_MODEL_ID],
+    const { header, perModel } = getfreeportSectionQuotas(
+      [FREEPORT_GPT_5_6_LUNA_MODEL_ID],
       onePool,
     )
     expect(header?.pool).toBe('premium')
@@ -93,19 +93,19 @@ describe('a section holding two pools', () => {
     // One bucket, header from the first row, nothing inline — a new client
     // against an old server must not start annotating rows at random.
     const legacy = {
-      [FREEBUFF_GPT_5_6_LUNA_MODEL_ID]: {
-        ...quotas[FREEBUFF_GPT_5_6_LUNA_MODEL_ID]!,
+      [FREEPORT_GPT_5_6_LUNA_MODEL_ID]: {
+        ...quotas[FREEPORT_GPT_5_6_LUNA_MODEL_ID]!,
         pool: undefined,
         poolLabel: undefined,
       },
-      [FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID]: {
-        ...quotas[FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID]!,
+      [FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID]: {
+        ...quotas[FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID]!,
         pool: undefined,
         poolLabel: undefined,
       },
     }
-    const { header, perModel } = getFreebuffSectionQuotas(rows, legacy)
-    expect(header?.model).toBe(FREEBUFF_GPT_5_6_LUNA_MODEL_ID)
+    const { header, perModel } = getfreeportSectionQuotas(rows, legacy)
+    expect(header?.model).toBe(FREEPORT_GPT_5_6_LUNA_MODEL_ID)
     expect(perModel).toEqual({})
   })
 
@@ -114,17 +114,17 @@ describe('a section holding two pools', () => {
     // looks like to a build shipped today.
     const future = {
       ...quotas,
-      [FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID]: quota(
-        FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID,
+      [FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID]: quota(
+        FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID,
         'some_new_pool',
         'Frontier',
         2,
         2,
       ),
     }
-    const { perModel } = getFreebuffSectionQuotas(rows, future)
+    const { perModel } = getfreeportSectionQuotas(rows, future)
     expect(
-      formatFreebuffRowQuota(perModel[FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID]!),
+      formatfreeportRowQuota(perModel[FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID]!),
     ).toBe('Frontier: 2 of 2 used')
   })
 })

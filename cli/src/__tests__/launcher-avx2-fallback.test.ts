@@ -65,7 +65,7 @@ function makeLauncher(
     configurable: true,
   })
   Object.defineProperty(process, 'arch', { value: arch, configurable: true })
-  return createLauncher({ packageName: 'freebuff', configDir: tempConfigDir })
+  return createLauncher({ packageName: 'FREEPORT', configDir: tempConfigDir })
     .__testing
 }
 
@@ -106,14 +106,14 @@ function captureLauncherOutput() {
   }
 }
 
-/** A tar.gz holding a single `freebuff.exe` that runs `script`. */
+/** A tar.gz holding a single `FREEPORT.exe` that runs `script`. */
 function baselineTarball(script: string) {
   const stageDir = mkdtempSync(join(tmpdir(), 'launcher-baseline-'))
-  writeFileSync(join(stageDir, 'freebuff.exe'), `#!/bin/sh\n${script}\n`, {
+  writeFileSync(join(stageDir, 'FREEPORT.exe'), `#!/bin/sh\n${script}\n`, {
     mode: 0o755,
   })
   const archive = join(stageDir, 'out.tar.gz')
-  execFileSync('tar', ['-czf', archive, '-C', stageDir, 'freebuff.exe'])
+  execFileSync('tar', ['-czf', archive, '-C', stageDir, 'FREEPORT.exe'])
   return readFileSync(archive)
 }
 
@@ -129,7 +129,7 @@ let restoreReleaseEnv = () => {}
 beforeAll(async () => {
   releaseServer = createServer((request, response) => {
     const wantsBaseline = request.url?.endsWith(
-      'freebuff-win32-x64-baseline.tar.gz',
+      'freeport-win32-x64-baseline.tar.gz',
     )
     if (releaseTarball && wantsBaseline) {
       response.writeHead(200)
@@ -407,12 +407,12 @@ describe('what the fallback persists', () => {
   test('does not fight an explicitly chosen target', async () => {
     const t = makeLauncher()
     installBinary(t, 'win32-x64')
-    process.env.FREEBUFF_BINARY_TARGET = 'win32-x64'
+    process.env.FREEPORT_BINARY_TARGET = 'win32-x64'
     try {
       expect(await t.tryFallbackToBaseline(0xc000001d, null, 40)).toBe(false)
       expect(t.readCachedAvx2()).toBe(null)
     } finally {
-      delete process.env.FREEBUFF_BINARY_TARGET
+      delete process.env.FREEPORT_BINARY_TARGET
     }
   })
 
@@ -487,7 +487,7 @@ describe('the crash report a windows user sees', () => {
 
     const output = launcher.lines.join('\n')
     expect(output).toContain('without AVX2 support')
-    expect(output).toContain('FREEBUFF_BINARY_TARGET=win32-x64-baseline')
+    expect(output).toContain('FREEPORT_BINARY_TARGET=win32-x64-baseline')
     expect(output).toContain('AVX2:     no (recorded crash)')
   })
 
@@ -516,7 +516,7 @@ describe('the crash report a windows user sees', () => {
     const output = launcher.lines.join('\n')
     expect(output).toContain('crashed with an abort signal')
     expect(output).not.toContain('without AVX2 support')
-    expect(output).not.toContain('FREEBUFF_BINARY_TARGET=')
+    expect(output).not.toContain('FREEPORT_BINARY_TARGET=')
   })
 
   test('never lets captured escapes undo the terminal reset', async () => {

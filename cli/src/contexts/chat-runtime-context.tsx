@@ -9,7 +9,7 @@ import {
 
 import { useAgentValidation } from '../hooks/use-agent-validation'
 import { useElapsedTime } from '../hooks/use-elapsed-time'
-import { holdsLiveFreebuffSlot } from '../utils/freebuff-session-api'
+import { holdsLivefreeportSlot } from '../utils/freeport-session-api'
 import {
   useMessageQueue,
   type QueuedMessage,
@@ -21,8 +21,8 @@ import {
   type SubscriptionResponse,
 } from '../hooks/use-subscription-query'
 import { useChatStore } from '../state/chat-store'
-import { useFreebuffSessionStore } from '../state/freebuff-session-store'
-import { IS_FREEBUFF } from '../utils/constants'
+import { usefreeportSessionStore } from '../state/freeport-session-store'
+import { IS_FREEPORT } from '../utils/constants'
 import { logger } from '../utils/logger'
 import {
   applyActiveRunQueuePolicy,
@@ -69,7 +69,7 @@ const ChatRuntimeContext = createContext<ChatRuntime | null>(null)
 
 /**
  * Owns everything tied to the active chat run. It remains mounted while
- * history and Freebuff session-gate views replace the Chat surface.
+ * history and FREEPORT session-gate views replace the Chat surface.
  */
 export const ChatRuntimeProvider = ({
   agentId,
@@ -113,14 +113,14 @@ export const ChatRuntimeProvider = ({
     }
   }, [askUserState, mainAgentTimer])
 
-  const freebuffSession = useFreebuffSessionStore((state) => state.session)
-  const sendBlocked = IS_FREEBUFF && !holdsLiveFreebuffSlot(freebuffSession)
+  const freeportSession = usefreeportSessionStore((state) => state.session)
+  const sendBlocked = IS_FREEPORT && !holdsLivefreeportSlot(freeportSession)
 
   useEffect(() => {
     if (sendBlocked) {
       logger.info(
         {},
-        '[chat-runtime] Freebuff session over; holding queued messages until rejoin',
+        '[chat-runtime] FREEPORT session over; holding queued messages until rejoin',
       )
     }
   }, [sendBlocked])

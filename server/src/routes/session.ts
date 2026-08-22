@@ -10,6 +10,7 @@ import {
   endAllSessionsForUser,
   getActiveSessionForUser,
   getSessionUsageUnits,
+  getSpendSinceMs,
   incrementSessionUsage,
   isPaidUser,
   rotateSession,
@@ -18,7 +19,7 @@ import {
 // Model ids this deployment serves. The fork routes every model to DeepInfra's
 // DeepSeek V4 Flash upstream, so these labels ride along on the session row but
 // the serving model is governed by the client's provider config. Coerce unknown
-// ids to the fallback rather than rejecting, matching Freebuff's behavior.
+// ids to the fallback rather than rejecting, matching FREEPORT's behavior.
 const SUPPORTED_MODEL_IDS = [
   'deepseek/deepseek-v4-flash',
   'deepseek/deepseek-v4-pro',
@@ -134,7 +135,7 @@ function rateLimitedResponse(config: ServerConfig, model: string, recentCount: n
 
 export const sessionRoutes = new Hono<AppBindings>()
 
-sessionRoutes.get('/api/v1/freebuff/session', requireUser, (c) => {
+sessionRoutes.get('/api/v1/FREEPORT/session', requireUser, (c) => {
   const config = c.get('config')
   const db = c.get('db')
   const user = c.get('user')!
@@ -142,7 +143,7 @@ sessionRoutes.get('/api/v1/freebuff/session', requireUser, (c) => {
   const active = getActiveSessionForUser(db, user.id)
   if (!active) return c.json(noneResponse(config, db, user.id))
 
-  const callerInstanceId = c.req.header('x-freebuff-instance-id')
+  const callerInstanceId = c.req.header('x-FREEPORT-instance-id')
   if (callerInstanceId && callerInstanceId !== active.instance_id) {
     // Another CLI (or a rotated instance) owns the row now.
     return c.json({ status: 'superseded' })
@@ -151,12 +152,12 @@ sessionRoutes.get('/api/v1/freebuff/session', requireUser, (c) => {
   return c.json(activeResponse(config, db, active, user.id))
 })
 
-sessionRoutes.post('/api/v1/freebuff/session', requireUser, (c) => {
+sessionRoutes.post('/api/v1/FREEPORT/session', requireUser, (c) => {
   const config = c.get('config')
   const db = c.get('db')
   const user = c.get('user')!
 
-  const requestedModel = resolveModel(c.req.header('x-freebuff-model'))
+  const requestedModel = resolveModel(c.req.header('x-FREEPORT-model'))
   const active = getActiveSessionForUser(db, user.id)
 
   if (active) {
@@ -187,6 +188,21 @@ sessionRoutes.post('/api/v1/freebuff/session', requireUser, (c) => {
     return c.json(rateLimitedResponse(config, requestedModel, recent, dailyLimit))
   }
 
+  // Free-tier cost safety: refuse admission once today's reported model spend
+  // crosses the hard cap (protects against runaway context loops).
+  if (!paid && config.freeDailySpendCapUsd > 0) {
+    const spentToday = getSpendSinceMs(db, user.id, period.startMs)
+    if (spentToday >= config.freeDailySpendCapUsd) {
+      c.status(429)
+      return c.json({
+        ...rateLimitedResponse(config, requestedModel, recent, dailyLimit),
+        reason: 'daily_spend_cap',
+        spendCapUsd: config.freeDailySpendCapUsd,
+        spentTodayUsd: Number(spentToday.toFixed(4)),
+      })
+    }
+  }
+
   const admitted = admitSession(db, {
     userId: user.id,
     model: requestedModel,
@@ -196,7 +212,7 @@ sessionRoutes.post('/api/v1/freebuff/session', requireUser, (c) => {
   return c.json(activeResponse(config, db, admitted, user.id))
 })
 
-sessionRoutes.delete('/api/v1/freebuff/session', requireUser, (c) => {
+sessionRoutes.delete('/api/v1/FREEPORT/session', requireUser, (c) => {
   const config = c.get('config')
   const db = c.get('db')
   const user = c.get('user')!

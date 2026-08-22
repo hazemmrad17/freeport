@@ -17,7 +17,7 @@ import { routeUserPrompt, addBashMessageToHistory } from './commands/router'
 import { SingleAdBanner } from './components/ad-banner'
 import { ChatInputBar } from './components/chat-input-bar'
 import { ChatHeader } from './components/chat-header'
-import { FreebuffActiveSessionSummary } from './components/freebuff-active-session-summary'
+import { freeportActiveSessionSummary } from './components/freeport-active-session-summary'
 import { LoadPreviousButton } from './components/load-previous-button'
 import { QueuePanel } from './components/queue-panel'
 import { ReviewScreen } from './components/review-screen'
@@ -65,8 +65,8 @@ import { stopActiveRun } from './utils/active-run'
 import { trackEvent } from './utils/analytics'
 import { showClipboardMessage } from './utils/clipboard'
 import { readClipboardImage } from './utils/clipboard-image'
-import { returnToFreebuffLanding } from './hooks/use-freebuff-session'
-import { END_SESSION_MESSAGE, IS_FREEBUFF } from './utils/constants'
+import { returnTofreeportLanding } from './hooks/use-freeport-session'
+import { END_SESSION_MESSAGE, IS_FREEPORT } from './utils/constants'
 import { getSystemMessage } from './utils/message-history'
 import { getInputModeConfig } from './utils/input-modes'
 import {
@@ -98,7 +98,7 @@ import { computeInputLayoutMetrics } from './utils/text-layout'
 import type { CommandResult } from './commands/command-registry'
 import type { MultilineInputHandle } from './components/multiline-input'
 import type { MatchedSlashCommand } from './hooks/use-suggestion-engine'
-import type { FreebuffSessionResponse } from './types/freebuff-session'
+import type { freeportSessionResponse } from './types/freeport-session'
 import type { User } from './utils/auth'
 import type { AgentMode } from './utils/constants'
 import type { FileTreeNode } from '@codebuff/common/util/file'
@@ -117,7 +117,7 @@ export const Chat = ({
   initialMode,
   gitRoot,
   onSwitchToGitRoot,
-  freebuffSession,
+  freeportSession,
 }: {
   consumeInitialPrompt: () => string | null
   fileTree: FileTreeNode[]
@@ -129,16 +129,16 @@ export const Chat = ({
   initialMode?: AgentMode
   gitRoot?: string | null
   onSwitchToGitRoot?: () => void
-  freebuffSession: FreebuffSessionResponse | null
+  freeportSession: freeportSessionResponse | null
 }) => {
   const [forceFileOnlyMentions, setForceFileOnlyMentions] = useState(false)
   const headerRef = useRef<BoxRenderable | null>(null)
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
 
   // First-time onboarding: show clickable starter prompts until the user
-  // submits their first prompt ever (persisted in settings). Freebuff only.
+  // submits their first prompt ever (persisted in settings). FREEPORT only.
   const [showSuggestedPrompts, setShowSuggestedPrompts] = useState(
-    () => IS_FREEBUFF && !hasSubmittedFirstPrompt(),
+    () => IS_FREEPORT && !hasSubmittedFirstPrompt(),
   )
 
   // Subscribe to ask_user bridge to trigger form display
@@ -192,7 +192,7 @@ export const Chat = ({
     recordClick,
     recordImpression,
   } = useGravityAd({
-    enabled: IS_FREEBUFF || !hasSubscription,
+    enabled: IS_FREEPORT || !hasSubscription,
     provider: 'gravity',
     inline: true,
     surface: 'cli_chat',
@@ -201,7 +201,7 @@ export const Chat = ({
     // Keep the rotating above-input slot separate for reporting continuity.
     slotPlacementId: 'Single-Ad-Unit-1',
   })
-  const showInlineAds = IS_FREEBUFF || getAdsEnabled()
+  const showInlineAds = IS_FREEPORT || getAdsEnabled()
 
   // Stable identities so the message-block callbacks (set once) always call
   // the latest recorder from the hook.
@@ -753,7 +753,7 @@ export const Chat = ({
     }
   }, [queuePanelOpen, reviewMode, askUserState, closeQueuePanel])
 
-  // The panel store outlives this component and a Freebuff session can end on
+  // The panel store outlives this component and a FREEPORT session can end on
   // its own, unmounting chat mid-edit. Without this, the next session would
   // open onto a panel for a queue that no longer exists.
   useEffect(() => () => useQueuePanelStore.getState().closeQueuePanel(), [])
@@ -1482,16 +1482,16 @@ export const Chat = ({
     }
   }, [subscriptionRateLimit?.limited, fallbackToALaCarte])
 
-  const hasActiveFreebuffSession =
-    IS_FREEBUFF && freebuffSession?.status === 'active'
-  const isFreebuffSessionOver =
-    IS_FREEBUFF && freebuffSession?.status === 'ended'
+  const hasActivefreeportSession =
+    IS_FREEPORT && freeportSession?.status === 'active'
+  const isfreeportSessionOver =
+    IS_FREEPORT && freeportSession?.status === 'ended'
   const shouldShowStatusLine =
     !feedbackMode &&
     (hasStatusIndicatorContent ||
       shouldShowQueuePreview ||
       !isAtBottom ||
-      hasActiveFreebuffSession)
+      hasActivefreeportSession)
 
   // Track mouse movement for ad activity (throttled)
   const lastMouseActivityRef = useRef<number>(0)
@@ -1563,8 +1563,8 @@ export const Chat = ({
             animationEnabled={isHeaderVisible && inputFocused}
           />
         </box>
-        {IS_FREEBUFF && (
-          <FreebuffActiveSessionSummary session={freebuffSession} />
+        {IS_FREEPORT && (
+          <freeportActiveSessionSummary session={freeportSession} />
         )}
         {hiddenMessageCount > 0 && (
           <LoadPreviousButton
@@ -1595,7 +1595,7 @@ export const Chat = ({
           backgroundColor: 'transparent',
         }}
       >
-        {showOnboardingPrompts && !reviewMode && !isFreebuffSessionOver && (
+        {showOnboardingPrompts && !reviewMode && !isfreeportSessionOver && (
           <SuggestedPrompts
             onSelect={handleSelectSuggestedPrompt}
             maxItems={isCompactHeight ? 2 : undefined}
@@ -1614,9 +1614,9 @@ export const Chat = ({
                 ...prev,
                 getSystemMessage(END_SESSION_MESSAGE),
               ])
-              returnToFreebuffLanding({ resetChat: true }).catch(() => {})
+              returnTofreeportLanding({ resetChat: true }).catch(() => {})
             }}
-            freebuffSession={freebuffSession}
+            freeportSession={freeportSession}
           />
         )}
 
@@ -1649,7 +1649,7 @@ export const Chat = ({
             width={separatorWidth}
             maxVisibleRows={isCompactHeight ? 4 : 8}
           />
-        ) : isFreebuffSessionOver && !askUserState ? (
+        ) : isfreeportSessionOver && !askUserState ? (
           <SessionEndedBanner
             isStreaming={isStreaming || isWaitingForResponse}
           />

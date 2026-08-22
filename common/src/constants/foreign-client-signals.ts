@@ -1,7 +1,7 @@
 import { toolNames } from '../tools/constants'
 
 /**
- * Where a free-mode request goes when it did not come from a freebuff client.
+ * Where a free-mode request goes when it did not come from a FREEPORT client.
  *
  * OpenRouter's `:free` variant, so a downgraded request costs nothing upstream
  * — which is the point. A caller proxying our free endpoint into their own
@@ -13,7 +13,7 @@ import { toolNames } from '../tools/constants'
  * prompt and completion, and `tools` + `tool_choice` in supported_parameters —
  * so a downgraded tool-calling request degrades rather than hard-erroring.
  */
-export const FREEBUFF_DOWNGRADE_MODEL_ID = 'inclusionai/ling-3.0-tiny:free'
+export const FREEPORT_DOWNGRADE_MODEL_ID = 'inclusionai/ling-3.0-tiny:free'
 
 /**
  * Tool names we define that other agent harnesses also ship.
@@ -45,12 +45,12 @@ export const GENERIC_TOOL_NAMES: ReadonlySet<string> = new Set([
 
 /**
  * Tools our own surfaces define outside `toolNames`, via
- * `customToolDefinitions`. Freebuff Desktop's autorun agent
- * (freebuff-desktop/src/server/services/mission.ts) offers exactly `decide` and
+ * `customToolDefinitions`. FREEPORT Desktop's autorun agent
+ * (FREEPORT-desktop/src/server/services/mission.ts) offers exactly `decide` and
  * nothing else, so without this it had no signature tool at all and was flagged
  * on 100% of its 2,904 requests from 41 users over 30 days.
  */
-export const FREEBUFF_CUSTOM_TOOL_NAMES = ['decide'] as const
+export const FREEPORT_CUSTOM_TOOL_NAMES = ['decide'] as const
 
 /**
  * Tool names that, on their own, mark a request as coming from one of our
@@ -64,11 +64,11 @@ export const FREEBUFF_CUSTOM_TOOL_NAMES = ['decide'] as const
  * also executing ours and speaking our result format. Evading this check
  * converges on behaving like a real client, which is the outcome we want.
  */
-export const FREEBUFF_SIGNATURE_TOOL_NAMES: ReadonlySet<string> = new Set([
+export const FREEPORT_SIGNATURE_TOOL_NAMES: ReadonlySet<string> = new Set([
   ...(toolNames as readonly string[]).filter(
     (name) => !GENERIC_TOOL_NAMES.has(name),
   ),
-  ...FREEBUFF_CUSTOM_TOOL_NAMES,
+  ...FREEPORT_CUSTOM_TOOL_NAMES,
 ])
 
 export type ForeignClientSignal =
@@ -108,7 +108,7 @@ function readToolNames(tools: unknown): string[] {
 }
 
 /**
- * Whether a free-mode request came from something other than a freebuff client.
+ * Whether a free-mode request came from something other than a FREEPORT client.
  *
  * Three signals, checked in a deliberate order:
  *
@@ -128,7 +128,7 @@ function readToolNames(tools: unknown): string[] {
  * checking them independently, would downgrade those users. Anyone sending our
  * tools is one of ours no matter what else the body says.
  */
-export function detectForeignFreebuffClient(
+export function detectForeignFREEPORTClient(
   body: InspectableRequest,
   /** The resolved agent id, when the caller has it. Root agents are agentic by
    *  definition, so one that offers no tools is not being driven by our client
@@ -142,7 +142,7 @@ export function detectForeignFreebuffClient(
 
   if (offered.length > 0) {
     const hasSignatureTool = offered.some((name) =>
-      FREEBUFF_SIGNATURE_TOOL_NAMES.has(name),
+      FREEPORT_SIGNATURE_TOOL_NAMES.has(name),
     )
     return {
       signal: hasSignatureTool ? null : 'foreign_toolset',
@@ -172,7 +172,7 @@ export function detectForeignFreebuffClient(
   //   base2-free-deepseek           4.46%  215,777 reqs   2,672 users
   //   base2-free-deepseek-flash     0.296% 103,726 reqs   2,281 users
   //   base2-free                    0.90%      222 reqs      15 users
-  //   freebuff-desktop-thread-local 0.018%   2,400 reqs      11 users
+  //   FREEPORT-desktop-thread-local 0.018%   2,400 reqs      11 users
   //
   // Only 417 of those users are 100% tool-free — actual bare-completion
   // proxies. The other 3,729 mix tool-free requests into heavy real agentic
@@ -186,7 +186,7 @@ export function detectForeignFreebuffClient(
   // (2,153), with 334 mixed users exceeding 50. There is no per-request
   // threshold, so enforcement needs an account-level verdict this function
   // cannot see. Note also that these requests all already reproduce our
-  // canonical root system prompt at position 0 — `requestHasFreebuffSystemMarker`
+  // canonical root system prompt at position 0 — `requestHasFREEPORTSystemMarker`
   // rejects root requests that do not — so the prompt is not a discriminator
   // either.
   if (isRootAgent) {
@@ -228,7 +228,7 @@ export type ForeignClientDecision = ForeignClientVerdict & {
  * Detect, then decide whether the signal changes what is served.
  *
  * `foreign_toolset` downgrades. Using a third-party client against this
- * endpoint is a terms violation, not a grey area: Freebuff funds free
+ * endpoint is a terms violation, not a grey area: FREEPORT funds free
  * inference with ads that only our own clients render, so a proxied request
  * takes the cost and returns none of the revenue.
  *
@@ -244,7 +244,7 @@ export type ForeignClientDecision = ForeignClientVerdict & {
  *    enforces, so the reclassification changes measurement, not behavior.
  *  - `root_agent_no_tools` — 3,729 users who also do real agentic work, 999 of
  *    whose sessions mix it with tool-bearing root calls. See the backtest in
- *    `detectForeignFreebuffClient`. Catching the 417 genuine proxies inside
+ *    `detectForeignFREEPORTClient`. Catching the 417 genuine proxies inside
  *    that population needs an account-level verdict, not a per-request one.
  *
  * They stay as measurements, which is what makes the account-level rule
@@ -255,7 +255,7 @@ export function resolveForeignClientDowngrade(params: {
   isRootAgent?: boolean
 }): ForeignClientDecision | null {
   const { body, isRootAgent = false } = params
-  const verdict = detectForeignFreebuffClient(body, isRootAgent)
+  const verdict = detectForeignFREEPORTClient(body, isRootAgent)
   if (!verdict.signal) return null
 
   return {
@@ -265,8 +265,8 @@ export function resolveForeignClientDowngrade(params: {
     // a no-op write that still reads as an enforcement in the logs.
     downgradeTo:
       verdict.signal === 'foreign_toolset' &&
-      body.model !== FREEBUFF_DOWNGRADE_MODEL_ID
-        ? FREEBUFF_DOWNGRADE_MODEL_ID
+      body.model !== FREEPORT_DOWNGRADE_MODEL_ID
+        ? FREEPORT_DOWNGRADE_MODEL_ID
         : null,
   }
 }

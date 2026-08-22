@@ -70,7 +70,7 @@ function createTestBroker() {
 }
 
 function protocolFilesForThisProcess(): Set<string> {
-  const prefix = `freebuff-terminal-command-broker-${process.pid}-`
+  const prefix = `freeport-terminal-command-broker-${process.pid}-`
   return new Set(
     readdirSync(tmpdir()).filter((name) => name.startsWith(prefix)),
   )
@@ -114,24 +114,24 @@ describe('terminal command broker', () => {
   test('requires its private environment marker and flag before --', () => {
     expect(
       isTerminalCommandBrokerInvocation(
-        ['freebuff', '--terminal-command-broker'],
+        ['FREEPORT', '--terminal-command-broker'],
         { CODEBUFF_TERMINAL_COMMAND_BROKER: '1' },
       ),
     ).toBe(true)
     expect(
       isTerminalCommandBrokerInvocation(
-        ['freebuff', '--', '--terminal-command-broker'],
+        ['FREEPORT', '--', '--terminal-command-broker'],
         { CODEBUFF_TERMINAL_COMMAND_BROKER: '1' },
       ),
     ).toBe(false)
     expect(
       isTerminalCommandBrokerInvocation(
-        ['freebuff', '--terminal-command-broker'],
+        ['FREEPORT', '--terminal-command-broker'],
         {},
       ),
     ).toBe(false)
     expect(
-      isTerminalCommandBrokerInvocation(['freebuff'], {
+      isTerminalCommandBrokerInvocation(['FREEPORT'], {
         CODEBUFF_TERMINAL_COMMAND_BROKER: '1',
       }),
     ).toBe(false)
@@ -140,7 +140,7 @@ describe('terminal command broker', () => {
   test('accepts protocol files only at the constrained temp path', () => {
     const validPath = path.join(
       tmpdir(),
-      `freebuff-terminal-command-broker-${process.pid}-${crypto.randomUUID()}.json`,
+      `freeport-terminal-command-broker-${process.pid}-${crypto.randomUUID()}.json`,
     )
     expect(
       protocolPathFromEnv({
@@ -269,7 +269,7 @@ describe('terminal command broker', () => {
         terminalCommandBroker: broker,
       }),
     ).rejects.toThrow(
-      'Failed to start terminal command broker: helper executable is unavailable\n\nRestart Freebuff and try again.',
+      'Failed to start terminal command broker: helper executable is unavailable\n\nRestart FREEPORT and try again.',
     )
     expect(failures).toEqual([{ stage: 'spawn', failureCode: 'unknown' }])
   })
@@ -280,7 +280,7 @@ describe('terminal command broker', () => {
       invocation: () => ({
         executable: path.join(
           tmpdir(),
-          `missing-freebuff-broker-${crypto.randomUUID()}`,
+          `missing-freeport-broker-${crypto.randomUUID()}`,
         ),
         args: [],
       }),
@@ -315,7 +315,7 @@ describe('terminal command broker', () => {
         timeout_seconds: 10,
         terminalCommandBroker: broker,
       }),
-    ).rejects.toThrow('Restart Freebuff and try again.')
+    ).rejects.toThrow('Restart FREEPORT and try again.')
   })
 
   test('adds recovery guidance when the helper exits before responding', async () => {
@@ -326,7 +326,7 @@ describe('terminal command broker', () => {
         args: [
           path.join(
             tmpdir(),
-            `missing-freebuff-entry-${crypto.randomUUID()}.ts`,
+            `missing-freeport-entry-${crypto.randomUUID()}.ts`,
           ),
         ],
       }),
@@ -347,7 +347,7 @@ describe('terminal command broker', () => {
     }
 
     expect(failureMessage).toContain('Terminal command broker failed:')
-    expect(failureMessage).toContain('Restart Freebuff and try again.')
+    expect(failureMessage).toContain('Restart FREEPORT and try again.')
     expect(failures).toEqual([
       { stage: 'completion', failureCode: 'protocol_missing' },
     ])
@@ -356,7 +356,7 @@ describe('terminal command broker', () => {
   test('does not add broker recovery guidance to a command spawn failure', async () => {
     const missingCwd = path.join(
       tmpdir(),
-      `missing-freebuff-cwd-${crypto.randomUUID()}`,
+      `missing-freeport-cwd-${crypto.randomUUID()}`,
     )
 
     let failureMessage = ''
@@ -373,7 +373,7 @@ describe('terminal command broker', () => {
     }
 
     expect(failureMessage).toContain('ENOENT')
-    expect(failureMessage).not.toContain('Restart Freebuff and try again.')
+    expect(failureMessage).not.toContain('Restart FREEPORT and try again.')
   })
 
   test('kills the broker process group after a timeout', async () => {

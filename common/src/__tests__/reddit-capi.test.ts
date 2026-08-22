@@ -18,7 +18,7 @@ describe('Reddit CAPI', () => {
       customEventName: 'FirstPrompt',
       conversionId: 'conversion-1',
       actionSource: 'WEBSITE',
-      eventSourceUrl: 'https://freebuff.com/chat?utm_source=reddit',
+      eventSourceUrl: 'https://FREEPORT.com/chat?utm_source=reddit',
       testId: 'test-123',
       eventAt: 123,
       user: {
@@ -39,7 +39,7 @@ describe('Reddit CAPI', () => {
             event_at: 123,
             action_source: 'WEBSITE',
             event_source_url:
-              'https://freebuff.com/chat?utm_source=reddit&rdt_cid=reddit-click',
+              'https://FREEPORT.com/chat?utm_source=reddit&rdt_cid=reddit-click',
             type: {
               tracking_type: 'CUSTOM',
               custom_event_name: 'FirstPrompt',

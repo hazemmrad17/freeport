@@ -205,7 +205,7 @@ export type RunOptions = {
   costMode?: string
   /** Extra key/values merged into each LLM request's `codebuff_metadata`.
    *  Used by hosts (e.g. the CLI) to forward client-scoped identifiers like
-   *  `freebuff_instance_id` that server-side gates read from the request body. */
+   *  `FREEPORT_instance_id` that server-side gates read from the request body. */
   extraCodebuffMetadata?: Record<string, string>
   /** Optional checkpoint hook. Called once when the run starts and then
    * periodically while it is in flight, with a RunState snapshot that

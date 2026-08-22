@@ -1,10 +1,10 @@
-import { FREEBUFF_WEB_URL_PROD } from '@codebuff/common/constants/hosts'
+import { FREEPORT_WEB_URL_PROD } from '@codebuff/common/constants/hosts'
 import { env, IS_DEV } from '@codebuff/common/env'
 
 // Get the website URL from environment or use default
 export const WEBSITE_URL = env.NEXT_PUBLIC_CODEBUFF_APP_URL
 
-// Login flow — point to DeepInfra; no separate freebuff web app
+// Login flow — point to DeepInfra; no separate FREEPORT web app
 export const LOGIN_WEBSITE_URL = env.NEXT_PUBLIC_CODEBUFF_APP_URL
 
 // freeport ASCII Logo

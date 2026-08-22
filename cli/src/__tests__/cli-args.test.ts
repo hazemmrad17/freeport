@@ -142,11 +142,11 @@ describe('CLI Argument Parsing', () => {
   })
 })
 
-describe('Freebuff CLI Argument Parsing', () => {
+describe('FREEPORT CLI Argument Parsing', () => {
   test('accepts login as a command, not an unexpected argument', () => {
     const result = parseArgs({
-      argv: ['node', 'freebuff', 'login'],
-      isFreebuff: true,
+      argv: ['node', 'FREEPORT', 'login'],
+      isFREEPORT: true,
       version: '1.0.0',
     })
 
@@ -157,8 +157,8 @@ describe('Freebuff CLI Argument Parsing', () => {
 
   test('allows cwd before the login command', () => {
     const result = parseArgs({
-      argv: ['node', 'freebuff', '--cwd', '/tmp', 'login'],
-      isFreebuff: true,
+      argv: ['node', 'FREEPORT', '--cwd', '/tmp', 'login'],
+      isFREEPORT: true,
       version: '1.0.0',
     })
 
@@ -169,8 +169,8 @@ describe('Freebuff CLI Argument Parsing', () => {
 
   test('allows cwd after the login command', () => {
     const result = parseArgs({
-      argv: ['node', 'freebuff', 'login', '--cwd', '/tmp'],
-      isFreebuff: true,
+      argv: ['node', 'FREEPORT', 'login', '--cwd', '/tmp'],
+      isFREEPORT: true,
       version: '1.0.0',
     })
 

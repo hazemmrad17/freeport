@@ -3,8 +3,8 @@
  * read them.
  *
  * These used to be copied into each consumer (scripts/rollup-ad-revenue.ts,
- * scripts/rollup-freebuff-spend.ts, web/src/db/ad-revenue.ts and
- * freebuff/web/src/lib/admin-spend.ts each carried a `shiftUtcDay`). The
+ * scripts/rollup-FREEPORT-spend.ts, web/src/db/ad-revenue.ts and
+ * FREEPORT/web/src/lib/admin-spend.ts each carried a `shiftUtcDay`). The
  * window-boundary math is the sensitive part — a half-open `[start, end)` bound
  * or a trailing-window off-by-one silently drops or double-counts a day — so it
  * now lives here, in one place, instead of four copies that could drift.

@@ -1,19 +1,19 @@
 import { flushAnalytics } from './analytics'
-import { IS_FREEBUFF } from './constants'
+import { IS_FREEPORT } from './constants'
 import { stopEngagementTracking } from './engagement'
-import { endFreebuffSessionBestEffort } from './freebuff-session-api'
+import { endfreeportSessionBestEffort } from './freeport-session-api'
 import { drainClientLogs } from './log-shipper'
 import { withTimeout } from './terminal-color-detection'
 
 const EXIT_CLEANUP_TIMEOUT_MS = 1_000
 
 type ExitCliDependencies = {
-  isFreebuff: boolean
+  isFREEPORT: boolean
   cleanupLocal: () => void
   stopEngagementTracking: () => void
   flushAnalytics: () => Promise<void>
   drainClientLogs: () => Promise<void>
-  endFreebuffSession: () => Promise<void>
+  endfreeportSession: () => Promise<void>
   waitForRemoteCleanup: (tasks: Promise<void>[]) => Promise<void>
   exit: (code: number) => void
 }
@@ -43,7 +43,7 @@ export function createExitCliCleanly(deps: ExitCliDependencies) {
       } catch {
         // Cleanup is best-effort; never strand the process in a half-exited UI.
       }
-      if (deps.isFreebuff) {
+      if (deps.isFREEPORT) {
         try {
           deps.stopEngagementTracking()
         } catch {}
@@ -53,8 +53,8 @@ export function createExitCliCleanly(deps: ExitCliDependencies) {
         Promise.resolve().then(deps.flushAnalytics),
         Promise.resolve().then(deps.drainClientLogs),
       ]
-      if (deps.isFreebuff) {
-        remoteTasks.push(Promise.resolve().then(deps.endFreebuffSession))
+      if (deps.isFREEPORT) {
+        remoteTasks.push(Promise.resolve().then(deps.endfreeportSession))
       }
 
       try {
@@ -69,12 +69,12 @@ export function createExitCliCleanly(deps: ExitCliDependencies) {
 }
 
 export const exitCliCleanly = createExitCliCleanly({
-  isFreebuff: IS_FREEBUFF,
+  isFREEPORT: IS_FREEPORT,
   cleanupLocal: () => localExitCleanup?.(),
   stopEngagementTracking,
   flushAnalytics,
   drainClientLogs,
-  endFreebuffSession: endFreebuffSessionBestEffort,
+  endfreeportSession: endfreeportSessionBestEffort,
   waitForRemoteCleanup: async (tasks) => {
     await withTimeout(
       Promise.allSettled(tasks),

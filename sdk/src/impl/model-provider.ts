@@ -1,6 +1,6 @@
 /**
  * Builds the language model for freeport: routes directly to DeepInfra's
- * OpenAI-compatible endpoint, bypassing the Codebuff/Freebuff backend entirely.
+ * OpenAI-compatible endpoint, bypassing the Codebuff/FREEPORT backend entirely.
  *
  * Model: DeepSeek V4 Flash (deepseek/deepseek-chat-v3-0324)
  * Provider: DeepInfra  —  https://deepinfra.com
@@ -70,7 +70,7 @@ export function setFreeModeCapacityDeferralListener(
 
 /**
  * Wrap global fetch so transient connection failures are rethrown as
- * retryable APICallErrors. Same logic as the original Freebuff SDK.
+ * retryable APICallErrors. Same logic as the original FREEPORT SDK.
  */
 function fetchWithRetryableNetworkErrors(
   ...args: Parameters<typeof globalThis.fetch>

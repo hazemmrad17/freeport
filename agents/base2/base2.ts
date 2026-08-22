@@ -1,15 +1,15 @@
 import { buildArray } from '@codebuff/common/util/array'
 import { COMPOSIO_META_TOOL_NAMES } from '@codebuff/common/constants/composio'
 import {
-  FREEBUFF_GEMINI_THINKER_AGENT_ID,
-  FREEBUFF_GEMINI_THINKER_INSTRUCTIONS_PROMPT,
-  FREEBUFF_GEMINI_THINKER_SYSTEM_INSTRUCTION,
-} from '@codebuff/common/constants/freebuff-gemini-thinker'
-import { FREEBUFF_REVIEWER_AGENT_ID_BY_MODEL } from '@codebuff/common/constants/free-agents'
+  FREEPORT_GEMINI_THINKER_AGENT_ID,
+  FREEPORT_GEMINI_THINKER_INSTRUCTIONS_PROMPT,
+  FREEPORT_GEMINI_THINKER_SYSTEM_INSTRUCTION,
+} from '@codebuff/common/constants/freeport-gemini-thinker'
+import { FREEPORT_REVIEWER_AGENT_ID_BY_MODEL } from '@codebuff/common/constants/free-agents'
 import {
-  canFreebuffModelSpawnGeminiThinker,
-  FREEBUFF_MINIMAX_M3_MODEL_ID,
-} from '@codebuff/common/constants/freebuff-models'
+  canfreeportModelSpawnGeminiThinker,
+  FREEPORT_MINIMAX_M3_MODEL_ID,
+} from '@codebuff/common/constants/freeport-models'
 import { contextPrunerBudgetForModel } from '@codebuff/common/constants/model-config'
 
 import {
@@ -36,7 +36,7 @@ const THINKER_SPAWN_LIMIT =
 type Base2Mode = 'default' | 'free' | 'lite' | 'max' | 'fast'
 
 /**
- * Free mode runs MiniMax M3 (routed through the Fireworks AI API). New Freebuff
+ * Free mode runs MiniMax M3 (routed through the Fireworks AI API). New FREEPORT
  * clients select an explicit free variant from the model picker; the
  * unqualified base2-free agent covers legacy callers.
  */
@@ -45,18 +45,18 @@ const MODEL_BY_MODE = {
   max: OPUS_MODEL,
   fast: OPUS_MODEL,
   lite: LITE_MODEL,
-  free: FREEBUFF_MINIMAX_M3_MODEL_ID,
+  free: FREEPORT_MINIMAX_M3_MODEL_ID,
 } satisfies Record<Base2Mode, SecretAgentDefinition['model']>
 
 /**
  * The reviewer each lean model reviews with, per product. Codebuff adds lite's
- * own reviewer on top of the shared ones; Freebuff deliberately gets only the
+ * own reviewer on top of the shared ones; FREEPORT deliberately gets only the
  * free-tier map, so no free session can resolve to code-reviewer-lite even if a
- * freebuff agent were pointed at lite's model. Anything unmapped falls back to
+ * FREEPORT agent were pointed at lite's model. Anything unmapped falls back to
  * DeepSeek Flash — cheap, and allowed in a free session.
  */
 const CODEBUFF_REVIEWER_BY_MODEL: Record<string, string> = {
-  ...FREEBUFF_REVIEWER_AGENT_ID_BY_MODEL,
+  ...FREEPORT_REVIEWER_AGENT_ID_BY_MODEL,
   [LITE_MODEL]: 'code-reviewer-lite',
 }
 const FALLBACK_REVIEWER_AGENT_ID = 'code-reviewer-deepseek-flash'
@@ -88,26 +88,26 @@ export function createBase2(
   const isMax = mode === 'max'
   // Product identity and orchestration shape used to be one flag, which told
   // paying lite users they were "coding with AI for free" on a product they
-  // weren't using. isFreebuff picks the branding and the meta-information
+  // weren't using. isFREEPORT picks the branding and the meta-information
   // block; isLean picks the stripped-down shape lite shares with free mode:
   // direct edits, a cheap reviewer, no propose_* tools.
-  const isFreebuff = mode === 'free'
+  const isFREEPORT = mode === 'free'
   const isLean = mode === 'free' || mode === 'lite'
 
   const model = modelOverride ?? MODEL_BY_MODE[mode]
   // Both lean modes can offload deeper reasoning to the Gemini thinker, which
   // is the only sanctioned way to reach Gemini Pro.
   //
-  // Freebuff gates it on the parent model: that set is a free-session admission
-  // rule (see canFreebuffModelSpawnGeminiThinker and free-session/public-api),
+  // FREEPORT gates it on the parent model: that set is a free-session admission
+  // rule (see canfreeportModelSpawnGeminiThinker and free-session/public-api),
   // limiting which free picks may pull a premium model on an unbilled path.
   // Lite is billed, so the completions gate leaves it alone and no such
   // restriction applies.
   const hasGeminiThinker =
-    isLite || (isFreebuff && canFreebuffModelSpawnGeminiThinker(model))
+    isLite || (isFREEPORT && canfreeportModelSpawnGeminiThinker(model))
   const leanCodeReviewerAgentId =
-    (isFreebuff
-      ? FREEBUFF_REVIEWER_AGENT_ID_BY_MODEL
+    (isFREEPORT
+      ? FREEPORT_REVIEWER_AGENT_ID_BY_MODEL
       : CODEBUFF_REVIEWER_BY_MODEL)[model] ?? FALLBACK_REVIEWER_AGENT_ID
   const contextPrunerMaxContextLength = contextPrunerBudgetForModel(model)
   const defaultProviderOptions = getBase2ProviderOptions(model)
@@ -173,12 +173,12 @@ export function createBase2(
       isLean && !noReview && leanCodeReviewerAgentId,
       isDefault && 'code-reviewer',
       isMax && 'code-reviewer-multi-prompt',
-      hasGeminiThinker && FREEBUFF_GEMINI_THINKER_AGENT_ID,
-      !isFreebuff && 'thinker-gpt',
+      hasGeminiThinker && FREEPORT_GEMINI_THINKER_AGENT_ID,
+      !isFREEPORT && 'thinker-gpt',
       'context-pruner',
     ),
 
-    systemPrompt: `You are Buffy, the strategic coding assistant. You are the AI agent behind the product, ${isFreebuff ? 'Freebuff' : 'Codebuff'}, a tool where users can chat with you to code with AI${isFreebuff ? ' for free' : ''}.
+    systemPrompt: `You are Buffy, the strategic coding assistant. You are the AI agent behind the product, ${isFREEPORT ? 'FREEPORT' : 'Codebuff'}, a tool where users can chat with you to code with AI${isFREEPORT ? ' for free' : ''}.
 
 Current date: ${PLACEHOLDER.CURRENT_DATE}.
 
@@ -225,7 +225,7 @@ Use the spawn_agents tool to spawn specialized agents to help you complete the u
 - **Sequence agents properly:** Keep in mind dependencies when spawning different agents. Don't spawn agents in parallel that depend on each other.
   ${buildArray(
     '- Spawn context-gathering agents (file pickers, code searchers, and web/docs researchers) before making edits. Use the list_directory and glob tools directly for searching and exploring the codebase.',
-    hasGeminiThinker && FREEBUFF_GEMINI_THINKER_SYSTEM_INSTRUCTION,
+    hasGeminiThinker && FREEPORT_GEMINI_THINKER_SYSTEM_INSTRUCTION,
     isLite &&
       "- The thinker-with-files-gemini agent is lite mode's one escalation path. It runs a model several times more expensive per token than lite itself and the user is billed for every spawn, so escalate when a problem genuinely needs it rather than routinely. Do not spawn thinker-gpt unless the user asks for it: it costs about the same per token and adds nothing over the gemini thinker here. If the work needs sustained deep reasoning rather than one hard question, say so and suggest the user switch to DEFAULT or MAX mode.",
     isDefault &&
@@ -247,13 +247,13 @@ Use the spawn_agents tool to spawn specialized agents to help you complete the u
 - **Limit thinker spawns:** ${THINKER_SPAWN_LIMIT}
 - **Never spawn the context-pruner agent:** This agent is spawned automatically for you and you don't need to spawn it yourself.
 
-# ${isFreebuff ? 'Freebuff' : 'Codebuff'} Meta-information
+# ${isFREEPORT ? 'FREEPORT' : 'Codebuff'} Meta-information
 
 You are running on the ${model} model.
 
 ${
-  isFreebuff
-    ? 'See freebuff.com for more information about the product.'
+  isFREEPORT
+    ? 'See FREEPORT.com for more information about the product.'
     : [
         'Users send prompts to you in one of a few user-selected modes, like DEFAULT, LITE, MAX, or PLAN.',
         "Every prompt sent consumes the user's credits, which is calculated based on the API cost of the models used.",
@@ -350,10 +350,10 @@ ${PLACEHOLDER.GIT_CHANGES_PROMPT}
           leanCodeReviewerAgentId,
         }),
     // handleSteps is serialized via .toString() and re-eval'd, so closure
-    // variables like `isFreebuff` are not in scope at runtime. Pick the right
+    // variables like `isFREEPORT` are not in scope at runtime. Pick the right
     // literal-baked function here instead.
     handleSteps: getBase2HandleSteps({
-      isFreebuff,
+      isFREEPORT,
       maxContextLength: contextPrunerMaxContextLength,
     }),
   }
@@ -387,13 +387,13 @@ function getBase2ProviderOptions(
 }
 
 function getBase2HandleSteps({
-  isFreebuff,
+  isFREEPORT,
   maxContextLength,
 }: {
-  isFreebuff: boolean
+  isFREEPORT: boolean
   maxContextLength: 250_000 | 400_000
 }): Base2HandleSteps {
-  if (isFreebuff) {
+  if (isFREEPORT) {
     if (maxContextLength === 250_000) return handleStepsFree250k
     return handleStepsFree400k
   }
@@ -519,7 +519,7 @@ ${buildArray(
   (isDefault || isMax || isLean) &&
     `- For any task requiring 3+ steps, use the write_todos tool to write out your step-by-step implementation plan. Include ALL of the applicable tasks in the list.${isFast || noReview ? '' : ' You should include a step to review the changes after you have implemented the changes.'}:${hasNoValidation ? '' : ' You should include at least one step to validate/test your changes: be specific about whether to typecheck, run tests, run lints, etc.'} You may be able to do reviewing and validation in parallel in the same step. Skip write_todos for simple tasks like quick edits or answering questions.`,
   `- ${THINKER_SPAWN_LIMIT}`,
-  hasGeminiThinker && FREEBUFF_GEMINI_THINKER_INSTRUCTIONS_PROMPT,
+  hasGeminiThinker && FREEPORT_GEMINI_THINKER_INSTRUCTIONS_PROMPT,
   (isDefault || isMax) &&
     `- For quick problems, briefly explain your reasoning to the user. If you need to think longer, write your thoughts within the <think> tags. Finally, for complex problems, spawn the thinker agent to help find the best solution. (gpt-5-agent is a last resort for complex problems)`,
   isDefault &&

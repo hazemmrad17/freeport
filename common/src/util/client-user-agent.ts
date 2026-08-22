@@ -5,12 +5,12 @@
  * client-identifying field we store is `session.fingerprint_id`, which the
  * client picks for itself — reading it as client identity produced a
  * 659-account false-positive ban on 2026-08-03. The request user agent is a
- * second, independent signal: the official CLI sends `Freebuff-CLI/<version>`
+ * second, independent signal: the official CLI sends `FREEPORT-CLI/<version>`
  * (`getCliAdRequestUserAgent` in cli/src/hooks/use-gravity-ad.ts), so anything
  * else is at least worth a look.
  *
  * It is **not** proof either: a user agent is equally client-supplied, and
- * published Freebuff proxies already spoof ours. Treat the output as a lead.
+ * published FREEPORT proxies already spoof ours. Treat the output as a lead.
  *
  * Two properties make this safe to attach to a high-volume event:
  *
@@ -43,7 +43,7 @@ export const UNRECOGNIZED_CLIENT = 'unrecognized'
 const VERSION_RE = /^\d[0-9A-Za-z.+-]*$/
 
 export type NormalizedClientUserAgent = {
-  /** Lowercased product token, e.g. `freebuff-cli`, or `unrecognized`. */
+  /** Lowercased product token, e.g. `FREEPORT-cli`, or `unrecognized`. */
   product: string
   /** Version token when the product declared a parseable one. */
   version?: string
@@ -78,7 +78,7 @@ export function normalizeClientUserAgent(
 
   // Empty after sanitizing, or implausibly long: collapse to one constant
   // rather than record a truncated fabrication. Real product tokens are short
-  // (`freebuff-cli` 12, `go-http-client` 14, `ai-sdk` 6), so anything past the
+  // (`FREEPORT-cli` 12, `go-http-client` 14, `ai-sdk` 6), so anything past the
   // cap is junk — and collapsing it also removes the cheapest way to pump
   // cardinality, which is a long random string per request.
   if (!product || product.length > MAX_PRODUCT_LEN) {

@@ -33,7 +33,7 @@ import { trackEvent } from './utils/analytics'
 import { getAuthToken, getAuthTokenDetails } from './utils/auth'
 import { resetCodebuffClient } from './utils/codebuff-client'
 import { setApiClientAuthToken } from './utils/codebuff-api'
-import { IS_FREEBUFF } from './utils/constants'
+import { IS_FREEPORT } from './utils/constants'
 import { initializeAgentRegistry } from './utils/local-agent-registry'
 import { trimOversizedChatLogs } from './utils/chat-history'
 import { clearLogFile, logger } from './utils/logger'
@@ -244,13 +244,13 @@ async function main(): Promise<void> {
     hasAgentOverride: hasAgentOverride,
     continueChat,
     initialMode: initialMode ?? 'DEFAULT',
-    isFreeBuff: IS_FREEBUFF,
+    isFREEPORT: IS_FREEPORT,
   })
   // Start shipping the launch row now, well before the Windows watchdog is
   // armed. If endpoint security terminates this process during that spawn, the
   // next --continue launch still has a prior row for the health dashboard's
   // rapid-resume and interruption joins.
-  if (IS_FREEBUFF && process.platform === 'win32') {
+  if (IS_FREEPORT && process.platform === 'win32') {
     void drainClientLogs()
   }
 
@@ -420,9 +420,9 @@ async function main(): Promise<void> {
 
   // Start the engaged-time heartbeat only once the interactive TUI is actually
   // live — reaching renderer creation means this is a real session (the
-  // login/publish/smoke-test commands all exit earlier). Freebuff-only, matching
+  // login/publish/smoke-test commands all exit earlier). freeport-only, matching
   // the MESSAGE_SENT DAU signal. Stopped in exitCliCleanly().
-  if (IS_FREEBUFF) {
+  if (IS_FREEPORT) {
     startEngagementTracking()
   }
 

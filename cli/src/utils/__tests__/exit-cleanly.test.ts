@@ -10,7 +10,7 @@ describe('createExitCliCleanly', () => {
   test('runs local cleanup before bounded remote cleanup and exits once', async () => {
     const events: string[] = []
     const exitCleanly = createExitCliCleanly({
-      isFreebuff: false,
+      isFREEPORT: false,
       cleanupLocal: () => events.push('local-cleanup'),
       stopEngagementTracking: () => events.push('stop-engagement'),
       flushAnalytics: async () => {
@@ -19,7 +19,7 @@ describe('createExitCliCleanly', () => {
       drainClientLogs: async () => {
         events.push('flush-logs')
       },
-      endFreebuffSession: async () => {
+      endFREEPORTSession: async () => {
         events.push('end-session')
       },
       waitForRemoteCleanup: async (tasks) => {
@@ -44,10 +44,10 @@ describe('createExitCliCleanly', () => {
     ])
   })
 
-  test('also stops engagement and releases the Freebuff session', async () => {
+  test('also stops engagement and releases the FREEPORT session', async () => {
     const events: string[] = []
     const exitCleanly = createExitCliCleanly({
-      isFreebuff: true,
+      isFREEPORT: true,
       cleanupLocal: () => events.push('local-cleanup'),
       stopEngagementTracking: () => events.push('stop-engagement'),
       flushAnalytics: async () => {
@@ -56,7 +56,7 @@ describe('createExitCliCleanly', () => {
       drainClientLogs: async () => {
         events.push('flush-logs')
       },
-      endFreebuffSession: async () => {
+      endFREEPORTSession: async () => {
         events.push('end-session')
       },
       waitForRemoteCleanup: async (tasks) => {
@@ -81,12 +81,12 @@ describe('createExitCliCleanly', () => {
     let cleanupCalls = 0
     const exitCodes: number[] = []
     const exitCleanly = createExitCliCleanly({
-      isFreebuff: false,
+      isFREEPORT: false,
       cleanupLocal: () => cleanupCalls++,
       stopEngagementTracking: () => {},
       flushAnalytics: async () => {},
       drainClientLogs: async () => {},
-      endFreebuffSession: async () => {},
+      endFREEPORTSession: async () => {},
       waitForRemoteCleanup: () =>
         new Promise<void>((resolve) => {
           finishRemoteCleanup = resolve

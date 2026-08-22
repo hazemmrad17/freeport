@@ -1,5 +1,5 @@
 import { describe, expect, test, mock, beforeEach, afterEach } from 'bun:test'
-import { FREEBUFF_PROVIDER_USAGE_MESSAGE } from '@codebuff/common/constants/freebuff-errors'
+import { FREEPORT_PROVIDER_USAGE_MESSAGE } from '@codebuff/common/constants/freeport-errors'
 
 import type { ChatMessage } from '../../../types/chat'
 import type { SendMessageTimerController } from '../../../utils/send-message-timer'
@@ -28,7 +28,7 @@ const ensureEnv = () => {
 ensureEnv()
 
 const { useChatStore } = await import('../../../state/chat-store')
-const { IS_FREEBUFF } = await import('../../../utils/constants')
+const { IS_FREEPORT } = await import('../../../utils/constants')
 const { createStreamController } = await import('../../stream-state')
 const {
   setupStreamingContext,
@@ -472,7 +472,7 @@ describe('handleRunCompletion', () => {
     })
   })
 
-  test('provider credit wording follows the Freebuff client policy', () => {
+  test('provider credit wording follows the FREEPORT client policy', () => {
     let messages = createBaseMessages()
     const timerController = createMockTimerController()
     const updater = createBatchedMessageUpdater('ai-1', (fn: any) => {
@@ -502,7 +502,7 @@ describe('handleRunCompletion', () => {
     })
 
     expect(messages[0]?.userError).toBe(
-      IS_FREEBUFF ? FREEBUFF_PROVIDER_USAGE_MESSAGE : 'Not Enough Credits',
+      IS_FREEPORT ? FREEPORT_PROVIDER_USAGE_MESSAGE : 'Not Enough Credits',
     )
   })
 })
@@ -907,7 +907,7 @@ describe('handleRunError', () => {
     // Content is preserved, error is stored in userError field
     expect(aiMessage!.content).toBe('Partial streamed content')
     expect(aiMessage!.userError).toContain(
-      IS_FREEBUFF ? FREEBUFF_PROVIDER_USAGE_MESSAGE : 'Out of credits',
+      IS_FREEPORT ? FREEPORT_PROVIDER_USAGE_MESSAGE : 'Out of credits',
     )
 
     // Blocks should be preserved for debugging context
@@ -916,7 +916,7 @@ describe('handleRunError', () => {
     // Message should be marked complete
     expect(aiMessage!.isComplete).toBe(true)
 
-    if (IS_FREEBUFF) {
+    if (IS_FREEPORT) {
       expect(setInputModeMock).not.toHaveBeenCalled()
     } else {
       expect(setInputModeMock).toHaveBeenCalledWith('outOfCredits')
@@ -1708,7 +1708,7 @@ describe('resetEarlyReturnState', () => {
   })
 })
 
-describe('freebuff gate errors', () => {
+describe('FREEPORT gate errors', () => {
   const makeUpdater = (messages: ChatMessage[]) => {
     const updater = createBatchedMessageUpdater('ai-1', (fn: any) => {
       const next = fn(messages)
@@ -1747,7 +1747,7 @@ describe('freebuff gate errors', () => {
       updateChainInProgress: () => {},
     })
     updater.flush()
-    expect(messages[0].userError).toContain('Another freebuff CLI took over')
+    expect(messages[0].userError).toContain('Another FREEPORT CLI took over')
   })
 
   test('handleRunError suppresses the inline error for 410 session_expired (ended banner takes over)', () => {

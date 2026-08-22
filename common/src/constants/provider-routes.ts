@@ -120,7 +120,7 @@ export const MIMO_NOVITA_PROVIDER_ROUTE =
  * A session with NO pin is, by construction, one admitted before the cutover
  * shipped: it runs the pre-cutover order and keeps the prompt cache it has
  * already paid to warm. See `deepseekEntryLane` and
- * docs/freebuff-deepseek-provider-cutover.md.
+ * docs/FREEPORT-deepseek-provider-cutover.md.
  *
  * Reference prices per M — CrofAI/Infron/OpenRouter from live billing
  * 2026-08-04, RunInfra from runinfra.ai/pricing and Infron re-read from its
@@ -144,7 +144,7 @@ export const MIMO_NOVITA_PROVIDER_ROUTE =
  * The DeepSeek repricing also made CrofAI the cheapest lane outright rather
  * than a near-tie: it is now cheaper than DeepSeek direct on every term, by
  * 2.3x on cache reads off-peak and 4.7x at peak. The lane ORDER has not been
- * revisited to match — see docs/freebuff-deepseek-provider-cutover.md.
+ * revisited to match — see docs/FREEPORT-deepseek-provider-cutover.md.
  *
  * It also serves `deepseek-v4-flash-0731` — the GA build, the same one
  * DeepSeek's own API serves — where Infron's undated slug is a frozen preview
@@ -286,7 +286,7 @@ export const DEEPSEEK_INFRON_MAKORA_PROVIDER_ROUTE =
  * what this lane's placement rests on. Note the DeepSeek rows sit BELOW
  * RunInfra on this workload since the 2026-08-16 repricing — that is a question
  * about the entry lane, not about this one, and it belongs to
- * docs/freebuff-deepseek-provider-cutover.md rather than here.
+ * docs/FREEPORT-deepseek-provider-cutover.md rather than here.
  *
  * The cache has a COLD START. Over that turn it served 82.3% of input tokens
  * from cache, but the aggregate hides the shape: the first few calls missed

@@ -1,3 +1,6 @@
+import { mkdirSync } from 'node:fs'
+import path from 'node:path'
+
 import { Database } from 'bun:sqlite'
 
 import type { ServerConfig } from './config'
@@ -82,9 +85,21 @@ export interface SubscriptionRow {
   paddle_customer_id: string | null
   status: string
   plan: string
+  price_id: string | null
+  product_id: string | null
+  scheduled_change_action: string | null
+  scheduled_change_at: number | null
   current_period_end: number | null
   grace_period_end: number | null
   last_event_id: string | null
+  created_at: number
+  updated_at: number
+}
+
+export interface CustomerRow {
+  customer_id: string
+  user_id: string | null
+  email: string
   created_at: number
   updated_at: number
 }
@@ -96,6 +111,7 @@ let db: Database | null = null
 export function getDb(config: ServerConfig): Database {
   if (db) return db
 
+  mkdirSync(path.dirname(config.dbPath), { recursive: true })
   const database = new Database(config.dbPath, { create: true })
   database.exec('PRAGMA journal_mode = WAL;')
   database.exec('PRAGMA foreign_keys = ON;')
@@ -191,11 +207,52 @@ function migrate(database: Database): void {
       paddle_customer_id TEXT,
       status TEXT NOT NULL DEFAULT 'inactive',
       plan TEXT NOT NULL DEFAULT 'free',
+      price_id TEXT,
+      product_id TEXT,
+      scheduled_change_action TEXT,
+      scheduled_change_at INTEGER,
       current_period_end INTEGER,
       grace_period_end INTEGER,
       last_event_id TEXT,
       created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
       updated_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
     );
+
+    CREATE TABLE IF NOT EXISTS customers (
+      customer_id TEXT PRIMARY KEY,
+      user_id TEXT REFERENCES users(id),
+      email TEXT NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+    );
   `)
+
+  ensureColumn(database, 'subscriptions', 'price_id', 'price_id TEXT')
+  ensureColumn(database, 'subscriptions', 'product_id', 'product_id TEXT')
+  ensureColumn(
+    database,
+    'subscriptions',
+    'scheduled_change_action',
+    'scheduled_change_action TEXT',
+  )
+  ensureColumn(
+    database,
+    'subscriptions',
+    'scheduled_change_at',
+    'scheduled_change_at INTEGER',
+  )
+}
+
+function ensureColumn(
+  database: Database,
+  table: string,
+  column: string,
+  ddl: string,
+): void {
+  const cols = database.query(`PRAGMA table_info(${table})`).all() as Array<{
+    name: string
+  }>
+  if (!cols.some((c) => c.name === column)) {
+    database.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`)
+  }
 }

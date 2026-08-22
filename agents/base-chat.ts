@@ -1,11 +1,11 @@
-import { FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID } from '@codebuff/common/constants/freebuff-models'
+import { FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID } from '@codebuff/common/constants/freeport-models'
 
 import { publisher } from './constants'
 
 import type { SecretAgentDefinition } from './types/secret-agent-definition'
 
 /**
- * Conversational agent behind freebuff.com/chat. Runs with no filesystem, but
+ * Conversational agent behind FREEPORT.com/chat. Runs with no filesystem, but
  * can spawn researcher-web to look things up on the live internet and call
  * gravity_index to recommend third-party developer services. The chat server
  * overrides `model` with the user's resolved chat selection on every request.
@@ -13,9 +13,9 @@ import type { SecretAgentDefinition } from './types/secret-agent-definition'
 const definition: SecretAgentDefinition = {
   id: 'base-chat',
   publisher,
-  model: FREEBUFF_DEEPSEEK_V4_FLASH_MODEL_ID,
-  displayName: 'Freebuff Chat',
-  spawnerPrompt: 'General-purpose chat assistant for freebuff.com/chat.',
+  model: FREEPORT_DEEPSEEK_V4_FLASH_MODEL_ID,
+  displayName: 'FREEPORT Chat',
+  spawnerPrompt: 'General-purpose chat assistant for FREEPORT.com/chat.',
   inputSchema: {
     prompt: {
       type: 'string',
@@ -31,7 +31,7 @@ const definition: SecretAgentDefinition = {
   ],
   spawnableAgents: ['researcher-web', 'thinker-gemini', 'context-pruner'],
 
-  systemPrompt: `You are Freebuff Chat, a friendly, sharp assistant made by Freebuff (freebuff.com), the home of free AI coding tools. You are chatting with a user in a web interface that renders markdown.`,
+  systemPrompt: `You are FREEPORT Chat, a friendly, sharp assistant made by FREEPORT (FREEPORT.com), the home of free AI coding tools. You are chatting with a user in a web interface that renders markdown.`,
   instructionsPrompt: `Be direct and helpful. Use markdown when it improves clarity (code blocks, lists, tables), and keep answers as short as they can be while fully answering the question.
 
 When the user is choosing a third-party developer service (database, auth, payments, hosting, email, monitoring, analytics, AI APIs, storage, CMS, search, etc.) or asks what provider to use for something, use the gravity_index tool instead of answering from memory: \`search\` with a query that includes their stack and constraints when they want a recommendation, or \`browse\`/\`list_categories\`/\`get_service\` to explore options. Ground your answer in the result. A Gravity search can return several options and you may search more than once. Decide which single service you are actually recommending, then call render_ui exactly once with a gravity_index link reference containing the exact \`search_id\` and selected \`service_slug\`; never transcribe the opaque URL. The runtime verifies the selection and substitutes the exact tracked click URL. Since you can't edit the user's files, share the relevant setup steps and env vars in chat instead of trying to install anything.
@@ -50,7 +50,7 @@ End every response by calling the suggest_followups tool with exactly 3 followup
     // Constants live inside handleSteps because it is serialized with
     // toString() and re-evaluated standalone — nothing outside this body,
     // imports included, is in scope. CONTEXT_WINDOWS mirrors
-    // FREEBUFF_MODEL_CONTEXT_WINDOWS (common/src/constants/freebuff-models.ts);
+    // FREEPORT_MODEL_CONTEXT_WINDOWS (common/src/constants/freeport-models.ts);
     // agents/__tests__/base-chat.test.ts fails if the two drift.
 
     /** Hard context window (tokens) per backend model id. */

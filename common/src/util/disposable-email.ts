@@ -54,7 +54,7 @@ const DISPOSABLE_EMAIL_DOMAINS = [
   'throwawaymail.com',
   'trashmail.com',
   'yopmail.com',
-  // Observed in Freebuff referral farms, 2026-07 (scripted rings minting
+  // Observed in FREEPORT referral farms, 2026-07 (scripted rings minting
   // referred accounts on niche throwaway domains — see the 07-29 sock sweep).
   'aifotoeditor.com',
   'animateany.com',
@@ -71,7 +71,7 @@ const DISPOSABLE_EMAIL_DOMAINS = [
   'pumpkinai.space',
   'pumpkinai.it.com',
   // Compiled 2026-08-03 from prod, not from a public blocklist: every domain
-  // below has >=20 Freebuff accounts and >=75% of them already banned. That
+  // below has >=20 FREEPORT accounts and >=75% of them already banned. That
   // covers 7,129 accounts of which 6,699 were banned before this list existed.
   // The threshold is what keeps real providers out — Gmail sits at 0.8%
   // banned, Outlook 11%, Proton 4%, duck.com 30%, and the two school domains
@@ -142,7 +142,7 @@ const DISPOSABLE_EMAIL_DOMAINS = [
   // ceiling on the SG *geography* was doing two jobs at once: bounding a farm
   // that happens to egress there, and taxing ~270 ordinary developers on
   // gmail/qq/163/outlook. Naming the farm by domain is what lets the geography
-  // cap come off — see FREEBUFF_ELEVATED_COUNTRIES.
+  // cap come off — see FREEPORT_ELEVATED_COUNTRIES.
   //
   // Rates below are "share of the domain's accounts carrying an automated ban,
   // honeypot hit, or foreign-toolset detection". Baselines from the same

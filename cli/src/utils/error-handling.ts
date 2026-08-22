@@ -1,17 +1,17 @@
-import { FREEBUFF_PROVIDER_USAGE_ERROR_PATTERN } from '@codebuff/common/constants/freebuff-errors'
+import { FREEPORT_PROVIDER_USAGE_ERROR_PATTERN } from '@codebuff/common/constants/freeport-errors'
 import { env } from '@codebuff/common/env'
 import { extractApiErrorDetails } from '@codebuff/common/util/error'
-import { formatFreebuffHardBlockedPrivacySignals } from '@codebuff/common/util/freebuff-privacy'
-import { getFreebuffGateCode } from '@codebuff/common/types/freebuff-session'
+import { formatfreeportHardBlockedPrivacySignals } from '@codebuff/common/util/freeport-privacy'
+import { getfreeportGateCode } from '@codebuff/common/types/freeport-session'
 
 import type { ChatMessage } from '../types/chat'
 import type {
-  FreebuffCountryBlockReason,
-  FreebuffGateCode,
-  FreebuffIpPrivacySignal,
-} from '@codebuff/common/types/freebuff-session'
+  freeportCountryBlockReason,
+  freeportGateCode,
+  freeportIpPrivacySignal,
+} from '@codebuff/common/types/freeport-session'
 
-import { IS_FREEBUFF } from './constants'
+import { IS_FREEPORT } from './constants'
 
 const defaultAppUrl = env.NEXT_PUBLIC_CODEBUFF_APP_URL || 'https://codebuff.com'
 
@@ -118,7 +118,7 @@ const getCliApiErrorDetails = (error: unknown) => {
   }
 }
 
-export const getFreebuffRateLimitErrorMessage = (
+export const getfreeportRateLimitErrorMessage = (
   error: unknown,
 ): string | null => {
   const details = getCliApiErrorDetails(error)
@@ -126,7 +126,7 @@ export const getFreebuffRateLimitErrorMessage = (
   if (details.errorCode === 'free_mode_rate_limited') {
     // Our own rate limiter's message is already user-facing and includes the
     // retry countdown — show it verbatim.
-    return details.message ?? FREEBUFF_RATE_LIMIT_MESSAGE
+    return details.message ?? FREEPORT_RATE_LIMIT_MESSAGE
   }
   // Other 429s (e.g. relayed upstream capacity errors) keep the branded
   // message but include the server detail so users aren't left guessing.
@@ -141,23 +141,23 @@ export const getFreebuffRateLimitErrorMessage = (
     extractApiErrorDetails(error).message ??
     (isRunOutputObject ? details.message : undefined)
   if (detail && !/^too many requests\.?$/i.test(detail)) {
-    return `${FREEBUFF_RATE_LIMIT_MESSAGE} (${detail})`
+    return `${FREEPORT_RATE_LIMIT_MESSAGE} (${detail})`
   }
-  return FREEBUFF_RATE_LIMIT_MESSAGE
+  return FREEPORT_RATE_LIMIT_MESSAGE
 }
 
 /**
- * Provider billing failures are an operator problem in Freebuff, not a reason
+ * Provider billing failures are an operator problem in FREEPORT, not a reason
  * to send a free user to Codebuff's credit-purchase flow. Upstreams disagree
  * on the status (observed as both 401 and 402), so retain the status check but
  * also recognize the provider wording that can survive into an agent output.
  */
-export const isFreebuffProviderUsageError = (error: unknown): boolean => {
+export const isfreeportProviderUsageError = (error: unknown): boolean => {
   const details = getCliApiErrorDetails(error)
   const message = details.message ?? extractErrorMessage(error, '')
   return (
     details.statusCode === 402 ||
-    FREEBUFF_PROVIDER_USAGE_ERROR_PATTERN.test(message)
+    FREEPORT_PROVIDER_USAGE_ERROR_PATTERN.test(message)
   )
 }
 
@@ -165,8 +165,8 @@ export const getCountryBlockFromFreeModeError = (
   error: unknown,
 ): {
   countryCode: string
-  countryBlockReason?: FreebuffCountryBlockReason
-  ipPrivacySignals?: FreebuffIpPrivacySignal[]
+  countryBlockReason?: freeportCountryBlockReason
+  ipPrivacySignals?: freeportIpPrivacySignal[]
 } | null => {
   if (!isFreeModeUnavailableError(error)) return null
   const errorDetails = getCliApiErrorDetails(error)
@@ -180,10 +180,10 @@ export const getCountryBlockFromFreeModeError = (
     countryCode,
     countryBlockReason:
       typeof errorDetails.countryBlockReason === 'string'
-        ? (errorDetails.countryBlockReason as FreebuffCountryBlockReason)
+        ? (errorDetails.countryBlockReason as freeportCountryBlockReason)
         : undefined,
     ipPrivacySignals: errorDetails.ipPrivacySignals as
-      | FreebuffIpPrivacySignal[]
+      | freeportIpPrivacySignal[]
       | undefined,
   }
 }
@@ -194,7 +194,7 @@ export const getFreeModeUnavailableErrorMessage = (
   const details = getCliApiErrorDetails(error)
   const block = getCountryBlockFromFreeModeError(error)
   if (block?.countryBlockReason === 'anonymous_network') {
-    return `${IS_FREEBUFF ? 'Freebuff' : 'Free mode'} cannot be used from ${formatFreebuffHardBlockedPrivacySignals(
+    return `${IS_FREEPORT ? 'FREEPORT' : 'Free mode'} cannot be used from ${formatfreeportHardBlockedPrivacySignals(
       block.ipPrivacySignals,
     )} traffic. Please disable it and try again.`
   }
@@ -203,28 +203,28 @@ export const getFreeModeUnavailableErrorMessage = (
 
 /**
  * The subset of the session gate the CLI has a recovery for. The codes and
- * their statuses come from FREEBUFF_GATE_CODES (the shared wire contract, see
- * docs/freebuff-session-admission.md); the narrowing is deliberate —
+ * their statuses come from FREEPORT_GATE_CODES (the shared wire contract, see
+ * docs/freeport-session-admission.md); the narrowing is deliberate —
  * `session_limit_reached` is the Desktop concurrent-tab cap, and the CLI runs
  * one session per user, so it can never earn it and has no banner for it.
  *
  * The names keep their legacy waiting-room spelling for wire compatibility.
  */
-export type FreebuffGateErrorKind = Exclude<
-  FreebuffGateCode,
+export type freeportGateErrorKind = Exclude<
+  freeportGateCode,
   'session_limit_reached'
 >
 
-export const getFreebuffGateErrorKind = (
+export const getfreeportGateErrorKind = (
   error: unknown,
-): FreebuffGateErrorKind | null => {
+): freeportGateErrorKind | null => {
   if (!error || typeof error !== 'object') return null
   const { error: errorCode, statusCode } = error as {
     error?: unknown
     statusCode?: unknown
   }
   if (typeof errorCode !== 'string') return null
-  const code = getFreebuffGateCode({
+  const code = getfreeportGateCode({
     error: errorCode,
     statusCode: typeof statusCode === 'number' ? statusCode : undefined,
   })
@@ -233,11 +233,11 @@ export const getFreebuffGateErrorKind = (
 
 export const OUT_OF_CREDITS_MESSAGE = `Out of credits. Please add credits at ${defaultAppUrl}/usage`
 
-export const FREEBUFF_RATE_LIMIT_MESSAGE =
-  'Freebuff is temporarily busy. Please try again in a moment.'
+export const FREEPORT_RATE_LIMIT_MESSAGE =
+  'FREEPORT is temporarily busy. Please try again in a moment.'
 
-export const FREE_MODE_UNAVAILABLE_MESSAGE = IS_FREEBUFF
-  ? 'Freebuff is not available in your country.'
+export const FREE_MODE_UNAVAILABLE_MESSAGE = IS_FREEPORT
+  ? 'FREEPORT is not available in your country.'
   : 'Free mode is not available in your country. You can use another mode to continue.'
 
 export const createErrorMessage = (

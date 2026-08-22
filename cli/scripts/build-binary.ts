@@ -167,7 +167,7 @@ async function main() {
     ['process.env.CODEBUFF_IS_BINARY', '"true"'],
     ['process.env.CODEBUFF_CLI_VERSION', `"${version}"`],
     ['process.env.CODEBUFF_CLI_TARGET', `"${getCliTargetLabel(targetInfo)}"`],
-    ['process.env.FREEBUFF_MODE', `"${process.env.FREEBUFF_MODE ?? 'false'}"`],
+    ['process.env.FREEPORT_MODE', `"${process.env.FREEPORT_MODE ?? 'false'}"`],
     ...nextPublicEnvVars,
   ]
 

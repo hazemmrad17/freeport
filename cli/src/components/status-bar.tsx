@@ -1,4 +1,4 @@
-import { getFreebuffModel } from '@codebuff/common/constants/freebuff-models'
+import { getfreeportModel } from '@codebuff/common/constants/freeport-models'
 import { TextAttributes } from '@opentui/core'
 import React, { useEffect, useState } from 'react'
 
@@ -6,16 +6,16 @@ import { Button } from './button'
 import { ScrollToBottomButton } from './scroll-to-bottom-button'
 import { ShimmerText } from './shimmer-text'
 
-import { useFreebuffSessionProgress } from '../hooks/use-freebuff-session-progress'
+import { usefreeportSessionProgress } from '../hooks/use-freeport-session-progress'
 import { useTheme } from '../hooks/use-theme'
 import { formatElapsedTime } from '../utils/format-elapsed-time'
 import {
-  FREEBUFF_COUNTDOWN_VISIBLE_MS,
-  formatFreebuffSessionCountdown,
-  formatFreebuffSessionRemaining,
-} from '../utils/freebuff-session-display'
+  FREEPORT_COUNTDOWN_VISIBLE_MS,
+  formatfreeportSessionCountdown,
+  formatfreeportSessionRemaining,
+} from '../utils/freeport-session-display'
 
-import type { FreebuffSessionResponse } from '../types/freebuff-session'
+import type { freeportSessionResponse } from '../types/freeport-session'
 import type { StatusIndicatorState } from '../utils/status-indicator-state'
 
 /** A small status-bar action button with hover-bold styling. */
@@ -57,7 +57,7 @@ interface StatusBarProps {
   statusIndicatorState: StatusIndicatorState
   onStop?: () => void
   onEndSession?: () => void
-  freebuffSession: FreebuffSessionResponse | null
+  freeportSession: freeportSessionResponse | null
 }
 
 export const StatusBar = ({
@@ -67,7 +67,7 @@ export const StatusBar = ({
   statusIndicatorState,
   onStop,
   onEndSession,
-  freebuffSession,
+  freeportSession,
 }: StatusBarProps) => {
   const theme = useTheme()
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
@@ -106,9 +106,9 @@ export const StatusBar = ({
     return () => clearInterval(interval)
   }, [timerStartTime, shouldShowTimer, statusIndicatorState?.kind])
 
-  const sessionProgress = useFreebuffSessionProgress(freebuffSession)
+  const sessionProgress = usefreeportSessionProgress(freeportSession)
   const isUnlimited =
-    freebuffSession?.status === 'active' && !freebuffSession.rateLimit
+    freeportSession?.status === 'active' && !freeportSession.rateLimit
 
   const renderStatusIndicator = () => {
     switch (statusIndicatorState.kind) {
@@ -166,10 +166,10 @@ export const StatusBar = ({
       case 'idle':
         if (sessionProgress !== null) {
           const isUrgent =
-            sessionProgress.remainingMs < FREEBUFF_COUNTDOWN_VISIBLE_MS
+            sessionProgress.remainingMs < FREEPORT_COUNTDOWN_VISIBLE_MS
           const modelName =
-            freebuffSession?.status === 'active'
-              ? getFreebuffModel(freebuffSession.model).displayName
+            freeportSession?.status === 'active'
+              ? getfreeportModel(freeportSession.model).displayName
               : null
           return (
             <span
@@ -184,7 +184,7 @@ export const StatusBar = ({
               {modelName ? `${modelName} · ` : ''}
               {isUnlimited
                 ? 'unlimited'
-                : formatFreebuffSessionRemaining(sessionProgress.remainingMs)}
+                : formatfreeportSessionRemaining(sessionProgress.remainingMs)}
             </span>
           )
         }
@@ -204,7 +204,7 @@ export const StatusBar = ({
   const elapsedTimeContent = renderElapsedTime()
 
   // Show gray background when there's status indicator, timer, or when the
-  // freebuff session fill is visible (otherwise the fill would float over
+  // FREEPORT session fill is visible (otherwise the fill would float over
   // transparent space).
   const hasContent =
     statusIndicatorContent || elapsedTimeContent || sessionProgress !== null
@@ -268,18 +268,18 @@ export const StatusBar = ({
           )}
         {onEndSession &&
           statusIndicatorState.kind === 'idle' &&
-          freebuffSession?.status === 'active' && (
+          freeportSession?.status === 'active' && (
             <StatusActionButton onClick={onEndSession}>
               ✕ End session
             </StatusActionButton>
           )}
         {sessionProgress !== null &&
-          sessionProgress.remainingMs < FREEBUFF_COUNTDOWN_VISIBLE_MS &&
+          sessionProgress.remainingMs < FREEPORT_COUNTDOWN_VISIBLE_MS &&
           statusIndicatorState.kind !== 'idle' &&
           !isUnlimited && (
             <text style={{ wrapMode: 'none' }}>
               <span fg={theme.warning} attributes={TextAttributes.BOLD}>
-                {formatFreebuffSessionCountdown(sessionProgress.remainingMs)}
+                {formatfreeportSessionCountdown(sessionProgress.remainingMs)}
               </span>
             </text>
           )}
