@@ -43,8 +43,8 @@ import { usefreeportSessionStore } from '../state/freeport-session-store'
 import { useTerminalDimensions } from '../hooks/use-terminal-dimensions'
 import { useTheme } from '../hooks/use-theme'
 import {
-  freeportModelNavigationDirectionForKey,
-  nextfreeportModelId,
+  FREEPORTModelNavigationDirectionForKey,
+  nextFREEPORTModelId,
 } from '../utils/freeport-model-navigation'
 import { formatSessionUnits } from '../utils/format-session-units'
 import {
@@ -736,7 +736,7 @@ export const freeportModelSelector: React.FC<freeportModelSelectorProps> = ({
       (key: KeyEvent) => {
         if (pending) return
         const name = key.name ?? ''
-        const direction = freeportModelNavigationDirectionForKey(key)
+        const direction = FREEPORTModelNavigationDirectionForKey(key)
         // Use the shared Enter detector so the keypad Enter and the niche
         // Linux terminals that send \n (linefeed) for Enter also commit; a
         // raw name === 'return' check silently ignores those, which looks
@@ -766,7 +766,7 @@ export const freeportModelSelector: React.FC<freeportModelSelectorProps> = ({
           return
         }
         if (!direction) return
-        const targetId = nextfreeportModelId({
+        const targetId = nextFREEPORTModelId({
           modelIds: navIds,
           focusedId,
           direction,

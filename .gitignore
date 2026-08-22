@@ -38,17 +38,17 @@ docs/bot-detection.md
 # Buffbench DEBUG_ERROR dumps
 evals/buffbench/*-error-*.json
 
-# Freebuff Desktop local runtime state in an opened project (SQLite DB, git
+# FREEPORT Desktop local runtime state in an opened project (SQLite DB, git
 # worktrees, materialized built-in skills) — never source, always regenerated.
-.freebuff/
+.FREEPORT/
 
 # Materialized by release package prepack scripts and removed by postpack.
 cli/release/launcher.js
 cli/release/http.js
 cli/release-staging/launcher.js
 cli/release-staging/http.js
-freebuff/cli/release/launcher.js
-freebuff/cli/release/http.js
+FREEPORT/cli/release/launcher.js
+FREEPORT/cli/release/http.js
 
 # QA harness fixture: a snapshot of REAL feedback rows, including the Discord
 # and GitHub handles of real people and what they complained about. Useful
@@ -56,7 +56,7 @@ freebuff/cli/release/http.js
 feedback-lab/src/real-data.json
 
 # Design-tooling scratch.
-freebuff/web/.impeccable/
+FREEPORT/web/.impeccable/
 
 # Throwaway helper scripts written next to the repo during a task. Never part
 # of the build; one reached a PR before review caught it. At the ROOT so it

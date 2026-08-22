@@ -16,7 +16,7 @@ The same rule covers generated inputs. `cli/src/agents/bundled-agents.generated.
 
 Tests that need a **service** rather than a variable should skip cleanly and say why, but never in CI. `@codebuff/internal/testing/test-db` probes Postgres once, skips the DB suites locally with the docker command to fix it, and throws when `CODEBUFF_GITHUB_ACTIONS=true` — otherwise a broken CI service container would read as a pass. Gate on **reachability**, never on `!process.env.DATABASE_URL`: the fixtures supply a placeholder URL, so presence stopped meaning availability.
 
-Tests that spawn a server child should race readiness against `proc.exited` and report the child's captured output (see `freebuff-desktop/src/app/server.test.ts`). Polling a dead port surfaces only as "a hook timed out", which names neither the cause nor the process that failed.
+Tests that spawn a server child should race readiness against `proc.exited` and report the child's captured output (see `FREEPORT-desktop/src/app/server.test.ts`). Polling a dead port surfaces only as "a hook timed out", which names neither the cause nor the process that failed.
 
 ### The CI guard against disappearing tests
 
@@ -27,7 +27,7 @@ CI does not run `bun test` directly — it goes through `scripts/ci/test-with-gu
 
 Growth never fails the build, so adding tests needs no baseline change; the guard just notes the baseline is stale. Deleting tests on purpose means re-recording: re-run the job's command with `--update`.
 
-**Refresh the baselines periodically, and act on the "stale" line.** Because growth never fails, a baseline nobody touches quietly becomes a floor far below reality — which is a guard that no longer guards. When this rot was first measured, `freebuff-desktop` was recorded at 971 tests while actually running 1278, so **307 tests could have stopped running and CI would have stayed green** (393 across all suites). Re-record from a real CI run, not locally.
+**Refresh the baselines periodically, and act on the "stale" line.** Because growth never fails, a baseline nobody touches quietly becomes a floor far below reality — which is a guard that no longer guards. When this rot was first measured, `FREEPORT-desktop` was recorded at 971 tests while actually running 1278, so **307 tests could have stopped running and CI would have stayed green** (393 across all suites). Re-record from a real CI run, not locally.
 
 Expect to do it more than once. Desktop moved 1278 → 1282 → 1339 over the two days it took to land that refresh, so on an active package the floor starts sliding immediately. That is fine — a floor 50 tests low still catches the failure this exists for, which is a suite losing *hundreds* at once. It is a floor 300 low that is worthless. Treat the "stale" line as a nudge, not an emergency.
 
@@ -73,16 +73,16 @@ restore, SDK build) costs far more than the tests in almost every job.
 
 ### Typecheck runs in lanes
 
-`bun --filter='*' run typecheck` scheduled `@codebuff/freebuff-web` last: it did
+`bun --filter='*' run typecheck` scheduled `@codebuff/FREEPORT-web` last: it did
 not start until 114s into a 227s step, then ran ~113s alone while all 17 other
 packages had finished and the runner idled on one tsc. So the typecheck job is a
-matrix over *lanes* — `freebuff-web` gets its own runner, `rest` takes the other
+matrix over *lanes* — `FREEPORT-web` gets its own runner, `rest` takes the other
 17 — defined in `scripts/ci/typecheck-lanes.ts`.
 
 Membership lives in that script rather than in `ci.yml` because both obvious
 ways to write it in YAML fail silently:
 
-- **`--filter='*' --filter='!@codebuff/freebuff-web'` does not exclude
+- **`--filter='*' --filter='!@codebuff/FREEPORT-web'` does not exclude
   anything.** bun 1.3.14 ignores the negation and runs all 18 packages
   (verified), so the `rest` lane would re-run the package it exists to hand off
   and the split would buy nothing while looking correct.
@@ -114,7 +114,7 @@ check nothing loud. Each of these **exits 0** on its own:
   lane.
 
 **Beware retry-inflated numbers when you profile this.** The first pass at the
-table above recorded `freebuff-desktop` at 130s, which was wrong: the job had
+table above recorded `FREEPORT-desktop` at 130s, which was wrong: the job had
 silently failed once (`Boundary result-checkpointed was not reached`, 69.55s)
 and passed on attempt 2 (48.78s), and `nick-fields/retry` reported success. Read
 bun's own `Ran N tests across M files [Xs]` line, not the step duration, and
@@ -142,17 +142,17 @@ purpose: a prefix match would hand back a dist built from different sources and
 every downstream test would silently run against a stale SDK. A miss just costs
 the ~18s build.
 
-`freebuff/web`'s `prepare:workspace` shells out to that same SDK build, and it
-was the tail of the typecheck job — freebuff/web finishes last, and spent its
+`FREEPORT/web`'s `prepare:workspace` shells out to that same SDK build, and it
+was the tail of the typecheck job — FREEPORT/web finishes last, and spent its
 first ~65s rebuilding what the job had already restored. It now honours
 `SDK_ALREADY_BUILT`, which **only** CI's typecheck job sets, immediately after
 `build-sdk` has run. Unset everywhere else, so local runs and Render deploys
-still build normally. If you add a job that runs `freebuff/web`'s typecheck or
+still build normally. If you add a job that runs `FREEPORT/web`'s typecheck or
 build, either let it rebuild or set the flag *after* `build-sdk` — never before.
 
 ### Known remaining cost
 
-`freebuff-desktop` is the heaviest suite — ~54s on CI, about half of all test
+`FREEPORT-desktop` is the heaviest suite — ~54s on CI, about half of all test
 execution in the repo — and `src/app/thread-engine.test.ts` is most of it (244
 of its tests). There is no hot spot to fix: the time is spread evenly (the
 slowest single test is 1.6s) and about a quarter of it is the `gitEngine`
@@ -251,7 +251,7 @@ command: `--cmd "bun --env-file=../.env.local test"`.
 
 The hunter is a magnifier, not an oracle, and one open flake is proof of that.
 `useProjectSkills` failed on **three separate PRs, on three different cases**,
-none of which touched `freebuff-desktop` — and never once under 24 hunted runs
+none of which touched `FREEPORT-desktop` — and never once under 24 hunted runs
 at load 11-16, nor under 12 concurrent runs with CPU hogs, on the fixed and
 unfixed versions alike.
 
@@ -362,7 +362,7 @@ it. And a test of the form "sleep 20ms, then assert nothing has happened yet"
 can only pass *vacuously* under load, so this harness will never flag it; those
 need rewriting to assert ordering rather than absence.
 
-The weekly `flake-hunt.yml` workflow runs this against `freebuff-desktop` and
+The weekly `flake-hunt.yml` workflow runs this against `FREEPORT-desktop` and
 reports failures without blocking any PR.
 
 **A sixth shape, and the only one the hunt cannot reproduce: the budget bun
@@ -406,7 +406,7 @@ first — and bun does **not** load files in the order the command line lists th
 to it, the full suite passes 3573/3573 on a laptop, and CI still fails with a
 different set of tests every run.
 
-What it looked like: `test-freebuff-desktop` red on four `main` commits in a row,
+What it looked like: `test-FREEPORT-desktop` red on four `main` commits in a row,
 once on a commit with no file changes at all, naming ~20 tests across
 `Tab.rename`, `ContextBar.menu`, `AccountMenu.menu`, `AgentPicker.menu` and
 `QuotaBadge` — five files with nothing in common except that they are the only
@@ -463,7 +463,7 @@ which is exactly "some earlier file did this", and running the affected files:
 
 ```bash
 echo ';(globalThis as any).requestAnimationFrame = () => 0' > /tmp/leak.ts
-cd freebuff-desktop && bun test \
+cd FREEPORT-desktop && bun test \
   --preload ../test/setup-scm-loader.ts --preload ../sdk/test/setup-env.ts --preload /tmp/leak.ts \
   src/ui/shell/Tab.rename.test.tsx src/ui/agent/QuotaBadge.test.tsx
 ```

@@ -22,8 +22,8 @@ import { getAuthTokenDetails } from '../utils/auth'
 import { stopActiveRun } from '../utils/active-run'
 import { IS_FREEPORT } from '../utils/constants'
 import {
-  isfreeportInstanceOwnedByDeadLocalProcess,
-  recordfreeportInstanceOwner,
+  isFREEPORTInstanceOwnedByDeadLocalProcess,
+  recordFREEPORTInstanceOwner,
 } from '../utils/freeport-instance-owner'
 import { logger } from '../utils/logger'
 import { getSystemMessage } from '../utils/message-history'
@@ -400,7 +400,7 @@ export function usefreeportSession(): UsefreeportSessionResult {
       rememberReferral(next)
       if (next.status === 'active') {
         usefreeportModelStore.getState().setSelectedModel(next.model)
-        recordfreeportInstanceOwner(next.instanceId)
+        recordFREEPORTInstanceOwner(next.instanceId)
       } else if (next.status === 'none' && next.accessTier === 'limited') {
         usefreeportModelStore
           .getState()
@@ -572,7 +572,7 @@ export function usefreeportSession(): UsefreeportSessionResult {
           // A fast restart after Ctrl+C can observe the old server row before
           // best-effort DELETE lands. If the row belongs to a dead local
           // process, silently do the same POST as the Take over button.
-          if (isfreeportInstanceOwnedByDeadLocalProcess(next.instanceId)) {
+          if (isFREEPORTInstanceOwnedByDeadLocalProcess(next.instanceId)) {
             nextMethod = 'POST'
             schedule(0)
             return

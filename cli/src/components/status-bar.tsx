@@ -11,8 +11,8 @@ import { useTheme } from '../hooks/use-theme'
 import { formatElapsedTime } from '../utils/format-elapsed-time'
 import {
   FREEPORT_COUNTDOWN_VISIBLE_MS,
-  formatfreeportSessionCountdown,
-  formatfreeportSessionRemaining,
+  formatFREEPORTSessionCountdown,
+  formatFREEPORTSessionRemaining,
 } from '../utils/freeport-session-display'
 
 import type { freeportSessionResponse } from '../types/freeport-session'
@@ -184,7 +184,7 @@ export const StatusBar = ({
               {modelName ? `${modelName} · ` : ''}
               {isUnlimited
                 ? 'unlimited'
-                : formatfreeportSessionRemaining(sessionProgress.remainingMs)}
+                : formatFREEPORTSessionRemaining(sessionProgress.remainingMs)}
             </span>
           )
         }
@@ -279,7 +279,7 @@ export const StatusBar = ({
           !isUnlimited && (
             <text style={{ wrapMode: 'none' }}>
               <span fg={theme.warning} attributes={TextAttributes.BOLD}>
-                {formatfreeportSessionCountdown(sessionProgress.remainingMs)}
+                {formatFREEPORTSessionCountdown(sessionProgress.remainingMs)}
               </span>
             </text>
           )}

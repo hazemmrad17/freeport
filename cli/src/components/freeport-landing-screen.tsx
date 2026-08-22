@@ -10,7 +10,7 @@ import {
   refreshfreeportLandingMetadata,
   takeOverfreeportSession,
 } from '../hooks/use-freeport-session'
-import { usefreeportCtrlCExit } from '../hooks/use-freeport-ctrl-c-exit'
+import { useFREEPORTCtrlCExit } from '../hooks/use-freeport-ctrl-c-exit'
 import { usefreeportStreakQuery } from '../hooks/use-freeport-streak-query'
 import { useGravityAd } from '../hooks/use-gravity-ad'
 import { useLogo } from '../hooks/use-logo'
@@ -414,7 +414,7 @@ export const freeportLandingScreen: React.FC<freeportLandingScreenProps> = ({
     surface: 'waiting_room',
   })
 
-  usefreeportCtrlCExit()
+  useFREEPORTCtrlCExit()
 
   const [exitHover, setExitHover] = useState(false)
 

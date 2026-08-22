@@ -1,7 +1,7 @@
 /**
- * E2E test that verifies Freebuff can perform a simple code edit.
+ * E2E test that verifies FREEPORT can perform a simple code edit.
  *
- * Starts Freebuff in tmux, sends a prompt asking it to add a console.log
+ * Starts FREEPORT in tmux, sends a prompt asking it to add a console.log
  * to a file, and verifies the file was modified correctly.
  *
  * Requires CODEBUFF_API_KEY — skipped if not set.
@@ -9,7 +9,7 @@
 
 import { afterEach, describe, expect, test } from 'bun:test'
 
-import { FreebuffSession, requireFreebuffBinary } from '../utils'
+import { FREEPORTSession, requireFREEPORTBinary } from '../utils'
 
 const TEST_TIMEOUT = 1_000_000
 
@@ -17,8 +17,8 @@ function getApiKey(): string | null {
   return process.env.CODEBUFF_API_KEY ?? null
 }
 
-describe.skip('Freebuff: Code Edit', () => {
-  let session: FreebuffSession | null = null
+describe.skip('FREEPORT: Code Edit', () => {
+  let session: FREEPORTSession | null = null
 
   afterEach(async () => {
     if (session) {
@@ -38,7 +38,7 @@ describe.skip('Freebuff: Code Edit', () => {
         return
       }
 
-      const binary = requireFreebuffBinary()
+      const binary = requireFREEPORTBinary()
       const initialContent = [
         'function greet(name) {',
         "  return 'Hello, ' + name",
@@ -46,8 +46,8 @@ describe.skip('Freebuff: Code Edit', () => {
         '',
       ].join('\n')
 
-      // Create the file before starting freebuff so it's in the initial context
-      session = await FreebuffSession.start(binary, {
+      // Create the file before starting FREEPORT so it's in the initial context
+      session = await FREEPORTSession.start(binary, {
         waitSeconds: 5,
         initialFiles: { 'index.js': initialContent },
       })
@@ -58,7 +58,7 @@ describe.skip('Freebuff: Code Edit', () => {
       // Verify the file was created
       expect(session.readFile('index.js')).toBe(initialContent)
 
-      // Send a prompt asking freebuff to add a console.log
+      // Send a prompt asking FREEPORT to add a console.log
       await session.send('Add console.log("hello world") to index.js')
 
       // Wait for the file to be modified with the console.log

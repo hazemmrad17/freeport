@@ -4,7 +4,7 @@ import { getAuthToken } from '../utils/auth'
 import { getApiClient, setApiClientAuthToken } from '../utils/codebuff-api'
 import { logger as defaultLogger } from '../utils/logger'
 
-import type { freeportStreakResponse } from '@codebuff/common/types/freeport-streak'
+import type { FREEPORTStreakResponse } from '@codebuff/common/types/freeport-streak'
 import type { Logger } from '@codebuff/common/types/contracts/logger'
 
 export const freeportStreakQueryKeys = {
@@ -15,10 +15,10 @@ export const freeportStreakQueryKeys = {
 export async function fetchfreeportStreak(params: {
   authToken: string
   logger?: Logger
-}): Promise<freeportStreakResponse> {
+}): Promise<FREEPORTStreakResponse> {
   const { authToken, logger = defaultLogger } = params
   setApiClientAuthToken(authToken)
-  const response = await getApiClient().get<freeportStreakResponse>(
+  const response = await getApiClient().get<FREEPORTStreakResponse>(
     '/api/v1/FREEPORT/streak',
     { retry: false },
   )

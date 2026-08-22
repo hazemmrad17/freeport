@@ -7,9 +7,9 @@ import {
 } from './freeport-streak'
 
 import type {
-  freeportRecentUsage,
-  freeportUsageSessionsByModel,
-  freeportUsageSummary,
+  FREEPORTRecentUsage,
+  FREEPORTUsageSessionsByModel,
+  FREEPORTUsageSummary,
 } from '../types/freeport-usage'
 
 /**
@@ -45,14 +45,14 @@ export function calculateLongestfreeportStreak(
  * order and may include days after `todayDateKey` (a client whose clock has run
  * ahead of the Pacific date key); both are normalised here.
  */
-export function buildfreeportUsageSummary(params: {
+export function buildFREEPORTUsageSummary(params: {
   activeDates: readonly string[]
   todayDateKey: string
-  recent?: freeportRecentUsage | null
-  sessionsByModel?: readonly freeportUsageSessionsByModel[]
+  recent?: FREEPORTRecentUsage | null
+  sessionsByModel?: readonly FREEPORTUsageSessionsByModel[]
   windowDays?: number
   timeZone?: string
-}): freeportUsageSummary {
+}): FREEPORTUsageSummary {
   const windowDays = Math.max(1, params.windowDays ?? FREEPORT_USAGE_MAP_DAYS)
   const todayDateKey = params.todayDateKey
 

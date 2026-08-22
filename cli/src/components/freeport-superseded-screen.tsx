@@ -1,7 +1,7 @@
 import { TextAttributes } from '@opentui/core'
 import React from 'react'
 
-import { usefreeportCtrlCExit } from '../hooks/use-freeport-ctrl-c-exit'
+import { useFREEPORTCtrlCExit } from '../hooks/use-freeport-ctrl-c-exit'
 import { useLogo } from '../hooks/use-logo'
 import { useTerminalDimensions } from '../hooks/use-terminal-dimensions'
 import { useTheme } from '../hooks/use-theme'
@@ -23,7 +23,7 @@ export const freeportSupersededScreen: React.FC = () => {
     blockColor,
   })
 
-  usefreeportCtrlCExit()
+  useFREEPORTCtrlCExit()
 
   return (
     <box

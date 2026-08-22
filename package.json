@@ -9,7 +9,7 @@
     "cli",
     "common",
     "evals",
-    "freebuff",
+    "FREEPORT",
     "packages/agent-runtime",
     "packages/code-map",
     "packages/llm-providers",
@@ -20,14 +20,14 @@
   "scripts": {
     "start-cli": "bun --cwd cli dev",
     "dev": "bun start-cli",
-    "dev:freebuff": "FREEBUFF_MODE=true bun --cwd cli dev",
+    "dev:FREEPORT": "FREEPORT_MODE=true bun --cwd cli dev",
     "release:cli": "bun run --cwd=cli release",
     "release:sdk": "bun run --cwd=sdk release",
-    "release:freebuff": "bun run --cwd=freebuff release",
+    "release:FREEPORT": "bun run --cwd=FREEPORT release",
     "build:sdk": "cd sdk && bun run build",
-    "build:freebuff": "bun freebuff/cli/build.ts 0.0.0-dev",
+    "build:FREEPORT": "bun FREEPORT/cli/build.ts 0.0.0-dev",
     "buffbench": "bun --cwd evals run-buffbench",
-    "ci": "bun run build:sdk && bun run build:freebuff"
+    "ci": "bun run build:sdk && bun run build:FREEPORT"
   },
   "dependencies": {
     "canvas": "^3.2.0",

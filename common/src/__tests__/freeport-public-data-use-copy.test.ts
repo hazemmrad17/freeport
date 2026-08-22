@@ -8,8 +8,8 @@ import {
   FREEPORT_DATA_USE_GENERATED_MDX_BLOCK,
   FREEPORT_POLICY_ROLLOUT,
   FREEPORT_PUBLIC_DATA_USE_COPY,
-  renderfreeportDataUseFaqMarkdown,
-  renderfreeportDataUseFaqMdx,
+  renderFREEPORTDataUseFaqMarkdown,
+  renderFREEPORTDataUseFaqMdx,
 } from '../constants/freeport-data-use'
 
 const REPO_ROOT = resolve(import.meta.dir, '../../..')
@@ -68,7 +68,7 @@ describe('public FREEPORT data-use copy', () => {
           readRepoFile(path),
           FREEPORT_DATA_USE_GENERATED_MARKDOWN_BLOCK,
         ),
-      ).toBe(renderfreeportDataUseFaqMarkdown())
+      ).toBe(renderFREEPORTDataUseFaqMarkdown())
     },
   )
 
@@ -78,7 +78,7 @@ describe('public FREEPORT data-use copy', () => {
   ])('%s matches the generated MDX FAQ', (path) => {
     expect(
       generatedBlock(readRepoFile(path), FREEPORT_DATA_USE_GENERATED_MDX_BLOCK),
-    ).toBe(renderfreeportDataUseFaqMdx())
+    ).toBe(renderFREEPORTDataUseFaqMdx())
   })
 
   test('the standalone landing prototype matches canonical FAQ copy', () => {

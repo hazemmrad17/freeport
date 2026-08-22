@@ -1,6 +1,6 @@
-# Freebuff E2E Tests
+# FREEPORT E2E Tests
 
-End-to-end tests for the Freebuff CLI binary. Tests verify that the compiled binary works correctly by interacting with it via tmux.
+End-to-end tests for the FREEPORT CLI binary. Tests verify that the compiled binary works correctly by interacting with it via tmux.
 
 ## Architecture
 
@@ -8,14 +8,14 @@ Two testing approaches are supported:
 
 ### 1. Direct tmux tests (fast, deterministic)
 
-Use the `FreebuffSession` class to start the binary in tmux, send commands, capture output, and assert directly.
+Use the `FREEPORTSession` class to start the binary in tmux, send commands, capture output, and assert directly.
 
 ```typescript
 import { describe, test, expect, afterEach } from 'bun:test'
-import { FreebuffSession, requireFreebuffBinary } from '../utils'
+import { FREEPORTSession, requireFREEPORTBinary } from '../utils'
 
 describe('My Feature', () => {
-  let session: FreebuffSession | null = null
+  let session: FREEPORTSession | null = null
 
   afterEach(async () => {
     if (session) await session.stop()
@@ -23,8 +23,8 @@ describe('My Feature', () => {
   })
 
   test('works correctly', async () => {
-    const binary = requireFreebuffBinary()
-    session = await FreebuffSession.start(binary)
+    const binary = requireFREEPORTBinary()
+    session = await FREEPORTSession.start(binary)
 
     await session.send('/help')
     const output = await session.capture(2)
@@ -36,13 +36,13 @@ describe('My Feature', () => {
 
 ### 2. SDK agent-driven tests (AI-powered verification)
 
-Use the Codebuff SDK to run a testing agent that interacts with Freebuff via custom tmux tools. The agent reasons about the CLI output and verifies complex behaviors.
+Use the Codebuff SDK to run a testing agent that interacts with FREEPORT via custom tmux tools. The agent reasons about the CLI output and verifies complex behaviors.
 
 ```typescript
 import { describe, test, expect, afterEach } from 'bun:test'
 import { CodebuffClient } from '@codebuff/sdk'
-import { freebuffTesterAgent } from '../agent/freebuff-tester'
-import { createFreebuffTmuxTools, requireFreebuffBinary } from '../utils'
+import { FREEPORTTesterAgent } from '../agent/FREEPORT-tester'
+import { createFREEPORTTmuxTools, requireFREEPORTBinary } from '../utils'
 
 describe('Agent Test', () => {
   let cleanup: (() => Promise<void>) | null = null
@@ -56,15 +56,15 @@ describe('Agent Test', () => {
     const apiKey = process.env.CODEBUFF_API_KEY
     if (!apiKey) return // Skip if no API key
 
-    const binary = requireFreebuffBinary()
-    const tmuxTools = createFreebuffTmuxTools(binary)
+    const binary = requireFREEPORTBinary()
+    const tmuxTools = createFREEPORTTmuxTools(binary)
     cleanup = tmuxTools.cleanup
 
     const client = new CodebuffClient({ apiKey })
     const result = await client.run({
-      agent: freebuffTesterAgent.id,
-      prompt: 'Start Freebuff and verify the branding is correct.',
-      agentDefinitions: [freebuffTesterAgent],
+      agent: FREEPORTTesterAgent.id,
+      prompt: 'Start FREEPORT and verify the branding is correct.',
+      agentDefinitions: [FREEPORTTesterAgent],
       customToolDefinitions: tmuxTools.tools,
       handleEvent: () => {},
     })
@@ -77,7 +77,7 @@ describe('Agent Test', () => {
 ## Prerequisites
 
 - **tmux** must be installed: `brew install tmux` (macOS) or `sudo apt-get install tmux` (Ubuntu)
-- **Freebuff binary** must be built: `bun freebuff/cli/build.ts 0.0.0-dev`
+- **FREEPORT binary** must be built: `bun FREEPORT/cli/build.ts 0.0.0-dev`
 - **SDK built** (for agent tests): `cd sdk && bun run build`
 - **CODEBUFF_API_KEY** (for agent tests only): Set this environment variable
 
@@ -86,34 +86,34 @@ describe('Agent Test', () => {
 ### Build the binary first
 
 ```bash
-bun freebuff/cli/build.ts 0.0.0-dev
+bun FREEPORT/cli/build.ts 0.0.0-dev
 ```
 
 ### Run all tests
 
 ```bash
-bun test freebuff/e2e/tests/
+bun test FREEPORT/e2e/tests/
 ```
 
 ### Run a specific test
 
 ```bash
-bun test freebuff/e2e/tests/version.e2e.test.ts
-bun test freebuff/e2e/tests/startup.e2e.test.ts
-bun test freebuff/e2e/tests/help-command.e2e.test.ts
-bun test freebuff/e2e/tests/agent-startup.e2e.test.ts
+bun test FREEPORT/e2e/tests/version.e2e.test.ts
+bun test FREEPORT/e2e/tests/startup.e2e.test.ts
+bun test FREEPORT/e2e/tests/help-command.e2e.test.ts
+bun test FREEPORT/e2e/tests/agent-startup.e2e.test.ts
 ```
 
 ### Use a custom binary path
 
 ```bash
-FREEBUFF_BINARY=/path/to/freebuff bun test freebuff/e2e/tests/
+FREEPORT_BINARY=/path/to/FREEPORT bun test FREEPORT/e2e/tests/
 ```
 
 ## Adding New Tests
 
-1. Create a new file in `freebuff/e2e/tests/` with the naming convention `<feature>.e2e.test.ts`
-2. Add the test name to `.github/workflows/freebuff-e2e.yml` matrix:
+1. Create a new file in `FREEPORT/e2e/tests/` with the naming convention `<feature>.e2e.test.ts`
+2. Add the test name to `.github/workflows/FREEPORT-e2e.yml` matrix:
 
 ```yaml
 matrix:
@@ -129,9 +129,9 @@ matrix:
 
 ## CI Workflow
 
-The `.github/workflows/freebuff-e2e.yml` workflow:
+The `.github/workflows/FREEPORT-e2e.yml` workflow:
 
-1. **Builds** the Freebuff binary once (linux-x64)
+1. **Builds** the FREEPORT binary once (linux-x64)
 2. **Runs each test file in parallel** via GitHub Actions matrix strategy
 3. **Uploads tmux session logs** on failure for debugging
 
@@ -141,11 +141,11 @@ Triggers:
 
 ## Utilities Reference
 
-### `FreebuffSession`
+### `FREEPORTSession`
 
 | Method | Description |
 |--------|-------------|
-| `FreebuffSession.start(binaryPath)` | Start binary in tmux, returns session |
+| `FREEPORTSession.start(binaryPath)` | Start binary in tmux, returns session |
 | `session.send(text)` | Send text input (presses Enter) |
 | `session.sendKey(key)` | Send special key (e.g. `'C-c'`, `'Escape'`) |
 | `session.capture(waitSec?)` | Capture terminal output |
@@ -153,17 +153,17 @@ Triggers:
 | `session.waitForText(pattern, timeoutMs?)` | Poll until text appears |
 | `session.stop()` | Stop session and clean up |
 
-### `createFreebuffTmuxTools(binaryPath)`
+### `createFREEPORTTmuxTools(binaryPath)`
 
 Creates SDK custom tools for agent-driven testing:
-- `start_freebuff` - Launch the CLI
-- `send_to_freebuff` - Send text input
-- `capture_freebuff_output` - Capture terminal output
-- `stop_freebuff` - Stop and clean up
+- `start_FREEPORT` - Launch the CLI
+- `send_to_FREEPORT` - Send text input
+- `capture_FREEPORT_output` - Capture terminal output
+- `stop_FREEPORT` - Stop and clean up
 
 ### Helper functions
 
 | Function | Description |
 |----------|-------------|
-| `requireFreebuffBinary()` | Get binary path, throws if not found |
-| `getFreebuffBinaryPath()` | Get binary path (may not exist) |
+| `requireFREEPORTBinary()` | Get binary path, throws if not found |
+| `getFREEPORTBinaryPath()` | Get binary path (may not exist) |

@@ -5,7 +5,7 @@ import path from 'path'
 import { tmuxCapture, tmuxSend, tmuxSendKey, tmuxStart, tmuxStop } from './tmux-helpers'
 
 /** Static strings that prove the CLI reached a post-init boot screen. */
-export const FREEBUFF_BOOT_SIGNALS = [
+export const FREEPORT_BOOT_SIGNALS = [
   '█████╗  ██████╔╝', // ASCII logo (full or small variant)
   'Start coding for free',
   'Enter a coding task',
@@ -16,7 +16,7 @@ export const FREEBUFF_BOOT_SIGNALS = [
   'will run commands on your behalf',
 ] as const
 
-export class FreebuffSession {
+export class FREEPORTSession {
   public readonly name: string
   public readonly workDir: string
 
@@ -26,7 +26,7 @@ export class FreebuffSession {
   }
 
   /**
-   * Start a freebuff binary in a tmux session.
+   * Start a FREEPORT binary in a tmux session.
    * Creates a temporary working directory to simulate a real user project.
    */
   static async start(
@@ -37,10 +37,10 @@ export class FreebuffSession {
       height?: number
       initialFiles?: Record<string, string>
     },
-  ): Promise<FreebuffSession> {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'freebuff-e2e-'))
+  ): Promise<FREEPORTSession> {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'FREEPORT-e2e-'))
 
-    // Create a minimal project so freebuff has something to work with
+    // Create a minimal project so FREEPORT has something to work with
     fs.writeFileSync(
       path.join(tmpDir, 'README.md'),
       '# E2E Test Project\n',
@@ -67,7 +67,7 @@ export class FreebuffSession {
       height: options?.height ?? 30,
     })
 
-    return new FreebuffSession(sessionName, tmpDir)
+    return new FREEPORTSession(sessionName, tmpDir)
   }
 
   /** Write a file into the session's working directory. */
@@ -145,7 +145,7 @@ export class FreebuffSession {
     )
   }
 
-  /** Send text input to the freebuff CLI (presses Enter by default). */
+  /** Send text input to the FREEPORT CLI (presses Enter by default). */
   async send(
     text: string,
     options?: { noEnter?: boolean; waitIdle?: number },
@@ -178,7 +178,7 @@ export class FreebuffSession {
     const start = Date.now()
     while (Date.now() - start < timeoutMs) {
       const output = await this.capture()
-      if (FREEBUFF_BOOT_SIGNALS.some((signal) => output.includes(signal))) {
+      if (FREEPORT_BOOT_SIGNALS.some((signal) => output.includes(signal))) {
         return output
       }
       await new Promise((resolve) => setTimeout(resolve, 500))
@@ -186,7 +186,7 @@ export class FreebuffSession {
     const finalOutput = await this.capture()
     throw new Error(
       `Timed out after ${timeoutMs}ms waiting for a boot signal ` +
-        `(checked ${FREEBUFF_BOOT_SIGNALS.length} patterns).\n` +
+        `(checked ${FREEPORT_BOOT_SIGNALS.length} patterns).\n` +
         `Last output:\n${finalOutput}`,
     )
   }

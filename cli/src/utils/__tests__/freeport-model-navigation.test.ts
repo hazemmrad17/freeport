@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test'
 
 import {
-  freeportModelNavigationDirectionForKey,
-  nextfreeportModelId,
+  FREEPORTModelNavigationDirectionForKey,
+  nextFREEPORTModelId,
 } from '../freeport-model-navigation'
 
 describe('nextfreeportModelId', () => {
@@ -10,7 +10,7 @@ describe('nextfreeportModelId', () => {
     const modelIds = ['glm', 'minimax']
 
     expect(
-      nextfreeportModelId({
+      nextFREEPORTModelId({
         modelIds,
         focusedId: 'minimax',
         direction: 'forward',
@@ -22,7 +22,7 @@ describe('nextfreeportModelId', () => {
     const modelIds = ['glm', 'minimax']
 
     expect(
-      nextfreeportModelId({
+      nextFREEPORTModelId({
         modelIds,
         focusedId: 'minimax',
         direction: 'backward',
@@ -34,7 +34,7 @@ describe('nextfreeportModelId', () => {
     const modelIds = ['glm', 'minimax', 'other']
 
     expect(
-      nextfreeportModelId({
+      nextFREEPORTModelId({
         modelIds,
         focusedId: 'minimax',
         direction: 'forward',
@@ -44,7 +44,7 @@ describe('nextfreeportModelId', () => {
 
   test('returns null when no model exists', () => {
     expect(
-      nextfreeportModelId({
+      nextFREEPORTModelId({
         modelIds: [],
         focusedId: 'glm',
         direction: 'forward',
@@ -55,48 +55,48 @@ describe('nextfreeportModelId', () => {
 
 describe('freeportModelNavigationDirectionForKey', () => {
   test('maps arrow keys to model navigation directions', () => {
-    expect(freeportModelNavigationDirectionForKey({ name: 'down' })).toBe(
+    expect(FREEPORTModelNavigationDirectionForKey({ name: 'down' })).toBe(
       'forward',
     )
-    expect(freeportModelNavigationDirectionForKey({ name: 'right' })).toBe(
+    expect(FREEPORTModelNavigationDirectionForKey({ name: 'right' })).toBe(
       'forward',
     )
-    expect(freeportModelNavigationDirectionForKey({ name: 'up' })).toBe(
+    expect(FREEPORTModelNavigationDirectionForKey({ name: 'up' })).toBe(
       'backward',
     )
-    expect(freeportModelNavigationDirectionForKey({ name: 'left' })).toBe(
+    expect(FREEPORTModelNavigationDirectionForKey({ name: 'left' })).toBe(
       'backward',
     )
   })
 
   test('maps tab and shift-tab to model navigation directions', () => {
-    expect(freeportModelNavigationDirectionForKey({ name: 'tab' })).toBe(
+    expect(FREEPORTModelNavigationDirectionForKey({ name: 'tab' })).toBe(
       'forward',
     )
     expect(
-      freeportModelNavigationDirectionForKey({ name: 'tab', shift: true }),
+      FREEPORTModelNavigationDirectionForKey({ name: 'tab', shift: true }),
     ).toBe('backward')
   })
 
   test('maps terminal tab sequences to model navigation directions', () => {
-    expect(freeportModelNavigationDirectionForKey({ sequence: '\t' })).toBe(
+    expect(FREEPORTModelNavigationDirectionForKey({ sequence: '\t' })).toBe(
       'forward',
     )
     expect(
-      freeportModelNavigationDirectionForKey({ sequence: '\x1b[9u' }),
+      FREEPORTModelNavigationDirectionForKey({ sequence: '\x1b[9u' }),
     ).toBe('forward')
     expect(
-      freeportModelNavigationDirectionForKey({ sequence: '\x1b[Z' }),
+      FREEPORTModelNavigationDirectionForKey({ sequence: '\x1b[Z' }),
     ).toBe('backward')
     expect(
-      freeportModelNavigationDirectionForKey({ sequence: '\x1b[9;2u' }),
+      FREEPORTModelNavigationDirectionForKey({ sequence: '\x1b[9;2u' }),
     ).toBe('backward')
     expect(
-      freeportModelNavigationDirectionForKey({ sequence: '\x1b[27;2;9~' }),
+      FREEPORTModelNavigationDirectionForKey({ sequence: '\x1b[27;2;9~' }),
     ).toBe('backward')
   })
 
   test('ignores non-navigation keys', () => {
-    expect(freeportModelNavigationDirectionForKey({ name: 'enter' })).toBeNull()
+    expect(FREEPORTModelNavigationDirectionForKey({ name: 'enter' })).toBeNull()
   })
 })

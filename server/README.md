@@ -47,7 +47,7 @@ each admitted session costs one unit. The CLI reports real token usage to
 
 - **Auth** — `POST /api/auth/cli/code`, `GET /api/auth/cli/status`,
   `POST /api/auth/cli/logout`, `GET /api/v1/me`, `GET|POST /login`
-- **Session** — `GET|POST|DELETE /api/v1/freebuff/session`
+- **Session** — `GET|POST|DELETE /api/v1/FREEPORT/session`
   (wire-compatible with the CLI's session contract; daily `rate_limited`,
   `model_locked`, `superseded` responses)
 - **Ads** — `POST /api/v1/ads`, `/api/v1/ads/impression`, `/api/v1/ads/click`

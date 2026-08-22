@@ -109,7 +109,7 @@ Bash is required but was not found on this Windows system.
 Agents write bash, so bash is what we run. This error means we could not find one — Git for
 Windows is the usual source of it.
 
-**In Freebuff Desktop**: you should rarely see anything like this. The app looks in far more
+**In FREEPORT Desktop**: you should rarely see anything like this. The app looks in far more
 places than the message above implies (see below), and when bash genuinely is missing it says so
 with a card before your first prompt rather than failing mid-turn. The text above is the CLI's.
 Either way the fix is the same, and the app picks up a new install without a restart.

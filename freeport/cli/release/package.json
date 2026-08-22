@@ -1,10 +1,10 @@
 {
-  "name": "freebuff",
+  "name": "FREEPORT",
   "version": "0.0.150",
   "description": "The world's strongest free coding agent",
   "license": "MIT",
   "bin": {
-    "freebuff": "index.js"
+    "FREEPORT": "index.js"
   },
   "scripts": {
     "prepack": "node ../../../cli/release-core/prepare-package.js",
@@ -33,9 +33,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CodebuffAI/freebuff-private.git"
+    "url": "git+https://github.com/CodebuffAI/FREEPORT-private.git"
   },
-  "homepage": "https://freebuff.com",
+  "homepage": "https://FREEPORT.com",
   "publishConfig": {
     "access": "public",
     "provenance": false

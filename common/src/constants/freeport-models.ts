@@ -16,7 +16,7 @@ import {
 } from './freeport-model-ids'
 import {
   FREEPORT_AI_TRAINING_NOTICE,
-  type freeportModelDataUse,
+  type FREEPORTModelDataUse,
 } from './freeport-data-use'
 import { clampReasoningEffort, type ReasoningEffort } from './reasoning-effort'
 
@@ -49,7 +49,7 @@ export interface freeportModelOption {
   warning?: string
   /** Machine-readable data-use policy. Never infer storage or training
    *  behavior from the human-readable warning text. */
-  dataUse: freeportModelDataUse
+  dataUse: FREEPORTModelDataUse
   /** Premium models carry a per-day usage limit
    *  (FREEPORT_PREMIUM_SESSION_LIMIT). Surfaced in the UI as a "Premium"
    *  badge with the limit. Derived from FREEPORT_PREMIUM_MODEL_IDS so the two

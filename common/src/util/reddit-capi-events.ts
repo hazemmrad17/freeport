@@ -1,4 +1,4 @@
-import type { freeportRedditRetentionMilestoneDays } from '@codebuff/common/util/reddit-freeport-retention'
+import type { FREEPORTRetentionMilestoneDays } from '@codebuff/common/util/reddit-freeport-retention'
 
 export type RedditConversionSurface = 'cli' | 'web' | 'cloud' | 'chat'
 
@@ -11,7 +11,7 @@ export type RedditCapiEventName =
 export const REDDIT_FIRST_PROMPT_EVENT = 'FirstPrompt' as const
 
 export function redditRetentionCapiEventName(
-  milestone: freeportRedditRetentionMilestoneDays,
+  milestone: FREEPORTRetentionMilestoneDays,
 ): RedditCapiEventName {
   return `Retention${milestone}d`
 }

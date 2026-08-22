@@ -1,6 +1,6 @@
 # Contributing
 
-This repository is a public mirror of the Freebuff/Codebuff source tree. The private repository is the source of truth, so accepted public contributions are ported into the private repo and then exported back here.
+This repository is a public mirror of the FREEPORT/Codebuff source tree. The private repository is the source of truth, so accepted public contributions are ported into the private repo and then exported back here.
 
 ## Public Contributions
 
@@ -13,7 +13,7 @@ Good public PRs are usually scoped to:
 - `packages/agent-runtime/`
 - `packages/code-map/`
 - `packages/llm-providers/`
-- `freebuff/`, excluding the private web app
+- `FREEPORT/`, excluding the private web app
 - `scripts/tmux/`
 - public docs
 
@@ -33,10 +33,10 @@ Build the SDK:
 bun run build:sdk
 ```
 
-Build the Freebuff binary:
+Build the FREEPORT binary:
 
 ```bash
-bun run build:freebuff
+bun run build:FREEPORT
 ```
 
 ## Pull Request Flow
@@ -66,7 +66,7 @@ the PR:
 2. **Description** — must say what the change does and why. Accepted changes are
    ported by hand into a private source tree, so a PR that does not explain
    itself is expensive to accept.
-3. **Scope** — must not touch `web/`, `freebuff/web/`, `packages/internal/`,
+3. **Scope** — must not touch `web/`, `FREEPORT/web/`, `packages/internal/`,
    `packages/billing/`, `packages/bigquery/` or `packages/build-tools/`. Those
    are not part of this repository and a change to them cannot be merged here
    however good it is.

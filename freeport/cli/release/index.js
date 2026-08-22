@@ -22,10 +22,10 @@ const { createLauncher } = require(
 )
 
 const launcher = createLauncher({
-  packageName: 'freebuff',
-  displayName: 'Freebuff',
+  packageName: 'FREEPORT',
+  displayName: 'FREEPORT',
   wrapperVersion: require('./package.json').version,
-  telemetryEvent: 'cli.update_freebuff_failed',
+  telemetryEvent: 'cli.update_FREEPORT_failed',
 })
 
 module.exports = launcher

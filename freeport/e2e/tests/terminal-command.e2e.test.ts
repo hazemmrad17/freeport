@@ -1,7 +1,7 @@
 /**
- * E2E test that verifies Freebuff can run terminal commands.
+ * E2E test that verifies FREEPORT can run terminal commands.
  *
- * Starts Freebuff in tmux, sends a prompt asking it to run a shell command,
+ * Starts FREEPORT in tmux, sends a prompt asking it to run a shell command,
  * and verifies the command was executed by checking its side effects.
  *
  * Requires CODEBUFF_API_KEY — skipped if not set.
@@ -9,7 +9,7 @@
 
 import { afterEach, describe, expect, test } from 'bun:test'
 
-import { FreebuffSession, requireFreebuffBinary } from '../utils'
+import { FREEPORTSession, requireFREEPORTBinary } from '../utils'
 
 const TEST_TIMEOUT = 1_000_000
 
@@ -17,8 +17,8 @@ function getApiKey(): string | null {
   return process.env.CODEBUFF_API_KEY ?? null
 }
 
-describe.skip('Freebuff: Terminal Command', () => {
-  let session: FreebuffSession | null = null
+describe.skip('FREEPORT: Terminal Command', () => {
+  let session: FREEPORTSession | null = null
 
   afterEach(async () => {
     if (session) {
@@ -38,13 +38,13 @@ describe.skip('Freebuff: Terminal Command', () => {
         return
       }
 
-      const binary = requireFreebuffBinary()
-      session = await FreebuffSession.start(binary, { waitSeconds: 5 })
+      const binary = requireFREEPORTBinary()
+      session = await FREEPORTSession.start(binary, { waitSeconds: 5 })
 
       // Wait for the CLI to be fully ready before sending input
       await session.waitForReady()
 
-      // Ask freebuff to run a shell command whose output can only come from
+      // Ask FREEPORT to run a shell command whose output can only come from
       // actual terminal execution (not file-writing tools)
       await session.send(
         'Execute a shell command in the terminal to write the current Unix timestamp in seconds to timestamp.txt',

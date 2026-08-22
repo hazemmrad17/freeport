@@ -1,10 +1,10 @@
 import { z } from 'zod/v4'
 
-import { FreebuffSession } from './freebuff-session'
+import { FREEPORTSession } from './FREEPORT-session'
 
 import type { ZodType } from 'zod/v4'
 
-interface FreebuffToolDefinition {
+interface FREEPORTToolDefinition {
   toolName: string
   description: string
   inputSchema: ZodType
@@ -17,27 +17,27 @@ type ToolOutput = { type: 'json'; value: Record<string, unknown> }[]
 
 /**
  * Creates custom tool definitions that allow a Codebuff SDK agent
- * to interact with a Freebuff CLI binary via tmux.
+ * to interact with a FREEPORT CLI binary via tmux.
  *
  * Returns the tools array and a cleanup function to call in afterEach.
  *
  * Usage:
  * ```ts
- * const { tools, cleanup } = createFreebuffTmuxTools(binaryPath)
+ * const { tools, cleanup } = createFREEPORTTmuxTools(binaryPath)
  * // ... pass tools to client.run({ customToolDefinitions: tools })
  * // ... in afterEach: await cleanup()
  * ```
  */
-export function createFreebuffTmuxTools(binaryPath: string): {
-  tools: FreebuffToolDefinition[]
+export function createFREEPORTTmuxTools(binaryPath: string): {
+  tools: FREEPORTToolDefinition[]
   cleanup: () => Promise<void>
 } {
-  let session: FreebuffSession | null = null
+  let session: FREEPORTSession | null = null
 
-  const startTool: FreebuffToolDefinition = {
-    toolName: 'start_freebuff',
+  const startTool: FREEPORTToolDefinition = {
+    toolName: 'start_FREEPORT',
     description:
-      'Start the Freebuff CLI binary in a tmux terminal session. Call this first before interacting with Freebuff.',
+      'Start the FREEPORT CLI binary in a tmux terminal session. Call this first before interacting with FREEPORT.',
     inputSchema: z.object({}),
     endsAgentStep: true,
     exampleInputs: [{}],
@@ -53,7 +53,7 @@ export function createFreebuffTmuxTools(binaryPath: string): {
           },
         ]
       }
-      session = await FreebuffSession.start(binaryPath)
+      session = await FREEPORTSession.start(binaryPath)
       await session.waitForReady()
       const initialOutput = await session.capture()
       return [
@@ -69,12 +69,12 @@ export function createFreebuffTmuxTools(binaryPath: string): {
     },
   }
 
-  const sendInputTool: FreebuffToolDefinition = {
-    toolName: 'send_to_freebuff',
+  const sendInputTool: FREEPORTToolDefinition = {
+    toolName: 'send_to_FREEPORT',
     description:
-      'Send text input to the running Freebuff CLI. The text is sent as if typed by the user and Enter is pressed.',
+      'Send text input to the running FREEPORT CLI. The text is sent as if typed by the user and Enter is pressed.',
     inputSchema: z.object({
-      text: z.string().describe('Text to send to Freebuff'),
+      text: z.string().describe('Text to send to FREEPORT'),
     }),
     endsAgentStep: false,
     exampleInputs: [{ text: '/help' }],
@@ -84,7 +84,7 @@ export function createFreebuffTmuxTools(binaryPath: string): {
         return [
           {
             type: 'json',
-            value: { error: 'No session running. Call start_freebuff first.' },
+            value: { error: 'No session running. Call start_FREEPORT first.' },
           },
         ]
       }
@@ -93,10 +93,10 @@ export function createFreebuffTmuxTools(binaryPath: string): {
     },
   }
 
-  const captureOutputTool: FreebuffToolDefinition = {
-    toolName: 'capture_freebuff_output',
+  const captureOutputTool: FREEPORTToolDefinition = {
+    toolName: 'capture_FREEPORT_output',
     description:
-      'Capture the current terminal output from the running Freebuff CLI session. ' +
+      'Capture the current terminal output from the running FREEPORT CLI session. ' +
       'Use waitSeconds to wait before capturing (useful after sending a command).',
     inputSchema: z.object({
       waitSeconds: z
@@ -112,7 +112,7 @@ export function createFreebuffTmuxTools(binaryPath: string): {
         return [
           {
             type: 'json',
-            value: { error: 'No session running. Call start_freebuff first.' },
+            value: { error: 'No session running. Call start_FREEPORT first.' },
           },
         ]
       }
@@ -121,10 +121,10 @@ export function createFreebuffTmuxTools(binaryPath: string): {
     },
   }
 
-  const stopTool: FreebuffToolDefinition = {
-    toolName: 'stop_freebuff',
+  const stopTool: FREEPORTToolDefinition = {
+    toolName: 'stop_FREEPORT',
     description:
-      'Stop the running Freebuff CLI session and clean up resources. Always call this when done testing.',
+      'Stop the running FREEPORT CLI session and clean up resources. Always call this when done testing.',
     inputSchema: z.object({}),
     endsAgentStep: true,
     exampleInputs: [{}],

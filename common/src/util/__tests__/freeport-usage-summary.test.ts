@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 
 import {
   buildfreeportUsageGrid,
-  buildfreeportUsageSummary,
+  buildFREEPORTUsageSummary,
   calculateLongestfreeportStreak,
 } from '../freeport-usage-summary'
 
@@ -53,11 +53,11 @@ describe('calculateLongestfreeportStreak', () => {
   })
 })
 
-describe('buildfreeportUsageSummary', () => {
+describe('buildFREEPORTUsageSummary', () => {
   const activeDates = ['2026-08-10', '2026-08-11', '2026-08-12']
 
   it('reports the current and longest streak together', () => {
-    const summary = buildfreeportUsageSummary({
+    const summary = buildFREEPORTUsageSummary({
       activeDates: [
         // A four-day run that has since lapsed...
         '2026-07-01',
@@ -78,7 +78,7 @@ describe('buildfreeportUsageSummary', () => {
   })
 
   it('counts all-time active days regardless of the map window', () => {
-    const summary = buildfreeportUsageSummary({
+    const summary = buildFREEPORTUsageSummary({
       activeDates,
       todayDateKey: '2026-08-12',
       windowDays: 2,
@@ -91,7 +91,7 @@ describe('buildfreeportUsageSummary', () => {
   })
 
   it('drops days after today rather than letting a fast clock inflate totals', () => {
-    const summary = buildfreeportUsageSummary({
+    const summary = buildFREEPORTUsageSummary({
       activeDates: [...activeDates, '2026-08-13'],
       todayDateKey: '2026-08-12',
     })
@@ -101,7 +101,7 @@ describe('buildfreeportUsageSummary', () => {
   })
 
   it('sorts and dedupes unordered input before walking the streak', () => {
-    const summary = buildfreeportUsageSummary({
+    const summary = buildFREEPORTUsageSummary({
       activeDates: ['2026-08-12', '2026-08-10', '2026-08-11', '2026-08-11'],
       todayDateKey: '2026-08-12',
     })
@@ -114,7 +114,7 @@ describe('buildfreeportUsageSummary', () => {
   it('carries a null recent window through rather than inventing zeros', () => {
     // The token aggregate caps itself with a statement timeout; a timeout must
     // read as "unknown" downstream, never as "you sent nothing".
-    const summary = buildfreeportUsageSummary({
+    const summary = buildFREEPORTUsageSummary({
       activeDates,
       todayDateKey: '2026-08-12',
       recent: null,
@@ -124,7 +124,7 @@ describe('buildfreeportUsageSummary', () => {
   })
 
   it('passes the recent window through when it resolved', () => {
-    const summary = buildfreeportUsageSummary({
+    const summary = buildFREEPORTUsageSummary({
       activeDates,
       todayDateKey: '2026-08-12',
       recent: {

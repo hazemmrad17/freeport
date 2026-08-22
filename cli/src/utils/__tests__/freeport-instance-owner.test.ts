@@ -12,8 +12,8 @@ ensureCliTestEnv()
 
 const { getConfigDir } = await import('../auth')
 const {
-  isfreeportInstanceOwnedByDeadLocalProcess,
-  recordfreeportInstanceOwner,
+  isFREEPORTInstanceOwnedByDeadLocalProcess,
+  recordFREEPORTInstanceOwner,
 } = await import('../freeport-instance-owner')
 
 describe('FREEPORT instance owner', () => {
@@ -38,10 +38,10 @@ describe('FREEPORT instance owner', () => {
   })
 
   test('does not classify the current process as dead', () => {
-    recordfreeportInstanceOwner('inst-current')
+    recordFREEPORTInstanceOwner('inst-current')
 
     expect(
-      isfreeportInstanceOwnedByDeadLocalProcess('inst-current'),
+      isFREEPORTInstanceOwnedByDeadLocalProcess('inst-current'),
     ).toBe(false)
   })
 
@@ -52,7 +52,7 @@ describe('FREEPORT instance owner', () => {
       JSON.stringify({ instanceId: 'inst-dead', pid: 2_147_483_647 }),
     )
 
-    expect(isfreeportInstanceOwnedByDeadLocalProcess('inst-dead')).toBe(true)
+    expect(isFREEPORTInstanceOwnedByDeadLocalProcess('inst-dead')).toBe(true)
   })
 
   test('ignores a dead pid for a different instance id', () => {
@@ -63,7 +63,7 @@ describe('FREEPORT instance owner', () => {
     )
 
     expect(
-      isfreeportInstanceOwnedByDeadLocalProcess('inst-current'),
+      isFREEPORTInstanceOwnedByDeadLocalProcess('inst-current'),
     ).toBe(false)
   })
 })

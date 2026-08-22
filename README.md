@@ -1,6 +1,6 @@
 # Freeport
 
-**A freemium CLI coding agent with local payment support.** Fork of [Freebuff](https://freebuff.com) (Apache-2.0), repositioned for developers in regions without international payment access.
+**A freemium CLI coding agent with local payment support.** Fork of [FREEPORT](https://FREEPORT.com) (Apache-2.0), repositioned for developers in regions without international payment access.
 
 ## What is Freeport?
 
@@ -40,7 +40,7 @@ bun run dev             # starts on :8787
 |---|---|
 | `POST /api/auth/cli/code` | Device-code login flow |
 | `GET /api/auth/cli/status` | Poll for login approval |
-| `GET/POST/DELETE /api/v1/freebuff/session` | Session admission + daily quota |
+| `GET/POST/DELETE /api/v1/FREEPORT/session` | Session admission + daily quota |
 | `POST /api/v1/ads` | Sponsor line per request |
 | `POST /api/v1/usage/report` | CLI reports real token usage |
 | `GET /api/v1/subscription` | Check paid/free status |
@@ -103,4 +103,4 @@ Ad revenue target: ~$0.03/request (needs validation — Phase 4).
 
 ## License
 
-Apache-2.0 (forked from [CodebuffAI/freebuff](https://github.com/CodebuffAI/freebuff))
+Apache-2.0 (forked from [CodebuffAI/FREEPORT](https://github.com/CodebuffAI/FREEPORT))

@@ -3,12 +3,12 @@ const DAY_MS = 24 * 60 * 60 * 1000
 /** PostHog-style retention windows to mirror in Reddit CAPI custom events. */
 export const FREEPORT_REDDIT_RETENTION_MILESTONE_DAYS = [1, 7, 24] as const
 
-export type FREEPORTRedditRetentionMilestoneDays =
+export type FREEPORTRetentionMilestoneDays =
   (typeof FREEPORT_REDDIT_RETENTION_MILESTONE_DAYS)[number]
 
 export type FREEPORTRedditConversionPlan = {
   fireFirstPrompt: boolean
-  retentionMilestones: FREEPORTRedditRetentionMilestoneDays[]
+  retentionMilestones: FREEPORTRetentionMilestoneDays[]
 }
 
 function daysBetween(fromDateKey: string, toDateKey: string): number {
@@ -33,7 +33,7 @@ export function getFREEPORTRetentionMilestonesToFire(params: {
   previousUsageDays: readonly string[]
   todayDateKey: string
   newUsageDayRecorded: boolean
-}): FREEPORTRedditRetentionMilestoneDays[] {
+}): FREEPORTRetentionMilestoneDays[] {
   if (!params.newUsageDayRecorded) {
     return []
   }

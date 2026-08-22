@@ -19,7 +19,7 @@ describe('createExitCliCleanly', () => {
       drainClientLogs: async () => {
         events.push('flush-logs')
       },
-      endFREEPORTSession: async () => {
+      endfreeportSession: async () => {
         events.push('end-session')
       },
       waitForRemoteCleanup: async (tasks) => {
@@ -56,7 +56,7 @@ describe('createExitCliCleanly', () => {
       drainClientLogs: async () => {
         events.push('flush-logs')
       },
-      endFREEPORTSession: async () => {
+      endfreeportSession: async () => {
         events.push('end-session')
       },
       waitForRemoteCleanup: async (tasks) => {
@@ -86,7 +86,7 @@ describe('createExitCliCleanly', () => {
       stopEngagementTracking: () => {},
       flushAnalytics: async () => {},
       drainClientLogs: async () => {},
-      endFREEPORTSession: async () => {},
+      endfreeportSession: async () => {},
       waitForRemoteCleanup: () =>
         new Promise<void>((resolve) => {
           finishRemoteCleanup = resolve
