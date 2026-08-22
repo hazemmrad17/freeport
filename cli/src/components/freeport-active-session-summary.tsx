@@ -8,12 +8,12 @@ import { formatSessionUnits } from '../utils/format-session-units'
 
 import type { freeportSessionResponse } from '../types/freeport-session'
 
-interface freeportActiveSessionSummaryProps {
+interface FreeportActiveSessionSummaryProps {
   session: freeportSessionResponse | null
 }
 
-export const freeportActiveSessionSummary: React.FC<
-  freeportActiveSessionSummaryProps
+export const FreeportActiveSessionSummary: React.FC<
+  FreeportActiveSessionSummaryProps
 > = ({ session }) => {
   const theme = useTheme()
   const now = useNow(60_000, session?.status === 'active')

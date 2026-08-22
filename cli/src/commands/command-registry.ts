@@ -619,7 +619,7 @@ const ALL_COMMANDS: CommandDefinition[] = [
   }),
   // /end-session (freeport-only) — end the active session early and drop back
   // to the model picker. The hook flips status to 'none', which unmounts
-  // <Chat> and mounts <freeportLandingScreen>, where the user picks a model
+  // <Chat> and mounts <FreeportLandingScreen>, where the user picks a model
   // and hits Enter to start a new session.
   defineCommand({
     name: 'end-session',

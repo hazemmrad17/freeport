@@ -12,7 +12,7 @@ import { getLogoAccentColor, getLogoBlockColor } from '../utils/theme-system'
  * the same account rotated our instance id and we've stopped polling ΓÇö the
  * user needs to close the other instance and restart.
  */
-export const freeportSupersededScreen: React.FC = () => {
+export const FreeportSupersededScreen: React.FC = () => {
   const theme = useTheme()
   const { contentMaxWidth } = useTerminalDimensions()
   const blockColor = getLogoBlockColor(theme.name)

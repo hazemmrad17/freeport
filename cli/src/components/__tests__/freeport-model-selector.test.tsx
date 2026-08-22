@@ -4,7 +4,7 @@ import { createTestRenderer } from '@opentui/core/testing'
 import { createRoot, flushSync } from '@opentui/react'
 import React from 'react'
 
-import { freeportModelSelector } from '../freeport-model-selector'
+import { FreeportModelSelector } from '../freeport-model-selector'
 import {
   DEFAULT_FREEPORT_MODEL_ID,
   FALLBACK_FREEPORT_MODEL_ID,
@@ -56,7 +56,7 @@ const renderSelector = async (maxHeight = 40) => {
     flushSync(() => root.unmount())
     setup.renderer.destroy()
   }
-  flushSync(() => root.render(<freeportModelSelector maxHeight={maxHeight} />))
+  flushSync(() => root.render(<FreeportModelSelector maxHeight={maxHeight} />))
   await setup.renderOnce()
   return setup
 }
@@ -84,7 +84,7 @@ const renderSelectorWithGlmRemaining = async (remaining?: number) => {
   await nextSetup.renderOnce()
 }
 
-describe('freeportModelSelector referral selection', () => {
+describe('FreeportModelSelector referral selection', () => {
   test('keeps a fractional unlocked GLM session selected while its request is pending', async () => {
     await renderSelectorWithGlmRemaining(0.25)
     expect(getSelectedfreeportModel()).toBe(FREEPORT_GLM_V52_MODEL_ID)
@@ -101,7 +101,7 @@ describe('freeportModelSelector referral selection', () => {
   })
 })
 
-describe('freeportModelSelector tier layout', () => {
+describe('FreeportModelSelector tier layout', () => {
   test('keeps the referral actions on one condensed row', async () => {
     usefreeportSessionStore.getState().setSession({
       status: 'none',
@@ -425,7 +425,7 @@ describe('freeportModelSelector tier layout', () => {
   })
 })
 
-describe('freeportModelSelector limited-model offer', () => {
+describe('FreeportModelSelector limited-model offer', () => {
   const offerSession = (
     offer: Partial<{
       remaining: number

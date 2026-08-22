@@ -17,7 +17,7 @@ import { routeUserPrompt, addBashMessageToHistory } from './commands/router'
 import { SingleAdBanner } from './components/ad-banner'
 import { ChatInputBar } from './components/chat-input-bar'
 import { ChatHeader } from './components/chat-header'
-import { freeportActiveSessionSummary } from './components/freeport-active-session-summary'
+import { FreeportActiveSessionSummary } from './components/freeport-active-session-summary'
 import { LoadPreviousButton } from './components/load-previous-button'
 import { QueuePanel } from './components/queue-panel'
 import { ReviewScreen } from './components/review-screen'
@@ -1564,7 +1564,7 @@ export const Chat = ({
           />
         </box>
         {IS_FREEPORT && (
-          <freeportActiveSessionSummary session={freeportSession} />
+          <FreeportActiveSessionSummary session={freeportSession} />
         )}
         {hiddenMessageCount > 0 && (
           <LoadPreviousButton

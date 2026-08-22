@@ -5,10 +5,10 @@ import { useShallow } from 'zustand/react/shallow'
 import { Chat } from './chat'
 import { ChatHistoryScreen } from './components/chat-history-screen'
 import { ChatRuntimeProvider } from './contexts/chat-runtime-context'
-import { freeportSupersededScreen } from './components/freeport-superseded-screen'
+import { FreeportSupersededScreen } from './components/freeport-superseded-screen'
 import { LoginModal } from './components/login-modal'
 import { ProjectPickerScreen } from './components/project-picker-screen'
-import { freeportLandingScreen } from './components/freeport-landing-screen'
+import { FreeportLandingScreen } from './components/freeport-landing-screen'
 import { useAuthQuery } from './hooks/use-auth-query'
 import { useAuthState } from './hooks/use-auth-state'
 import { usefreeportSession } from './hooks/use-freeport-session'
@@ -337,7 +337,7 @@ const AuthedSurfaceRoutes = ({
   // instance id. Show a dedicated screen and stop polling — don't fall back
   // into the pre-chat screen, which would look like normal startup progress.
   if (IS_FREEPORT && session?.status === 'superseded') {
-    return <freeportSupersededScreen />
+    return <FreeportSupersededScreen />
   }
 
   // Route every non-admitted state through the pre-chat screen:
@@ -364,7 +364,7 @@ const AuthedSurfaceRoutes = ({
       session.status === 'ip_capped' ||
       session.status === 'takeover_prompt')
   ) {
-    return <freeportLandingScreen session={session} failure={sessionFailure} />
+    return <FreeportLandingScreen session={session} failure={sessionFailure} />
   }
 
   // Chat history renders inside AuthedSurface so the FREEPORT session stays

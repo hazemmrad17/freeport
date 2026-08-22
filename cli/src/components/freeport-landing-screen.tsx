@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Button } from './button'
 import { ChoiceAdBanner, AD_CARD_HEIGHT } from './ad-banner'
-import { freeportModelSelector } from './freeport-model-selector'
+import { FreeportModelSelector } from './freeport-model-selector'
 import { ShimmerText } from './shimmer-text'
 import {
   refreshfreeportLandingMetadata,
@@ -55,7 +55,7 @@ import type { freeportSessionFailure } from '../state/freeport-session-store'
 import type { freeportSessionResponse } from '../types/freeport-session'
 import type { KeyEvent } from '@opentui/core'
 
-interface freeportLandingScreenProps {
+interface FreeportLandingScreenProps {
   session: freeportSessionResponse | null
   failure: freeportSessionFailure | null
 }
@@ -339,7 +339,7 @@ export const LandingHeadingRow: React.FC<{
   )
 }
 
-export const freeportLandingScreen: React.FC<freeportLandingScreenProps> = ({
+export const FreeportLandingScreen: React.FC<FreeportLandingScreenProps> = ({
   session,
   failure,
 }) => {
@@ -681,7 +681,7 @@ export const freeportLandingScreen: React.FC<freeportLandingScreenProps> = ({
               {showStreakIndicator && !streakOnHeadingRow && (
                 <StreakInlineLine line={streakLine} />
               )}
-              <freeportModelSelector
+              <FreeportModelSelector
                 maxHeight={selectorMaxHeight}
                 onExpandedChange={setSelectorExpanded}
                 belowToggle={

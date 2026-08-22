@@ -10,7 +10,7 @@ import React, {
 } from 'react'
 
 import { Button } from './button'
-import { freeportReferralBanner } from './freeport-referral-banner'
+import { FreeportReferralBanner } from './freeport-referral-banner'
 import {
   FREEPORT_GLM_V52_MODEL_ID,
   FREEPORT_PREMIUM_SESSION_LIMIT,
@@ -126,7 +126,7 @@ const TOGGLE_ID = '__FREEPORT_toggle__'
  * scrollbar appears when the whole menu doesn't fit, and Tab/arrow navigation
  * keeps the focused control scrolled into view.
  */
-interface freeportModelSelectorProps {
+interface FreeportModelSelectorProps {
   /** Max vertical rows the picker may occupy. When the rendered rows exceed
    *  this, the list scrolls (scrollbar shown, focused row kept in view);
    *  otherwise the scrollbox shrinks to fit and no scrollbar appears. */
@@ -144,7 +144,7 @@ interface freeportModelSelectorProps {
 }
 
 /** The rows the grid shows a tier. GLM 5.2 is a referral reward, not a freely-pickable
- *  model, so it reaches the user through freeportReferralBanner instead. */
+ *  model, so it reaches the user through FreeportReferralBanner instead. */
 function gridModels(
   accessTier: freeportAccessTier,
 ): readonly freeportModelOption[] {
@@ -168,7 +168,7 @@ export function freeportCliOfferedModelIds(
   return [...gridModels(accessTier).map((m) => m.id), FREEPORT_GLM_V52_MODEL_ID]
 }
 
-export const freeportModelSelector: React.FC<freeportModelSelectorProps> = ({
+export const FreeportModelSelector: React.FC<FreeportModelSelectorProps> = ({
   maxHeight,
   onExpandedChange,
   belowToggle,
@@ -1122,7 +1122,7 @@ export const freeportModelSelector: React.FC<freeportModelSelectorProps> = ({
         {toggleContent}
         {belowToggle}
         {referral && (
-          <freeportReferralBanner
+          <FreeportReferralBanner
             width={buttonOuterWidth}
             referral={referral}
             glmPromo={glmPromo}

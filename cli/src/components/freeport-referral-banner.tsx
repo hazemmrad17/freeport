@@ -281,7 +281,7 @@ const CopyInviteLinkButton: React.FC<{
  * Renders nothing unless the server attached a `referral` block, so
  * pre-referral-code users never see it.
  */
-interface freeportReferralBannerProps {
+interface FreeportReferralBannerProps {
   width: number
   referral: freeportReferralInfo
   /** A live GLM promo, or undefined. Undefined is the ordinary state. */
@@ -291,7 +291,7 @@ interface freeportReferralBannerProps {
   onFocusTargetsChange: (targets: freeportReferralFocusTarget[]) => void
 }
 
-export const freeportReferralBanner: React.FC<freeportReferralBannerProps> = ({
+export const FreeportReferralBanner: React.FC<FreeportReferralBannerProps> = ({
   width,
   referral,
   glmPromo,

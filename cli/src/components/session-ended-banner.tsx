@@ -91,7 +91,7 @@ export const SessionEndedBanner: React.FC<SessionEndedBannerProps> = ({
     setPendingAction('landing')
     // Drop back to the landing picker (status: 'none') so the user picks a
     // model and hits Enter again to commit, instead of silently starting a
-    // new session. app.tsx swaps us into <freeportLandingScreen> on the
+    // new session. app.tsx swaps us into <FreeportLandingScreen> on the
     // transition, unmounting this banner — no need to clear the pending state on
     // success.
     returnTofreeportLanding({ resetChat: true }).catch(() =>
