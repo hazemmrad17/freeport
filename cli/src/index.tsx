@@ -310,16 +310,17 @@ async function main(): Promise<void> {
       React.useState(showProjectPicker)
 
     React.useEffect(() => {
-      const apiKey = getAuthTokenDetails().token ?? ''
-
-      if (!apiKey) {
-        setRequireAuth(true)
-        setHasInvalidCredentials(false)
+      // Only STORED credentials authenticate you to the Freeport backend.
+      // Provider keys in the environment (DEEPINFRA_API_KEY etc.) are for
+      // direct model calls (BYOK) — they must not count as login.
+      const { source } = getAuthTokenDetails()
+      if (source === 'credentials') {
+        setHasInvalidCredentials(true)
+        setRequireAuth(false)
         return
       }
-
-      setHasInvalidCredentials(true)
-      setRequireAuth(false)
+      setRequireAuth(true)
+      setHasInvalidCredentials(false)
     }, [])
 
     const loadFileTree = React.useCallback(async (root: string) => {
