@@ -7,6 +7,7 @@ import { identifyUser, trackEvent } from '../utils/analytics'
 import { getUserCredentials } from '../utils/auth'
 import { resetCodebuffClient } from '../utils/codebuff-client'
 import { IS_FREEPORT } from '../utils/constants'
+import { refreshfreeportSession } from './use-freeport-session'
 import { loggerContext } from '../utils/logger'
 
 import type { MultilineInputHandle } from '../components/multiline-input'
@@ -118,6 +119,12 @@ export const useAuthState = ({
       setInputFocused(true)
       setUser(loggedInUser)
       setIsAuthenticated(true)
+
+      // The Freeport session probe runs once on mount and stays silent when
+      // unauthenticated; kick admission now that real credentials exist.
+      if (IS_FREEPORT) {
+        void refreshfreeportSession().catch(() => {})
+      }
     },
     [resetChatStore, resetLoginState, setInputFocused],
   )

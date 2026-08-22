@@ -366,18 +366,13 @@ export function usefreeportSession(): UsefreeportSessionResult {
       return
     }
 
-    const { token } = getAuthTokenDetails()
-    if (!token) {
-      logger.warn(
-        {},
-        '[freeport-session] No auth token; skipping free-session admission',
-      )
-      setFailure({
-        type: 'other',
-        message: 'Not authenticated',
-        retry: null,
-        outcomeUnknown: false,
-      })
+    const { token, source } = getAuthTokenDetails()
+    if (!token || source === 'environment') {
+      // No stored Freeport credentials. Either we're pre-login (the login
+      // modal owns that UX) or running in BYOK/env-key mode, which by design
+      // bypasses server-side session admission. Stay silent — a successful
+      // login kicks a fresh probe via refreshfreeportSession().
+      setSession(null)
       return
     }
 
