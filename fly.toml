@@ -1,79 +1,50 @@
-# fly.toml — Freeport deployment on Fly.io free tier
-# Docs: https://fly.io/docs/reference/configuration/
+# fly.toml app configuration file generated for freeport on 2026-08-23T09:07:23Z
 #
-# Free tier: 3 shared-cpu-1x VMs, 3 GB persistent volumes, 160 GB egress
-# Deploy: fly launch --name freeport-server --no-deploy
-#         fly volumes create freeport_data --size 1
-#         fly secrets set FREEPORT_ADMIN_TOKEN=... GITHUB_CLIENT_ID=... GITHUB_CLIENT_SECRET=...
-#         fly deploy
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = "freeport-server"
-primary_region = "cdg"   # Paris — closest to Tunisia
+app = 'freeport'
+primary_region = 'fra'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [env]
-  NODE_ENV         = "production"
-  FREEPORT_PORT    = "8787"
-  FREEPORT_APP_URL = "https://freeport-server.fly.dev"
+  FREEPORT_APP_URL = 'https://freeport-server.fly.dev'
+  FREEPORT_BUYMEACOFFEE_URL = 'https://buymeacoffee.com/freeport'
+  FREEPORT_FREE_DAILY_SPEND_CAP_USD = '0.05'
+  FREEPORT_FREE_SESSIONS_PER_DAY = '3'
+  FREEPORT_GITHUB_SPONSORS_URL = 'https://github.com/sponsors/hazemmrad17'
+  FREEPORT_LOW_TRUST_FREE_SESSIONS_PER_DAY = '1'
+  FREEPORT_MAX_SIGNUPS_PER_IP_24H = '3'
+  FREEPORT_PAID_ADS_ENABLED = 'false'
+  FREEPORT_PAID_SESSIONS_PER_DAY = '6'
+  FREEPORT_PORT = '8787'
+  FREEPORT_PRICE_INPUT_USD_PER_MT = '0.1'
+  FREEPORT_PRICE_OUTPUT_USD_PER_MT = '0.2'
+  FREEPORT_SUBSCRIPTION_GRACE_PERIOD_DAYS = '7'
+  FREEPORT_WAITLIST_MODE = 'true'
+  GITHUB_OAUTH_REDIRECT_URI = 'https://freeport-server.fly.dev/api/auth/github/callback'
+  GOOGLE_OAUTH_REDIRECT_URI = 'https://freeport-server.fly.dev/api/auth/google/callback'
+  NODE_ENV = 'production'
+  PADDLE_ENV = 'sandbox'
 
-  # $0 waitlist gate — set to "false" once funding is secured
-  FREEPORT_WAITLIST_MODE = "true"
-
-  # OAuth redirect URIs (must match your GitHub OAuth App settings)
-  GITHUB_OAUTH_REDIRECT_URI  = "https://freeport-server.fly.dev/api/auth/github/callback"
-  GOOGLE_OAUTH_REDIRECT_URI  = "https://freeport-server.fly.dev/api/auth/google/callback"
-
-  # Anti-abuse
-  FREEPORT_LOW_TRUST_FREE_SESSIONS_PER_DAY = "1"
-  FREEPORT_MAX_SIGNUPS_PER_IP_24H          = "3"
-
-  # Session limits
-  FREEPORT_FREE_SESSIONS_PER_DAY          = "3"
-  FREEPORT_FREE_DAILY_SPEND_CAP_USD       = "0.05"
-  FREEPORT_PAID_SESSIONS_PER_DAY          = "6"
-  FREEPORT_PAID_ADS_ENABLED               = "false"
-  FREEPORT_SUBSCRIPTION_GRACE_PERIOD_DAYS = "7"
-
-  # Model pricing (DeepInfra DeepSeek V4 Flash)
-  FREEPORT_PRICE_INPUT_USD_PER_MT  = "0.1"
-  FREEPORT_PRICE_OUTPUT_USD_PER_MT = "0.2"
-
-  # Paddle (leave empty until paid plans are live)
-  PADDLE_ENV = "sandbox"
-
-  # Community sponsor links
-  FREEPORT_GITHUB_SPONSORS_URL = "https://github.com/sponsors/hazemmrad17"
-  FREEPORT_BUYMEACOFFEE_URL    = "https://buymeacoffee.com/freeport"
-
-  # Secrets set via: fly secrets set KEY=value
-  # FREEPORT_ADMIN_TOKEN   — set as secret
-  # GITHUB_CLIENT_ID       — set as secret
-  # GITHUB_CLIENT_SECRET   — set as secret
-  # PADDLE_API_KEY         — set as secret (when ready)
-  # PADDLE_WEBHOOK_SECRET  — set as secret (when ready)
-  # PADDLE_CLIENT_TOKEN    — set as secret (when ready)
+[[mounts]]
+  source = 'freeport_data'
+  destination = '/app/server/data'
 
 [http_service]
-  internal_port        = 8787
-  force_https          = true
-  auto_stop_machines   = true   # spin down when idle (free tier)
-  auto_start_machines  = true   # spin up on first request
-  min_machines_running = 0      # allow full scale-to-zero
+  internal_port = 8787
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
 
   [http_service.concurrency]
-    type       = "connections"
+    type = 'connections'
     hard_limit = 25
     soft_limit = 20
 
 [[vm]]
-  size   = "shared-cpu-1x"
-  memory = "256mb"
-
-# Persistent volume — SQLite data survives redeployments
-# Create ONCE before first deploy:
-#   fly volumes create freeport_data --size 1 --region cdg
-[[mounts]]
-  source      = "freeport_data"
-  destination = "/app/server/data"
+  size = 'shared-cpu-1x'
+  memory = '256mb'
