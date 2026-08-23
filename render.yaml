@@ -10,13 +10,10 @@ services:
     plan: free           # $0/month — spins down on inactivity, spins back up on first request
     healthCheckPath: /api/waitlist/count
     # repo: https://github.com/hazemmrad17/freeport
-
-    # Persistent disk — critical: this is where SQLite lives
-    # Free tier: 1 GB disk (more than enough for waitlist + users)
-    disk:
-      name: freeport-data
-      mountPath: /app/server/data
-      sizeGB: 1
+    # NOTE: Free tier has no persistent disk. SQLite lives in ephemeral container
+    # storage — data survives restarts but NOT redeployments. This is acceptable
+    # for the waitlist phase. Migrate to Fly.io (fly.toml in repo) for full
+    # persistence at $0, or upgrade to Render Starter ($7/mo) to re-enable the disk.
 
     envVars:
       # ── Core ──────────────────────────────────────────────────
