@@ -315,3 +315,46 @@ describe('usage + logs + admin', () => {
     expect(html).toContain('tester@example.com')
   })
 })
+
+describe('early access waitlist', () => {
+  test('rejects invalid email addresses', async () => {
+    const resp = await app.request('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'not-an-email' }),
+    })
+    expect(resp.status).toBe(400)
+  })
+
+  test('successfully registers an email and returns position', async () => {
+    const resp = await app.request('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'early-adopter@example.com', source: 'landing_hero' }),
+    })
+    expect(resp.status).toBe(200)
+    const data = (await json(resp)) as { success: boolean; position: number; alreadyJoined: boolean }
+    expect(data.success).toBe(true)
+    expect(data.position).toBeGreaterThanOrEqual(1)
+    expect(data.alreadyJoined).toBe(false)
+  })
+
+  test('submitting same email returns already joined status and preserved position', async () => {
+    const resp = await app.request('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'early-adopter@example.com' }),
+    })
+    expect(resp.status).toBe(200)
+    const data = (await json(resp)) as { success: boolean; position: number; alreadyJoined: boolean }
+    expect(data.success).toBe(true)
+    expect(data.alreadyJoined).toBe(true)
+  })
+
+  test('reports waitlist count', async () => {
+    const resp = await app.request('/api/waitlist/count')
+    expect(resp.status).toBe(200)
+    const data = (await json(resp)) as { count: number }
+    expect(data.count).toBeGreaterThanOrEqual(1)
+  })
+})

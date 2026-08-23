@@ -46,6 +46,23 @@ export interface ServerConfig {
   paidAdsEnabled: boolean
   /** Grace period in days after past_due before downgrade. */
   subscriptionGracePeriodDays: number
+  /** GitHub OAuth credentials & callback. */
+  githubClientId: string
+  githubClientSecret: string
+  githubRedirectUri: string
+  /** Google OAuth credentials & callback. */
+  googleClientId: string
+  googleClientSecret: string
+  googleRedirectUri: string
+  /** Free sessions allowed per day for low-trust users (default: 1). */
+  lowTrustFreeSessionsPerDay: number
+  /** Maximum number of account signups allowed per IP in 24 hours (default: 3). */
+  maxSignupsPerIp24h: number
+  /** Whether the server is in waitlist-only mode (protects $0 launch against unbacked inference costs). */
+  waitlistMode: boolean
+  /** Community donation & sponsor links. */
+  githubSponsorsUrl: string
+  buyMeACoffeeUrl: string
 }
 
 export interface AdInventoryEntry {
@@ -174,6 +191,29 @@ export function loadConfig(overrides: Partial<ServerConfig> = {}): ServerConfig 
       min: 0,
       max: 30,
     }),
+    githubClientId: process.env.GITHUB_CLIENT_ID ?? '',
+    githubClientSecret: process.env.GITHUB_CLIENT_SECRET ?? '',
+    githubRedirectUri:
+      process.env.GITHUB_OAUTH_REDIRECT_URI ??
+      `${process.env.FREEPORT_APP_URL ?? `http://localhost:${process.env.FREEPORT_PORT ?? '8787'}`}/api/auth/github/callback`,
+    googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+    googleRedirectUri:
+      process.env.GOOGLE_OAUTH_REDIRECT_URI ??
+      `${process.env.FREEPORT_APP_URL ?? `http://localhost:${process.env.FREEPORT_PORT ?? '8787'}`}/api/auth/google/callback`,
+    lowTrustFreeSessionsPerDay: envNumber('FREEPORT_LOW_TRUST_FREE_SESSIONS_PER_DAY', 1, {
+      min: 0,
+      max: 10_000,
+    }),
+    maxSignupsPerIp24h: envNumber('FREEPORT_MAX_SIGNUPS_PER_IP_24H', 3, {
+      min: 1,
+      max: 100_000,
+    }),
+    waitlistMode: process.env.FREEPORT_WAITLIST_MODE === 'true',
+    githubSponsorsUrl:
+      process.env.FREEPORT_GITHUB_SPONSORS_URL ?? 'https://github.com/sponsors/freeport',
+    buyMeACoffeeUrl:
+      process.env.FREEPORT_BUYMEACOFFEE_URL ?? 'https://buymeacoffee.com/freeport',
   }
   return { ...config, ...overrides }
 }

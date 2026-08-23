@@ -1,0 +1,97 @@
+# render.yaml — Freeport deployment on Render.com free tier
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: freeport-server
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free           # $0/month — spins down on inactivity, spins back up on first request
+    healthCheckPath: /api/waitlist/count
+    # repo: https://github.com/hazemmrad17/freeport
+
+    # Persistent disk — critical: this is where SQLite lives
+    # Free tier: 1 GB disk (more than enough for waitlist + users)
+    disk:
+      name: freeport-data
+      mountPath: /app/server/data
+      sizeGB: 1
+
+    envVars:
+      # ── Core ──────────────────────────────────────────────────
+      - key: NODE_ENV
+        value: production
+      - key: FREEPORT_PORT
+        value: "8787"
+      - key: FREEPORT_APP_URL
+        # Render generates this from your service name.
+        # Adjust if you rename the service in the dashboard.
+        value: https://freeport-server.onrender.com
+
+      # ── $0 Waitlist-Only Mode ─────────────────────────────────
+      # Set to "true" to gate free inference until funding is secured.
+      # Set to "false" once you have a sponsor/donation runway.
+      - key: FREEPORT_WAITLIST_MODE
+        value: "true"
+
+      # ── Admin (set via Render dashboard secret env var) ───────
+      - key: FREEPORT_ADMIN_TOKEN
+        sync: false      # must be entered manually in Render dashboard
+
+      # ── GitHub OAuth ──────────────────────────────────────────
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_OAUTH_REDIRECT_URI
+        value: https://freeport-server.onrender.com/api/auth/github/callback
+        # Must match exactly what you enter in: github.com/settings/developers → freeport OAuth App
+
+      # ── Google OAuth (optional — skip until launch) ───────────
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_OAUTH_REDIRECT_URI
+        value: https://freeport-server.onrender.com/api/auth/google/callback
+
+      # ── Anti-Abuse Thresholds ─────────────────────────────────
+      - key: FREEPORT_LOW_TRUST_FREE_SESSIONS_PER_DAY
+        value: "1"
+      - key: FREEPORT_MAX_SIGNUPS_PER_IP_24H
+        value: "3"
+
+      # ── Session Limits ────────────────────────────────────────
+      - key: FREEPORT_FREE_SESSIONS_PER_DAY
+        value: "3"
+      - key: FREEPORT_FREE_DAILY_SPEND_CAP_USD
+        value: "0.05"
+      - key: FREEPORT_PAID_SESSIONS_PER_DAY
+        value: "6"
+      - key: FREEPORT_PAID_ADS_ENABLED
+        value: "false"
+      - key: FREEPORT_SUBSCRIPTION_GRACE_PERIOD_DAYS
+        value: "7"
+
+      # ── Model Pricing (DeepInfra DeepSeek V4 Flash) ───────────
+      - key: FREEPORT_PRICE_INPUT_USD_PER_MT
+        value: "0.1"
+      - key: FREEPORT_PRICE_OUTPUT_USD_PER_MT
+        value: "0.2"
+
+      # ── Paddle (leave empty until you're ready for paid plans) ─
+      - key: PADDLE_API_KEY
+        sync: false
+      - key: PADDLE_WEBHOOK_SECRET
+        sync: false
+      - key: PADDLE_CLIENT_TOKEN
+        sync: false
+      - key: PADDLE_ENV
+        value: sandbox
+
+      # ── Community Sponsor Links ───────────────────────────────
+      - key: FREEPORT_GITHUB_SPONSORS_URL
+        value: https://github.com/sponsors/hazemmrad17
+      - key: FREEPORT_BUYMEACOFFEE_URL
+        value: https://buymeacoffee.com/freeport

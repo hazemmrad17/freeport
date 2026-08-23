@@ -5,12 +5,15 @@ import type { Database } from 'bun:sqlite'
 import type {
   AdEventRow,
   ApiTokenRow,
+  AuthProvider,
   CustomerRow,
   LoginAttemptRow,
   LogRecordRow,
   SessionRow,
   SessionUsageRow,
+  SignupIpLogRow,
   SubscriptionRow,
+  TrustTier,
   UsageEventRow,
   UserRow,
 } from './db'
@@ -51,16 +54,68 @@ export function getUserById(db: Database, id: string): UserRow | null {
   return (db.query('SELECT * FROM users WHERE id = ?').get(id) as UserRow | undefined) ?? null
 }
 
+export function getUserByProviderId(
+  db: Database,
+  authProvider: AuthProvider,
+  providerUserId: string,
+): UserRow | null {
+  return (
+    (db
+      .query('SELECT * FROM users WHERE auth_provider = ? AND provider_user_id = ?')
+      .get(authProvider, providerUserId) as UserRow | undefined) ?? null
+  )
+}
+
 export function createUser(
   db: Database,
-  params: { email: string; name: string; fingerprintId?: string },
+  params: {
+    email: string
+    name: string
+    fingerprintId?: string
+    authProvider?: AuthProvider
+    providerUserId?: string | null
+    username?: string | null
+    avatarUrl?: string | null
+    providerAccountCreatedAt?: number | null
+    trustTier?: TrustTier
+    signupIp?: string | null
+  },
 ): UserRow {
   const id = randomUUID()
   const now = Date.now()
+  const authProvider = params.authProvider ?? 'email'
+  const trustTier = params.trustTier ?? 'standard'
   db.query(
-    'INSERT INTO users (id, email, name, fingerprint_id, created_at) VALUES (?, ?, ?, ?, ?)',
-  ).run(id, params.email.trim().toLowerCase(), params.name.trim() || params.email, params.fingerprintId ?? null, now)
-  return { id, email: params.email, name: params.name, fingerprint_id: params.fingerprintId ?? null, created_at: now }
+    `INSERT INTO users (id, auth_provider, provider_user_id, email, name, username, avatar_url, provider_account_created_at, trust_tier, signup_ip, fingerprint_id, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  ).run(
+    id,
+    authProvider,
+    params.providerUserId ?? null,
+    params.email.trim().toLowerCase(),
+    params.name.trim() || params.email,
+    params.username ?? null,
+    params.avatarUrl ?? null,
+    params.providerAccountCreatedAt ?? null,
+    trustTier,
+    params.signupIp ?? null,
+    params.fingerprintId ?? null,
+    now,
+  )
+  return {
+    id,
+    auth_provider: authProvider,
+    provider_user_id: params.providerUserId ?? null,
+    email: params.email.trim().toLowerCase(),
+    name: params.name.trim() || params.email,
+    username: params.username ?? null,
+    avatar_url: params.avatarUrl ?? null,
+    provider_account_created_at: params.providerAccountCreatedAt ?? null,
+    trust_tier: trustTier,
+    signup_ip: params.signupIp ?? null,
+    fingerprint_id: params.fingerprintId ?? null,
+    created_at: now,
+  }
 }
 
 export function upsertUserByEmail(
@@ -78,6 +133,86 @@ export function upsertUserByEmail(
     return { ...existing, fingerprint_id: params.fingerprintId ?? existing.fingerprint_id }
   }
   return createUser(db, params)
+}
+
+export function upsertOAuthUser(
+  db: Database,
+  params: {
+    authProvider: AuthProvider
+    providerUserId: string
+    email: string
+    name: string
+    username?: string | null
+    avatarUrl?: string | null
+    providerAccountCreatedAt?: number | null
+    trustTier: TrustTier
+    signupIp?: string | null
+    fingerprintId?: string | null
+  },
+): UserRow {
+  let existing = getUserByProviderId(db, params.authProvider, params.providerUserId)
+  if (!existing && params.email) {
+    existing = getUserByEmail(db, params.email)
+  }
+
+  if (existing) {
+    db.query(
+      `UPDATE users
+       SET auth_provider = ?,
+           provider_user_id = ?,
+           name = ?,
+           username = COALESCE(?, username),
+           avatar_url = COALESCE(?, avatar_url),
+           provider_account_created_at = COALESCE(?, provider_account_created_at),
+           trust_tier = ?,
+           signup_ip = COALESCE(?, signup_ip),
+           fingerprint_id = COALESCE(?, fingerprint_id)
+       WHERE id = ?`,
+    ).run(
+      params.authProvider,
+      params.providerUserId,
+      params.name.trim() || existing.name,
+      params.username ?? null,
+      params.avatarUrl ?? null,
+      params.providerAccountCreatedAt ?? null,
+      params.trustTier,
+      params.signupIp ?? null,
+      params.fingerprintId ?? null,
+      existing.id,
+    )
+    return {
+      ...existing,
+      auth_provider: params.authProvider,
+      provider_user_id: params.providerUserId,
+      name: params.name.trim() || existing.name,
+      username: params.username ?? existing.username,
+      avatar_url: params.avatarUrl ?? existing.avatar_url,
+      provider_account_created_at: params.providerAccountCreatedAt ?? existing.provider_account_created_at,
+      trust_tier: params.trustTier,
+      signup_ip: params.signupIp ?? existing.signup_ip,
+      fingerprint_id: params.fingerprintId ?? existing.fingerprint_id,
+    }
+  }
+
+  return createUser(db, params)
+}
+
+export function recordSignupIp(db: Database, ip: string): void {
+  if (!ip) return
+  db.query('INSERT INTO signup_ip_log (ip, created_at) VALUES (?, ?)').run(ip, Date.now())
+}
+
+export function getSignupCountForIp(
+  db: Database,
+  ip: string,
+  windowMs = 24 * 60 * 60 * 1000,
+): number {
+  if (!ip) return 0
+  const sinceMs = Date.now() - windowMs
+  const row = db
+    .query('SELECT COUNT(*) as count FROM signup_ip_log WHERE ip = ? AND created_at >= ?')
+    .get(ip, sinceMs) as { count: number } | undefined
+  return Number(row?.count ?? 0)
 }
 
 // ---------------------------------------------------------------------------
@@ -379,6 +514,11 @@ export function isPaidUser(db: Database, userId: string): boolean {
   return false
 }
 
+export function getUserTrustTier(db: Database, userId: string): TrustTier {
+  const user = getUserById(db, userId)
+  return user?.trust_tier ?? 'standard'
+}
+
 export function upsertSubscription(
   db: Database,
   params: {
@@ -476,6 +616,116 @@ export function getCustomerByPaddleId(
       .query('SELECT * FROM customers WHERE customer_id = ?')
       .get(customerId) as CustomerRow | undefined
   ) ?? null
+}
+
+// ---------------------------------------------------------------------------
+// Early Access Waitlist
+// ---------------------------------------------------------------------------
+
+export interface WaitlistResult {
+  id: number
+  email: string
+  position: number
+  alreadyJoined: boolean
+}
+
+export function joinWaitlist(
+  db: Database,
+  email: string,
+  source = 'web',
+): WaitlistResult {
+  const cleanEmail = email.trim().toLowerCase()
+  const now = Date.now()
+
+  const existing = db
+    .query('SELECT * FROM waitlist WHERE email = ?')
+    .get(cleanEmail) as { id: number; email: string; created_at: number } | undefined
+
+  if (existing) {
+    const pos = (
+      db
+        .query('SELECT COUNT(*) AS count FROM waitlist WHERE id <= ?')
+        .get(existing.id) as { count: number }
+    ).count
+    return {
+      id: existing.id,
+      email: cleanEmail,
+      position: pos,
+      alreadyJoined: true,
+    }
+  }
+
+  const res = db
+    .query('INSERT INTO waitlist (email, source, created_at) VALUES (?, ?, ?)')
+    .run(cleanEmail, source, now)
+
+  const id = Number(res.lastInsertRowid)
+  const position = (
+    db
+      .query('SELECT COUNT(*) AS count FROM waitlist WHERE id <= ?')
+      .get(id) as { count: number }
+  ).count
+
+  return {
+    id,
+    email: cleanEmail,
+    position,
+    alreadyJoined: false,
+  }
+}
+
+export function getWaitlistCount(db: Database): number {
+  const row = db.query('SELECT COUNT(*) AS count FROM waitlist').get() as
+    | { count: number }
+    | undefined
+  return Number(row?.count ?? 0)
+}
+
+export interface WaitlistSummary {
+  total: number
+  bySource: Array<{ source: string; count: number }>
+}
+
+export interface UserDemographicsSummary {
+  total: number
+  byProvider: Array<{ provider: string; count: number }>
+  byTrustTier: Array<{ trustTier: string; count: number }>
+}
+
+export function getWaitlistSummary(db: Database): WaitlistSummary {
+  const totalRow = db.query('SELECT COUNT(*) AS count FROM waitlist').get() as
+    | { count: number }
+    | undefined
+  const sources = db
+    .query(
+      'SELECT source, COUNT(*) AS count FROM waitlist GROUP BY source ORDER BY count DESC',
+    )
+    .all() as Array<{ source: string; count: number }>
+  return {
+    total: Number(totalRow?.count ?? 0),
+    bySource: sources.map((s) => ({ source: String(s.source || 'web'), count: Number(s.count) })),
+  }
+}
+
+export function getUserDemographicsSummary(db: Database): UserDemographicsSummary {
+  const totalRow = db.query('SELECT COUNT(*) AS count FROM users').get() as
+    | { count: number }
+    | undefined
+  const providers = db
+    .query(
+      'SELECT COALESCE(auth_provider, "email") AS provider, COUNT(*) AS count FROM users GROUP BY auth_provider ORDER BY count DESC',
+    )
+    .all() as Array<{ provider: string; count: number }>
+  const trustTiers = db
+    .query(
+      'SELECT COALESCE(trust_tier, "standard") AS trustTier, COUNT(*) AS count FROM users GROUP BY trust_tier ORDER BY count DESC',
+    )
+    .all() as Array<{ trustTier: string; count: number }>
+  return {
+    total: Number(totalRow?.count ?? 0),
+    byProvider: providers.map((p) => ({ provider: String(p.provider), count: Number(p.count) })),
+    byTrustTier: trustTiers.map((t) => ({ trustTier: String(t.trustTier), count: Number(t.count) })),
+  }
 }
 
 export function isEventProcessed(
