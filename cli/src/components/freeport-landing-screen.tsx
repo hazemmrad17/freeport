@@ -775,16 +775,16 @@ export const FreeportLandingScreen: React.FC<FreeportLandingScreenProps> = ({
             </>
           )}
 
-          {/* Account banned. Terminal ΓÇö polling has stopped. Blocking here
+          {/* Account banned. Terminal — polling has stopped. Blocking here
               stops banned bots from re-entering free mode. */}
           {session?.status === 'banned' && (
             <>
               <text style={{ fg: theme.secondary, marginBottom: 1 }}>
-                ΓÜá Account unavailable
+                ▲ Account unavailable
               </text>
               <text style={{ fg: theme.muted, wrapMode: 'word' }}>
                 This account has been suspended and can't use FREEPORT. If you
-                think this is a mistake, contact support@codebuff.com. Press
+                think this is a mistake, contact support@freeport.dev. Press
                 Ctrl+C to exit.
               </text>
             </>

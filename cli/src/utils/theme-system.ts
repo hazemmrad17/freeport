@@ -93,18 +93,18 @@ export function getLogoBlockColor(
 
 /**
  * Get the accent color for the logo based on theme and terminal capabilities.
- * Returns the primary green color with appropriate fallback.
+ * Returns the primary Freeport brand color (#FFB000) with appropriate fallback.
  */
 export function getLogoAccentColor(
   themeName: ThemeName,
   env: CliEnv = getCliEnv(),
 ): string {
   const isTruecolor = supportsTruecolor(env)
-  // The primary green color - 'lime' is CSS bright green
+  // The primary Freeport amber/gold brand color
   if (themeName === 'dark') {
-    return isTruecolor ? '#9EFC62' : 'lime'
+    return isTruecolor ? '#FFB000' : 'yellow'
   }
-  return isTruecolor ? '#65A83E' : 'green'
+  return isTruecolor ? '#D97706' : 'yellow'
 }
 
 const IDE_THEME_INFERENCE = {
@@ -832,12 +832,12 @@ const DEFAULT_CHAT_THEMES: Record<ThemeName, ChatTheme> = {
   dark: {
     name: 'dark',
     // Core semantic colors
-    primary: '#9EFC62',
+    primary: '#FFB000',
     secondary: '#a3aed0',
     success: '#22c55e',
     error: '#ef4444',
     warning: '#FFA500',
-    info: '#9EFC62',
+    info: '#FFB000',
     link: '#3B82F6',
     directory: '#9CA3AF',
 
@@ -851,7 +851,7 @@ const DEFAULT_CHAT_THEMES: Record<ThemeName, ChatTheme> = {
 
     // Context-specific
     aiLine: '#6b7280',
-    userLine: '#9EFC62',
+    userLine: '#FFB000',
 
     // Agent backgrounds
     agentToggleHeaderBg: '#f97316',
@@ -880,12 +880,12 @@ const DEFAULT_CHAT_THEMES: Record<ThemeName, ChatTheme> = {
       inlineCodeFg: '#FF8534',
       codeTextFg: '#f1f5f9',
       headingFg: {
-        1: '#facc15',
-        2: '#facc15',
-        3: '#facc15',
-        4: '#facc15',
-        5: '#facc15',
-        6: '#facc15',
+        1: '#FFB000',
+        2: '#FFB000',
+        3: '#FFB000',
+        4: '#FFB000',
+        5: '#FFB000',
+        6: '#FFB000',
       },
       listBulletFg: '#a3aed0',
       blockquoteBorderFg: '#334155',
@@ -897,12 +897,12 @@ const DEFAULT_CHAT_THEMES: Record<ThemeName, ChatTheme> = {
   light: {
     name: 'light',
     // Core semantic colors
-    primary: '#65A83E',
+    primary: '#D97706',
     secondary: '#6b7280',
     success: '#059669',
     error: '#ef4444',
     warning: '#F59E0B',
-    info: '#65A83E',
+    info: '#D97706',
     link: '#2563EB',
     directory: '#6B7280',
 
@@ -916,7 +916,7 @@ const DEFAULT_CHAT_THEMES: Record<ThemeName, ChatTheme> = {
 
     // AI/User context
     aiLine: '#6b7280',
-    userLine: '#65A83E',
+    userLine: '#D97706',
 
     // Agent context
     agentToggleHeaderBg: '#ea580c',
@@ -945,12 +945,12 @@ const DEFAULT_CHAT_THEMES: Record<ThemeName, ChatTheme> = {
       inlineCodeFg: '#C45A00',
       codeTextFg: '#111827',
       headingFg: {
-        1: '#dc2626',
-        2: '#dc2626',
-        3: '#dc2626',
-        4: '#dc2626',
-        5: '#dc2626',
-        6: '#dc2626',
+        1: '#D97706',
+        2: '#D97706',
+        3: '#D97706',
+        4: '#D97706',
+        5: '#D97706',
+        6: '#D97706',
       },
       listBulletFg: '#6b7280',
       blockquoteBorderFg: '#d1d5db',

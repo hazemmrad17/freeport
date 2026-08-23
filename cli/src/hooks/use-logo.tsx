@@ -19,7 +19,7 @@ interface UseLogoOptions {
    */
   textColor?: string
   /**
-   * Accent color for shadow/border characters (defaults to acid green #9EFC62)
+   * Accent color for shadow/border characters (defaults to Freeport amber #FFB000)
    */
   accentColor?: string
   /**
@@ -53,7 +53,7 @@ interface LogoResult {
  * Returns:
  * - Full ASCII logo for width >= 70
  * - Small ASCII logo for width >= 40
- * - Text variant "CODEBUFF" or "Codebuff CLI" for narrow widths
+ * - Text variant "FREEPORT" or "FREEPORT CLI" for narrow widths
  *
  * The hook handles ALL formatting internally including:
  * - Line parsing and width limiting
@@ -65,7 +65,7 @@ export const useLogo = ({
   availableWidth,
   applySheenToChar,
   textColor,
-  accentColor = '#9EFC62',
+  accentColor = '#FFB000',
   blockColor = '#ffffff',
   maxHeight,
 }: UseLogoOptions): LogoResult => {
