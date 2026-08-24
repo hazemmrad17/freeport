@@ -1,0 +1,43 @@
+{
+  "name": "FREEPORT",
+  "version": "0.0.150",
+  "description": "The world's strongest free coding agent",
+  "license": "MIT",
+  "bin": {
+    "FREEPORT": "index.js"
+  },
+  "scripts": {
+    "prepack": "node ../../../cli/release-core/prepare-package.js",
+    "postpack": "node ../../../cli/release-core/prepare-package.js --clean"
+  },
+  "files": [
+    "index.js",
+    "launcher.js",
+    "http.js",
+    "README.md"
+  ],
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "dependencies": {
+    "tar": "^7.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodebuffAI/FREEPORT-private.git"
+  },
+  "homepage": "https://FREEPORT.com",
+  "publishConfig": {
+    "access": "public",
+    "provenance": false
+  }
+}
